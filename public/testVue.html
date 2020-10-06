@@ -1,0 +1,77 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+
+    <!-- Tocas 2.3.3 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/2.3.3/tocas.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/2.3.3/tocas.js"></script>
+
+    <!-- Vue -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.common.dev.js"></script>
+
+
+    <!-- Main Script -->
+    <script type="module" src="http://127.0.0.1/NCHU/public/js/main.js"></script>
+    <script type="module" src="http://127.0.0.1/NCHU/public/js/index.js"></script>
+    <script type="module" src="http://172.24.119.61/NCHU/public/js/index.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="http://172.24.119.61/NCHU/public/css/main.css">
+    <link rel="stylesheet" href="http://172.24.119.61/NCHU/public/css/calendar.css">
+</head>
+<body>
+    <div class="nchu main" id="main">
+        <div class="ts static left sidebar">
+            <div class="index">NCHU</div>
+            <div class="ts divider"></div>
+            <div class="ts divider"></div>
+            <div class="ts divider"></div>
+            <div class="ts divider"></div>
+            <div class="ts divider"></div>
+        </div>
+        <div class="squeezable pusher">
+            <header>
+                <div class="ts pointing secondary large icon menu">
+                    <a
+                        class="item"
+                        style="z-index: 2;"
+                        id="menu-button"
+                        data-tooltip="選單"
+                    ><i class="list icon"></i></a>
+                    <a
+                        class="item nchu header title"
+                        style="z-index: 2;"
+                        data-tooltip="首頁"
+                    >中興大學場地借用系統</a>
+                    <div class="right menu">
+                        <!-- <div class="item">OOO，您好</div> -->
+                        <a
+                            href=""
+                            class="item"
+                            style="z-index: 2;"
+                            data-tooltip="意見反饋"
+                        ><i class="mail outline icon"></i></a>
+                        <div class="item">登入｜註冊</div>
+                        <!-- <a
+                            href=""
+                            class="item"
+                            style="z-index: 2;"
+                            data-tooltip="個人檔案"
+                        ><i class="user outline icon"></i></a>
+                        <a
+                            href=""
+                            class="item"
+                            style="z-index: 2;"
+                            data-tooltip="登出"
+                        ><i class="log out icon"></i></a> -->
+                    </div>
+                </div>
+            </header>
+            <calendar
+            ></calendar>
+        </div>
+    </div>
+    <div class="nchu add">
+        <i class="circular add icon"></i>
+    </div>
+</body>

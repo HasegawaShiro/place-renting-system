@@ -1,0 +1,16 @@
+[
+  {
+    "name": "index",
+    "path": "/",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\index.vue",
+    "chunkName": "pages/index",
+    "_name": "_7ff88dad"
+  },
+  {
+    "name": "__laravel_nuxt__",
+    "path": "/__laravel_nuxt__",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\index.vue",
+    "chunkName": "pages/index",
+    "_name": "_7ff88dad"
+  }
+]

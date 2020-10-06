@@ -1,0 +1,69 @@
+body {
+    user-select: none;
+}
+[data-tooltip]::before{
+    display: none;
+}
+div.nchu.main>.pusher {
+    overflow-x: hidden;
+}
+.nchu.add {
+    position: fixed;
+    right: 1.5em;
+    bottom: 1.5em;
+    font-size: 2.5em;
+}
+.nchu.add i {
+    background-color: rgb(8, 188, 135) !important;
+    box-shadow: rgba(0, 0, 0, 0.2) 0;
+}
+.nchu.add i:before {
+    color:  #fff;
+}
+
+/* sidebar */
+.nchu.main .sidebar {
+    background-color:  rgb(8, 138, 120);
+    color: white;
+}
+.nchu.main .sidebar .index {
+    text-align: center;
+    font-size: 4em;
+    font-weight: bolder;
+    display: block;
+}
+/* .nchu.main .sidebar .index:hover::after {
+    background-color:  rgba(255, 255, 255, 0.5);
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    display: block;
+} */
+
+@media only screen and (max-width:767px){
+    [data-tooltip]::after {
+        display: none !important;
+    }
+    .nchu.add {
+        position: fixed;
+        right: 0.5em;
+        bottom: 0.5em;
+    }
+    header .menu {
+        font-size: 0.87em !important;
+    }
+}
+@media(hover: hover) and (pointer: fine) {
+    .nchu.add i:hover {
+        background-color:  rgb(27, 158, 141) !important;
+        cursor: pointer;
+    }
+}
+.nchu.add i:active {
+    background-color:  rgb(7, 99, 86) !important;
+    cursor: pointer;
+}

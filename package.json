@@ -1,0 +1,12 @@
+{
+    "private": true,
+    "scripts": {
+        "start": "laravel-nuxt dev",
+        "build": "laravel-nuxt build"
+    },
+    "dependencies": {
+        "laravel-nuxt": "^2.0.2"
+    },
+    "devDependencies": {
+    }
+}
