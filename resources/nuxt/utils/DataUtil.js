@@ -1,4 +1,4 @@
-export class DataUtil{
+export default class DataUtil{
     static equalityComparison(a, b, strict = false) {
         let result = true;
         try {
@@ -55,7 +55,7 @@ export class DataUtil{
 
     static isAnyEmpty(...values) {
         for (let value of values) {
-            if (isEmpty(value)) return true;
+            if (DataUtil.isEmpty(value)) return true;
         }
         return false;
     }
