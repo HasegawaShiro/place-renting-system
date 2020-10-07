@@ -1,7 +1,7 @@
 import {API} from '../functions/API.js';
-import {DataUtil} from '../utils/DataUtil.js';
+import DataUtil from '../utils/DataUtil.js';
 
-export class Calendar {
+export default class Calendar {
     #Year;
     #Month;
     #Week;
@@ -9,9 +9,6 @@ export class Calendar {
     #Schedules = [];
     #Today;
     #SelectedDate;
-    static CONSTANTS = {
-        DAY_TEXT: ['一','二','三','四','五','六','日'],
-    }
 
     constructor(year, month) {
         this.#Today = new Date();
@@ -68,7 +65,6 @@ export class Calendar {
                 dp++;
                 if(temp.getMonth() === month) weekOfThisMonth = true;
                 if((selected.getTime() === temp.getTime() && temp.getMonth() === month) || (today.getTime() === selected.getTime() && today.getTime() === temp.getTime())){
-                    console.log(`today => ${today.getTime()}, temp => ${temp.getTime()}, selected => ${selected.getTime()}`)
                     this.#Week = i;
                 }
             }
@@ -187,7 +183,6 @@ export class Calendar {
         let lastWeek = this.#Dates[prevw];
         this.#Week = prevw;
         this.#SelectedDate = lastWeek[0].date;
-        console.log(this)
     }
     nextWeek() {
         let nextw = this.#Week + 1;
@@ -198,6 +193,5 @@ export class Calendar {
         let nextWeek = this.#Dates[nextw];
         this.#Week = nextw;
         this.#SelectedDate = nextWeek[0].date;
-        console.log(this)
     }
 }
