@@ -13,10 +13,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-Route::get('/api/pong', function (Request $request) {
-    return "ping";
+Route::group(['prefix' => 'api'], function () {
+    Route::post('login', 'Auth\LoginController@login')->name("system.auth.login.post");
+    Route::get('ping', function (Request $request) {
+        return "pong";
+    });
+    Route::group(['middleware' => 'auth'], function() {});
 });
+/* Route::get('/api/pong', function (Request $request) {
+    return "ping";
+}); */
 
 
 Route::get(
