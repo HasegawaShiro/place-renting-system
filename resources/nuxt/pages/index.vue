@@ -1,7 +1,9 @@
 <template>
 <div>
-
     <div class="nchu main">
+        <Form
+            :form-mode="'schedule'"
+        ></Form>
         <div class="ts static left sidebar">
             <div class="index">NCHU</div>
             <div class="ts divider"></div>
@@ -18,6 +20,7 @@
                         style="z-index: 2;"
                         id="menu-button"
                         data-tooltip="選單"
+                        @click="toggleSidebar()"
                     ><i class="list icon"></i></a>
                     <a
                         class="item nchu header title"
@@ -51,20 +54,36 @@
             <Calendar></Calendar>
         </div>
     </div>
-    <div class="nchu add">
-        <i class="circular add icon"></i>
-    </div>
 </div>
 </template>
 
 <script>
 import Calendar from '../components/calendar/calendar.vue'
-export default {
-    components : {
-        Calendar
-    },
-    methods:{
+import Form from '../layouts/form.vue'
 
+export default {
+    data() {
+        return {
+            user: {
+                id: null,
+                name: null,
+                util: null,
+                mail: null,
+                phone: null,
+            }
+        };
+    },
+    mounted() {
+        console.log(this);
+    },
+    components: {
+        Calendar,
+        Form
+    },
+    methods: {
+        toggleSidebar() {
+            ts('.left.sidebar').sidebar('toggle');
+        },
     }
 }
 </script>

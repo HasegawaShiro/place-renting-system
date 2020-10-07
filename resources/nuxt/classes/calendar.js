@@ -7,13 +7,16 @@ export class Calendar {
     #Week;
     #Dates = [];
     #Schedules = [];
-    #Today = new Date();
-    #SelectedDate = new Date();
+    #Today;
+    #SelectedDate;
     static CONSTANTS = {
         DAY_TEXT: ['一','二','三','四','五','六','日'],
     }
 
-    constructor(year, month){
+    constructor(year, month) {
+        this.#Today = new Date();
+        this.#Today.setHours(0,0,0,0);
+        this.#SelectedDate = this.#Today;
         if(year === undefined){
             this.#Year = this.#Today.getFullYear();
         }else if(year >= 1900 && year <= 275760){
@@ -32,17 +35,16 @@ export class Calendar {
         this.setDates();
     }
 
-    setDates(){
+    setDates() {
         this.#Week = null;
         this.#Dates = [];
         const year = this.#Year;
         const month = this.#Month;
         const D = new Date(year, month);
-        const today = new Date();
+        const today = this.#Today;
         const selected = this.#SelectedDate;
         let firstDay = D.getDay() == 0 ? 7 : D.getDay();
         let dp = D.getDate();
-        today.setHours(0,0,0,0);
         for(let i = 0; i < 6; i++){
             const temp = new Date(year, month, dp);
             if(temp.getDay() != 1 && temp.getDay() <= firstDay){
@@ -51,8 +53,8 @@ export class Calendar {
                 break;
             }
         }
-        // console.log(dp);
-        for(let i = 0; i < 6; i++){
+
+        for(let i = 0; i < 6; i++) {
             const week = [];
             let weekOfThisMonth = false;
             for(let j = 0; j < 7; j++){
@@ -65,16 +67,17 @@ export class Calendar {
                 week.push(putIn);
                 dp++;
                 if(temp.getMonth() === month) weekOfThisMonth = true;
-                if((selected.getTime() === temp.getTime()) || (today.getTime() === selected.getTime() && today.getTime() === temp.getTime())){
+                if((selected.getTime() === temp.getTime() && temp.getMonth() === month) || (today.getTime() === selected.getTime() && today.getTime() === temp.getTime())){
+                    console.log(`today => ${today.getTime()}, temp => ${temp.getTime()}, selected => ${selected.getTime()}`)
                     this.#Week = i;
                 }
-                // this.#Week = (today.getTime() === temp.getTime()) ? i : 0;
             }
             if(weekOfThisMonth) this.#Dates.push(week);
         }
-        if(DataUtil.isEmpty(this.#Week)){
+
+        if(DataUtil.isEmpty(this.#Week)) {
             this.#Week = 0;
-            this.#SelectedDate = this.#Dates[0][0].date;
+            this.#SelectedDate = new Date(year, month, 1 ,0 ,0 ,0);
         };
     }
     setSchedules(){
@@ -103,16 +106,6 @@ export class Calendar {
         }
     }
 
-    /* get Mode() {return this.Mode}
-    set Mode(mode){
-        const MODES = ["month", "week", "list"];
-        if(MODES.includes(mode)){
-            this.Mode = mode;
-        }else{
-            console.error("Invalid mode. The mode should be 'month', 'week', or 'list'");
-        }
-    } */
-
     get Dates() {return this.#Dates}
     set Dates(x) {
         console.error("Dates cannot be setted.");
@@ -132,10 +125,10 @@ export class Calendar {
         }
     }
 
-    getDatesOfWeek(){
+    getDatesOfWeek() {
         return this.#Dates[this.#Week];
     }
-    getYearOfWeek(){
+    getYearOfWeek() {
         let result = {};
         for(let date of this.getDatesOfWeek()){
             if(result[date.date.getFullYear()] === undefined){
@@ -148,10 +141,10 @@ export class Calendar {
     }
 
     getDateToString(date, delimiter = '-'){
-        if(typeof date !== "object" && date.constructor !== Date){
-            date = this.#SelectedDate;
-        }else if(date.date !== undefined){
+        if(date.date !== undefined){
             return this.getDateToString(date.date);
+        }else if(typeof date !== "object" || date.constructor !== Date){
+            date = this.#SelectedDate;
         }
 
         return `${date.getFullYear()}${delimiter}${date.getMonth()+1}${delimiter}${date.getDate()}`
