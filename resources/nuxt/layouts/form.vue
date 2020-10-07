@@ -2,11 +2,12 @@
 <div class="nchu form">
     <i
         class="circular add icon"
+        :hidden.prop="!showAddMutation"
         @click="openModal()"
     ></i>
     <div class="ts modals dimmer">
         <Universal
-                v-if="formMode == 'universal'"
+            v-if="formMode == 'universal'"
         ></Universal>
         <Schedule
             v-else-if="formMode == 'schedule'"
@@ -21,6 +22,12 @@ import Universal from '../components/forms/universal.vue';
 
 export default {
     data() {
+        return {
+            showAddMutation: true,
+        };
+    },
+    mounted() {
+        this.showAddMutation = this.showAdd;
     },
     components: {
         Universal,
@@ -29,18 +36,32 @@ export default {
     methods: {
         openModal() {
             ts('.new.form').modal("show");
+            // this.toHideAdd();
         },
         closeModal() {
             ts('.new.form').modal("hide");
+            // this.toShowAdd();
+        },
+        toShowAdd() {
+            this.showAddMutation = true;
+        },
+        toHideAdd() {
+            this.showAddMutation = false;
         },
     },
     props: {
         'form-mode': {
             type: String,
             default() {
-                return "universal"
+                return "universal";
             },
-        }
+        },
+        'show-add': {
+            type: Boolean,
+            default() {
+                return true;
+            }
+        },
     },
 }
 </script>
@@ -51,7 +72,7 @@ export default {
         right: 1.5em;
         bottom: 1.5em;
         font-size: 2.5em;
-        z-index: 5;
+        z-index: 2;
     }
     .nchu.form .add {
         background-color: rgb(8, 188, 135) !important;
