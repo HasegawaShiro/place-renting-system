@@ -235,33 +235,22 @@
 
 <script>
 // import calendarMonthMode from "./items/calendarMonthMode.vue";
-import {Calendar} from '../../classes/calendar.js';
+import CONSTANTS from '../../constants.js'
+import Calendar from '../../classes/calendar.js';
+
 export default {
     data(){
-        console.log(new Calendar())
         return {
-            CONSTANTS:{
-                MODE_BUTTON:{
-                    'month': '月表',
-                    'week': '週表',
-                    'list': '列表'
-                },
-                HEADER_TEXT:{
-                    date: '日期',
-                    place: '場地'
-                },
-                DAY_TEXT: Calendar.CONSTANTS.DAY_TEXT,
-            },
-            config:{
+            CONSTANTS: CONSTANTS.calendar,
+            config: {
                 mode: 'month',
             },
-            headerColspan:{
+            headerColspan: {
                 month: 7,
                 week: 8,
                 list: 7
             },
             calendar: new Calendar(),
-
         };
     },
     props:{},
