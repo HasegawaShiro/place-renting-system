@@ -9,9 +9,11 @@ import '..\\resources\\nuxt\\assets\\css\\main.css'
 
 import '..\\resources\\nuxt\\assets\\css\\calendar.css'
 
+import _2d23adba from '..\\resources\\nuxt\\layouts\\form.vue'
+import _75c41e03 from '..\\resources\\nuxt\\layouts\\header.vue'
 import _6f6c098b from './layouts/default.vue'
 
-const layouts = { "_default": sanitizeComponent(_6f6c098b) }
+const layouts = { "_form": sanitizeComponent(_2d23adba),"_header": sanitizeComponent(_75c41e03),"_default": sanitizeComponent(_6f6c098b) }
 
 export default {
   render (h, props) {
