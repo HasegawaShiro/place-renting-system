@@ -23,9 +23,9 @@ module.exports = laravelNuxt({
         'assets/css/main.css',
         'assets/css/calendar.css',
     ],
-    /* axios: {
-        baseURL: baseUrl
-    }, */
+    axios: {
+        baseURL: '/api/'
+    },
     modules: [],
     plugins: [],
     build: {},
