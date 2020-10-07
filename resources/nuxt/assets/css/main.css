@@ -4,47 +4,33 @@ body {
 [data-tooltip]::before{
     display: none;
 }
-div.nchu.main>.pusher {
-    overflow-x: hidden;
-}
 
-/* sidebar */
-.nchu.main .sidebar {
-    background-color:  rgb(8, 138, 120);
-    color: white;
-}
-.nchu.main .sidebar .index {
-    text-align: center;
-    font-size: 4em;
-    font-weight: bolder;
-    display: block;
-}
 /* Scrollbar style */
 ::-webkit-scrollbar-track
 {
-	box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	border-radius: 10px;
-	background-color: #F5F5F5;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 10px;
+    background-color: #F5F5F5;
 }
 ::-webkit-scrollbar
 {
-	width: .65em;
-	border-radius: 10px;
-	background-color: #838383;
+    width: .65em;
+    border-radius: 10px;
+    background-color: #838383;
 }
 ::-webkit-scrollbar-thumb
 {
-	border-radius: 10px;
-	box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-	background-color: rgba(8, 138, 121, 0.733);
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: rgba(8, 138, 121, 0.733);
 }
 ::-webkit-scrollbar-thumb:hover
 {
-	background-color: rgb(8, 138, 120);
+    background-color: rgb(8, 138, 120);
 }
 ::-webkit-scrollbar-thumb:active
 {
-	background-color: rgb(7, 105, 92);
+    background-color: rgb(7, 105, 92);
 }
 
 @media only screen and (max-width:767px){
