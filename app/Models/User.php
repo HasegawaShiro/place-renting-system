@@ -11,13 +11,23 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $primaryKey = 'user_id';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'username',
+        'password',
+        'name',
+        'phone',
+        'email',
+        'user_disabled',
+        'util_id',
+        'created_by',
+        'updated_by',
     ];
 
     /**
@@ -26,7 +36,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
     ];
 
     /**
@@ -35,6 +45,9 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'user_disabled' => 'boolean',
+        'util_id' => 'integer',
+        'created_by' => 'integer',
+        'updated_by' => 'integer',
     ];
 }
