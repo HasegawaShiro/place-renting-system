@@ -17,7 +17,14 @@ module.exports = laravelNuxt({
                 rel: 'stylesheet',
                 href: 'https://cdnjs.cloudflare.com/ajax/libs/tocas-ui/2.3.3/tocas.css'
             }
-        ]
+        ],
+        meta: [
+            {
+                name: 'viewport',
+                content: 'width=device-width, initial-scale=1.0',
+                charset: 'UTF-8',
+            }
+        ],
     },
     css: [
         'assets/css/main.css',
@@ -27,7 +34,6 @@ module.exports = laravelNuxt({
         baseURL: '/api/'
     },
     modules: [],
-    plugins: [],
     build: {},
     ssr: false,
     telemetry: false
