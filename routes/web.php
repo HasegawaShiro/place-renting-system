@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\System\UserController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,11 +17,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['prefix' => 'api'], function () {
-    Route::post('login', 'Auth\LoginController@login')->name("system.auth.login.post");
-    Route::get('ping', function (Request $request) {
-        return "pong";
+    Route::post('login', [LoginController::class, 'login'])->name("system.auth.login.post");
+    Route::any('logout', [LoginController::class, 'logout'])->name('system.auth.logout');
+    Route::get('csrf', function (Request $request) {
+        return csrf_token();
     });
-    Route::group(['middleware' => 'auth'], function() {});
+    Route::group(['middleware' => 'auth'], function() {
+        Route::get('user', [UserController::class, 'getUserSession']);
+    });
 });
 /* Route::get('/api/pong', function (Request $request) {
     return "ping";
@@ -29,3 +35,7 @@ Route::get(
     '{uri}',
     '\\'.Pallares\LaravelNuxt\Controllers\NuxtController::class
 )->where('uri', '.*');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
