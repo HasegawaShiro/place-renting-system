@@ -29,9 +29,9 @@ class CreateUsersTable extends Migration
                 // $table->rememberToken();
                 $table->timestamps();
 
-                // $table->index(['user_id','username', 'name'],'users_index');
+                $table->index(['user_id','username', 'email'],'users_index');
         });
-        User::create(['username' => 'admin', 'password' => Hash::make('admin'), 'name' => 'Admin', 'util_id' => 1]);
+        User::create(['username' => 'admin', 'password' => Hash::make('admin'), 'name' => 'Admin', 'util_id' => 1, 'user_disabled' => false]);
     }
 
     /**
