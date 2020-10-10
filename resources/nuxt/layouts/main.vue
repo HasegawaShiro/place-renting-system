@@ -3,6 +3,7 @@
         <Form
             v-if="isLogin"
             :form-mode="formMode"
+            :form-data="formData"
         ></Form>
         <div class="ts static left sidebar">
             <div class="index">NCHU</div>
@@ -56,10 +57,10 @@
                                 :data-tooltip="CONSTANTS.TEXT.profile"
                             ><i class="user outline icon"></i></a>
                             <a
-                                href=""
                                 class="item"
                                 style="z-index: 2;"
                                 :data-tooltip="CONSTANTS.TEXT.logout"
+                                @click="logout()"
                             ><i class="log out icon"></i></a>
                         </template>
                     </div>
@@ -69,29 +70,44 @@
                         class="ts tiny closable modal login"
                     >
                         <div class="ts icon content grid">
-                            <div class="icon two wide column"><i class="big user circle icon"></i></div>
-                            <div class="fourteen wide column">
-                                <form class="ts form">
-                                    <div class="inline fluid field">
+                            <div class="icon three wide column"><i class="big user circle icon"></i></div>
+                            <div class="thirteen wide column">
+                                <form class="ts form" @keydown.enter="login()">
+                                    <div class="fluid field">
                                         <label>{{CONSTANTS.TEXT.username}}</label>
-                                        <input type="text" v-model="input.username">
+                                        <input type="text" v-model="input.username" @keydown.enter="login()">
                                     </div>
-                                    <div class="inline fluid field">
+                                    <div class="fluid field">
                                         <label>{{CONSTANTS.TEXT.password}}</label>
-                                        <input type="password" v-model="input.password">
+                                        <input type="password" v-model="input.password" @keydown.enter="login()">
+                                        <small id="forget-password">忘記密碼?</small>
                                     </div>
+                                    <button type="button" class="ts login fluid button" @click="login()" @keydown.enter="login()">
+                                        {{CONSTANTS.TEXT.login}}
+                                    </button>
                                 </form>
                             </div>
-                        </div>
-                        <div class="actions">
-                            <button type="button" class="ts login button" @click="login()">
-                                {{CONSTANTS.TEXT.login}}
-                            </button>
                         </div>
                     </dialog>
                 </div>
             </header>
             <slot name="content"></slot>
+            <!-- <slot name="loading"></slot> -->
+        </div>
+        <div class="ts bottom left snackbar">
+            <div class="content">
+                {{snackbar.info}}
+            </div>
+        </div>
+        <div class="ts bottom left success snackbar">
+            <div class="content">
+                {{snackbar.success}}
+            </div>
+        </div>
+        <div class="ts bottom left error snackbar">
+            <div class="content">
+                {{snackbar.error}}
+            </div>
         </div>
     </div>
 </template>
@@ -108,7 +124,9 @@ export default {
     data() {
         return {
             CONSTANTS: CONSTANTS.main,
-            user: {
+            MESSAGES: CONSTANTS.messages,
+            user: {},
+            guest:{
                 id: 0,
                 name: 'Guest',
                 util: null,
@@ -118,16 +136,33 @@ export default {
             input: {
                 username: null,
                 password: null,
+            },
+            snackbar: {
+                info: null,
+                success: null,
+                error: null,
             }
         };
     },
-    mounted() {
+    async mounted() {
+        this.$axios.get("/api/user").then(_ => {
+            console.log(_);
+            const data = _.data;
+            this.user = data.user;
+        }).catch(e => {
+            if (e.response) {
+                console.log(e.response.data);
+                console.log(e.response.status);
+                console.log(e.response.headers);
+            }
+            this.user = this.guest;
+        });
         console.log(`Login: ${this.isLogin}`);
     },
     computed: {
         isLogin() {
-            // return this.user.id !== 0 && this.user.name !== 'Guest' && !DataUtil.isAnyEmpty(this.user.id, this.user.name);
-            return false;
+            return this.user.id !== 0 && this.user.name !== 'Guest' && !DataUtil.isAnyEmpty(this.user.id, this.user.name);
+            // return false;
         },
     },
     methods: {
@@ -140,9 +175,42 @@ export default {
                 onDeny: () => {console.log('D')},
             }).modal('show');
         },
-        login() {
-
+        closeLoginModal() {
+            ts('.login.modal').modal('hide');
         },
+        login() {
+            let loginFormData = new FormData()
+            loginFormData.set('username',this.input.username)
+            loginFormData.set('password',this.input.password)
+            this.$axios.post("/api/login",loginFormData).then(_ => {
+                console.log(_);
+                const data = _.data;
+                if(data.success){
+                    this.user = data.user;
+                    this.closeLoginModal();
+                    ts('.success.snackbar').snackbar({
+                        content: DataUtil.parseResponseMessages(data.message)
+                    });
+                }else{
+                    this.refreshCSRFToken();
+                    ts('.error.snackbar').snackbar({
+                        content: DataUtil.parseResponseMessages(data.message)
+                    });
+                }
+                this.input.username = null;
+                this.input.password = null;
+            }).catch(e => console.log(e));
+            this.$store.commit("userStore/set", this.user);
+        },
+        logout() {
+            this.$axios.get("/api/logout").then(async _ => {
+                this.user = this.guest;
+                this.refreshCSRFToken();
+            }).catch(e => console.log(e));
+        },
+        async refreshCSRFToken() {
+            window.$nuxt.$axios.defaults.headers.common['X-CSRF-TOKEN'] = (await this.$axios.get("/api/csrf")).data;
+        }
     },
     props: {
         'has-form': {
@@ -157,6 +225,15 @@ export default {
                 return "universal";
             },
         },
+        'form-data': {
+            type: Object,
+        }
+    },
+    watch: {
+        formData: function(newVal, oldVal){
+            console.log("data changed.")
+            this.formData = newVal;
+        }
     },
 }
 </script>
@@ -182,14 +259,37 @@ export default {
         display: inline-grid;
     } */
     .nchu.main .login.modal .icon.column {
-        padding-top: 2.5em;
+        font-size: 2em;
+        padding-top: 3.3em;
+        padding-left: 0px;
+        border-right: 1px solid #ccc;
     }
     .nchu.main .login.modal .login.button {
         color: white;
         background-color:  rgb(8, 138, 120);
+        margin-top: 1em;
+    }
+    .nchu.main .login.modal #forget-password {
+        float: right;
+        margin-left: auto;
+    }
+
+    .nchu.main .success.snackbar {
+        background-color:  rgb(83, 145, 64);
+        color: white;
+        border-left: .5em solid rgb(53, 94, 43);
+    }
+    .nchu.main .error.snackbar {
+        background-color:  rgb(145, 64, 64);
+        color: white;
+        border-left: .5em solid rgb(94, 43, 43);
     }
 
     @media(hover: hover) and (pointer: fine) {
+        .nchu.main .login.modal #forget-password:hover {
+            color: rgb(46, 119, 255);
+            cursor: pointer;
+        }
         .nchu.main header .text.button:hover {
             color: rgb(8, 138, 120);
             cursor: pointer;

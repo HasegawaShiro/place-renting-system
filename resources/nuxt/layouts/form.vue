@@ -6,12 +6,14 @@
         @click="openModal()"
     ></i>
     <div class="ts modals dimmer">
-        <Universal
-            v-if="formMode == 'universal'"
-        ></Universal>
         <Schedule
-            v-else-if="formMode == 'schedule'"
+            v-if="formMode == 'schedule'"
+            :form-data="formData"
         ></Schedule>
+        <Universal
+            v-else
+        ></Universal>
+
     </div>
 </div>
 </template>
@@ -35,11 +37,11 @@ export default {
     },
     methods: {
         openModal() {
-            ts('.new.form').modal("show");
+            ts('dialog.new').modal("show");
             // this.toHideAdd();
         },
         closeModal() {
-            ts('.new.form').modal("hide");
+            ts('dialog.new').modal("hide");
             // this.toShowAdd();
         },
         toShowAdd() {
@@ -62,6 +64,14 @@ export default {
                 return true;
             }
         },
+        'form-data': {
+            type: Object
+        },
+    },
+    watch: {
+        formData(newVal, oldVal){
+            this.formData = newVal;
+        }
     },
 }
 </script>
