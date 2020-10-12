@@ -39,5 +39,6 @@ export default {
     messages: {
         'login-success': '登入成功',
         'user-disabled': '此用戶已遭停用',
+        'login-error': '帳號或密碼錯誤'
     },
 }
