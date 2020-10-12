@@ -23,11 +23,12 @@
                         :data-tooltip="CONSTANTS.TEXT.menu"
                         @click="toggleSidebar()"
                     ><i class="list icon"></i></a>
-                    <a
+                    <n-link
+                        to="/"
                         class="item nchu header title"
                         style="z-index: 2;"
                         :data-tooltip="CONSTANTS.TEXT.index"
-                    >{{CONSTANTS.TEXT.title}}</a>
+                    >{{CONSTANTS.TEXT.title}}</n-link>
                     <div class="right menu">
                         <div v-if="isLogin" class="item">{{user.name}}, {{CONSTANTS.TEXT.greet}}</div>
                         <a
@@ -75,14 +76,14 @@
                                 <form class="ts form" @keydown.enter="login()">
                                     <div class="fluid field">
                                         <label>{{CONSTANTS.TEXT.username}}</label>
-                                        <input type="text" v-model="input.username" @keydown.enter="login()">
+                                        <input type="text" v-model="input.username" >
                                     </div>
                                     <div class="fluid field">
                                         <label>{{CONSTANTS.TEXT.password}}</label>
-                                        <input type="password" v-model="input.password" @keydown.enter="login()">
+                                        <input type="password" v-model="input.password">
                                         <small id="forget-password">忘記密碼?</small>
                                     </div>
-                                    <button type="button" class="ts login fluid button" @click="login()" @keydown.enter="login()">
+                                    <button type="button" class="ts login fluid button" @click="login()">
                                         {{CONSTANTS.TEXT.login}}
                                     </button>
                                 </form>
@@ -116,6 +117,7 @@
 import CONSTANTS from '../constants.js'
 import Form from '../layouts/form.vue'
 import DataUtil from '../utils/DataUtil.js';
+import API from '../api.js';
 
 export default {
     components: {
@@ -144,20 +146,12 @@ export default {
             }
         };
     },
-    async mounted() {
-        this.$axios.get("/api/user").then(_ => {
-            console.log(_);
-            const data = _.data;
-            this.user = data.user;
+    mounted() {
+        API.sendRequest("/api/user").then(response => {
+            this.user = response.data.user;
         }).catch(e => {
-            if (e.response) {
-                console.log(e.response.data);
-                console.log(e.response.status);
-                console.log(e.response.headers);
-            }
             this.user = this.guest;
         });
-        console.log(`Login: ${this.isLogin}`);
     },
     computed: {
         isLogin() {
@@ -178,39 +172,39 @@ export default {
         closeLoginModal() {
             ts('.login.modal').modal('hide');
         },
-        login() {
-            let loginFormData = new FormData()
-            loginFormData.set('username',this.input.username)
-            loginFormData.set('password',this.input.password)
-            this.$axios.post("/api/login",loginFormData).then(_ => {
-                console.log(_);
-                const data = _.data;
-                if(data.success){
-                    this.user = data.user;
-                    this.closeLoginModal();
-                    ts('.success.snackbar').snackbar({
-                        content: DataUtil.parseResponseMessages(data.message)
-                    });
-                }else{
-                    this.refreshCSRFToken();
+        async login() {
+            let loginFormData = new FormData();
+            loginFormData.set('username',this.input.username);
+            loginFormData.set('password',this.input.password);
+            await API.sendRequest("/api/login", "post", loginFormData, {onlyData: true}).then(data => {
+                this.user = data.user;
+                this.closeLoginModal();
+                ts('.success.snackbar').snackbar({
+                    content: DataUtil.parseResponseMessages(data.message)
+                });
+                this.$store.commit("userStore/set", this.user);
+            }).catch(e => {
+                try {
+                    let errorData = e.response.data;
                     ts('.error.snackbar').snackbar({
-                        content: DataUtil.parseResponseMessages(data.message)
+                        content: DataUtil.parseResponseMessages(errorData.message)
+                    });
+                } catch (error) {
+                    ts('.error.snackbar').snackbar({
+                        content: DataUtil.getMessage('login-error')
                     });
                 }
-                this.input.username = null;
-                this.input.password = null;
-            }).catch(e => console.log(e));
-            this.$store.commit("userStore/set", this.user);
+            });
+            this.input.username = null;
+            this.input.password = null;
         },
         logout() {
             this.$axios.get("/api/logout").then(async _ => {
                 this.user = this.guest;
-                this.refreshCSRFToken();
+                API.refreshCSRFToken();
             }).catch(e => console.log(e));
         },
-        async refreshCSRFToken() {
-            window.$nuxt.$axios.defaults.headers.common['X-CSRF-TOKEN'] = (await this.$axios.get("/api/csrf")).data;
-        }
+
     },
     props: {
         'has-form': {
