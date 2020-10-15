@@ -1,6 +1,6 @@
 <template>
     <dialog
-        class="ts tiny closable modal new form"
+        class="ts tiny modal new form"
     >
         <div class="header">
             通用表單

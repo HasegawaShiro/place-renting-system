@@ -23,21 +23,25 @@ class Schedule extends Model
         'schedule_contact',
         'schedule_url',
         'schedule_repeat',
-        'schedule_options',
-        'schedule_regitrant',
+        'schedule_repeat_days',
+        'schedule_end_at',
+        'schedule_end_times',
+        'schedule_registrant',
         'created_by',
         'updated_by',
     ];
 
     protected $casts = [
         'place_id' => 'integer',
-        'schedule_date' => 'date',
-        'schedule_from' => 'time',
-        'schedule_to' => 'time',
+        'schedule_date' => 'datetime:Y-m-d',
+        'schedule_from' => 'datetime:H:i',
+        'schedule_to' => 'datetime:H:i',
         'user_id' => 'integer',
         'schedule_repeat' => 'boolean',
-        'schedule_options' => 'array',
-        'schedule_regitrant' => 'integer',
+        'schedule_repeat_days' => 'integer',
+        'schedule_end_at' => 'datetime:Y-m-d',
+        'schedule_end_times' => 'integer',
+        'schedule_registrant' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'
     ];

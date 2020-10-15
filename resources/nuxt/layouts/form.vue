@@ -9,6 +9,8 @@
         <Schedule
             v-if="formMode == 'schedule'"
             :form-data="formData"
+            :ref="'form-modal'"
+            @save="onModalSave($event)"
         ></Schedule>
         <Universal
             v-else
@@ -19,6 +21,9 @@
 </template>
 
 <script>
+import API from '../api.js';
+import CONSTANTS from '../constants.js';
+import DataUtil from '../utils/DataUtil.js';
 import Schedule from '../components/forms/schedule.vue';
 import Universal from '../components/forms/universal.vue';
 
@@ -30,14 +35,26 @@ export default {
     },
     mounted() {
         this.showAddMutation = this.showAdd;
+        console.log(this)
     },
     components: {
         Universal,
         Schedule,
     },
+    computed: {
+    },
     methods: {
-        openModal() {
-            ts('dialog.new').modal("show");
+        async openModal(defaultData = {}) {
+            this.dataChanged = false;
+            await this.$refs['form-modal'].add(defaultData);
+            ts('dialog.new').modal({
+                onDeny() {
+                    return confirm(CONSTANTS.messages["cancel-confirmation"]);
+                },
+                onApprove() {
+                    return false;
+                },
+            }).modal("show");
             // this.toHideAdd();
         },
         closeModal() {
@@ -49,6 +66,23 @@ export default {
         },
         toHideAdd() {
             this.showAddMutation = false;
+        },
+        onModalCancel() {
+            confirm(CONSTANTS.messages["cancel-confirmation"]);
+        },
+        onModalSave(event) {
+            API.sendRequest(`/api/post/${event.name}`, 'post', event.input, {onlyData: true}).then(response => {
+                this.$parent.showSnackbar("success", response.messages);
+                this.$parent.$parent.$refs['content'].getListDatas();
+                this.closeModal();
+            }).catch(e => {
+                try {
+                    this.$parent.showSnackbar("error", e.data.messages);
+                } catch (error) {
+                    let msg = DataUtil.getMessage('unknown-error')+DataUtil.getMessage('contact-maintenance');
+                    this.$parent.showSnackbar("error", msg);
+                }
+            });
         },
     },
     props: {

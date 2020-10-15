@@ -1,5 +1,6 @@
 <template>
-    <dialog class="ts mobile-wrapper tiny closable modal new schedule">
+<div class="ts modals dimmer">
+    <dialog class="ts mobile-wrapper closable modal schedule-events">
         <header class="header">
         </header>
 
@@ -8,11 +9,11 @@
                 {{ CONSTANTS.TEXT.selected_date }}
             </span>
             <h3 class="date-title">
-                {{ parseSelectedDate[0] }}
+                {{ parseDate[0] }}
                 {{ CONSTANTS.TEXT.year }}
-                {{ parseSelectedDate[1] }}
+                {{ parseDate[1] }}
                 {{ CONSTANTS.TEXT.month }}
-                {{ parseSelectedDate[2] }}
+                {{ parseDate[2] }}
                 {{ CONSTANTS.TEXT.day }}
             </h3>
 
@@ -55,29 +56,30 @@
             </div>
         </section>
     </dialog>
+</div>
 </template>
 
 <script>
-import CONSTANTS from "../../constants.js";
-import DataUtil from '../../utils/DataUtil.js';
+import CONSTANTS from "../../../constants.js";
+import DataUtil from '../../../utils/DataUtil.js';
 
 export default {
     data() {
         return {
             CONSTANTS: CONSTANTS.schedule,
+            showDate: null,
+            schedules: [],
+            active_id: 0,
         };
     },
     props: {
-        'form-data': {
-            type: Object,
-        },
     },
     computed: {
-        parseSelectedDate() {
+        parseDate() {
             let result = [];
             let toParseDate = new Date();
-            if(!DataUtil.isEmpty(this.formData.selected_date) && this.formData.selected_date.constructor === Date) {
-                toParseDate = this.formData.selected_date;
+            if(!DataUtil.isEmpty(this.showDate) && this.showDate.constructor == Date) {
+                toParseDate = this.showDate;
             }
 
             result.push(toParseDate.getFullYear(), toParseDate.getMonth()+1, toParseDate.getDate());
@@ -85,25 +87,37 @@ export default {
         }
     },
     methods: {
+        async openModal(inputData = {}) {
+            function putData(putIn, data) {
+                for(let k in data){
+                    if(putIn[k] !== undefined) putIn[k] = data[k];
+                }
+            }
+            await putData(this, inputData);
+            console.log(this)
+            ts('dialog.schedule-events').modal("show");
+            // this.toHideAdd();
+        },
+        closeModal() {
+            ts('dialog.schedule-events').modal("hide");
+            // this.toShowAdd();
+        },
         eventUnfold() {
 
         },
     },
     watch: {
-        formData(newVal, oldVal){
-            this.formData = newVal;
-        }
     },
 };
 </script>
 
 <style>
-.container {
+.schedule-events .container {
     width: 100%;
     margin: 0;
 }
 
-.mobile-wrapper {
+.schedule-events .mobile-wrapper {
     background: #fff;
     /* relative with .today-box::before*/
     z-index: 1;
@@ -119,20 +133,20 @@ export default {
     overflow: hidden;
 }
 
-.header {
+.schedule-events .header {
     padding-bottom: 15px;
 }
-.header .container {
+.schedule-events .header .container {
     position: relative;
 }
-.header .container span {
+.schedule-events .header .container span {
     color: #444;
     font-family: "Ramabhadra";
     font-size: 21px;
     font-weight: 700;
 }
 
-.today-box {
+.schedule-events .today-box {
     background: linear-gradient(
         to left,
         rgb(8, 138, 120),
@@ -145,7 +159,7 @@ export default {
     box-shadow: 0px 0px 40px -9px #026b6e;
     margin-bottom: 50px;
 }
-.today-box::before {
+.schedule-events .today-box::before {
     content: "";
     background: linear-gradient(
         to left,
@@ -166,19 +180,19 @@ export default {
     border-radius: 50%;
     box-shadow: 0px 0px 40px 0 #026b6e;
 }
-.today-box .breadcrumb {
+.schedule-events .today-box .breadcrumb {
     font-size: 1.5em;
     font-weight: 300;
     position: relative;
 }
-.today-box .date-title {
+.schedule-events .today-box .date-title {
     color: #fff !important;
     margin: 7px 0 0 0;
     letter-spacing: 1px;
     font-weight: 600;
     text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.15);
 }
-.today-box .plus-icon {
+.schedule-events .today-box .plus-icon {
     border: 2px solid rgba(255, 255, 255, 0.6);
     border-radius: 50%;
     box-shadow: 0px 10px 30px -14px #000;
@@ -190,10 +204,10 @@ export default {
     transition: all 350ms ease;
     transition-timing-function: cubic-bezier(0.05, 1.8, 1, 1.57);
 }
-.today-box .plus-icon:hover {
+.schedule-events .today-box .plus-icon:hover {
   transform: translateY(-40%);
 }
-.today-box .plus-icon i {
+.schedule-events .today-box .plus-icon i {
     font-size: 1.2em;
     font-weight: 700;
     background: #fff;
@@ -207,74 +221,74 @@ export default {
     justify-content: center;
     margin: 0;
 }
-.today-box .plus-icon:active {
+.schedule-events .today-box .plus-icon:active {
   top: 52%;
   transform: translatey(-52%);
   right: 38px;
   box-shadow: 0px 8px 30px -14px #000;
 }
 
-.upcoming-events .container h3 {
+.schedule-events .upcoming-events .container h3 {
     color: #333;
     font-size: 1.2em;
     margin-bottom: 30px;
     position: relative;
-    left: 10%;
+    margin-left: 5em;
 }
-.upcoming-events .container h3::before {
+.schedule-events .upcoming-events .container h3::before {
     content: "";
     display: block;
-    width: 18.5%;
+    width: 9%;
     height: 2px;
     background-color: #e8e8e8;
     position: absolute;
     top: 50%;
     transform: translatey(-60%);
-    left: -20%;
+    left: -5em;
 }
-.upcoming-events .container h3::after {
+/* .schedule-events .upcoming-events .container h3::after {
     content: "";
     display: block;
-    width: 84%;
+    width: 91%;
     height: 2px;
     background-color: #e8e8e8;
     position: absolute;
     top: 50%;
     transform: translatey(-60%);
     right: 0;
-}
-.upcoming-events .container .events-wrapper {
+} */
+.schedule-events .upcoming-events .container .events-wrapper {
     margin-bottom: 30px;
 }
-.upcoming-events .container .events-wrapper .event {
+.schedule-events .upcoming-events .container .events-wrapper .event {
     margin: 0;
     padding: 0;
 }
-.upcoming-events .container .events-wrapper .event .accordion summary {
+.schedule-events .upcoming-events .container .events-wrapper .event .accordion summary {
     color: #222;
     font-weight: 500;
     padding-left: 2.5em;
     padding-right: 2.5em;
 }
-.upcoming-events .container .events-wrapper .event .accordion[open] summary {
+.schedule-events .upcoming-events .container .events-wrapper .event .accordion[open] summary {
     background-color: rgba(63, 255, 182, 0.774);
 }
 @media(hover: hover) and (pointer: fine) {
-    .upcoming-events .container .events-wrapper .event .accordion[open] summary,
-    .upcoming-events .container .events-wrapper .event .accordion summary:hover {
+    .schedule-events .upcoming-events .container .events-wrapper .event .accordion[open] summary,
+    .schedule-events .upcoming-events .container .events-wrapper .event .accordion summary:hover {
         background-color: rgba(63, 255, 182, 0.774);
     }
 }
-.upcoming-events .container .events-wrapper .event .accordion summary i {
+.schedule-events .upcoming-events .container .events-wrapper .event .accordion summary i {
     position: absolute;
     right: 0;
     font-size: 1.5em;
     top: 30%;
 }
-.upcoming-events .container .events-wrapper .slate{
+.schedule-events .upcoming-events .container .events-wrapper .slate{
     box-shadow: 0px 0px 8px 3px #b3b3b3 inset;
 }
-.upcoming-events .container .events-wrapper .divider{
+.schedule-events .upcoming-events .container .events-wrapper .divider{
     margin: 0;
 }
 </style>

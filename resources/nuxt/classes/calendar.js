@@ -1,4 +1,4 @@
-import {API} from '../functions/API.js';
+import API from '../api.js';
 import DataUtil from '../utils/DataUtil.js';
 
 export default class Calendar {
@@ -6,7 +6,6 @@ export default class Calendar {
     #Month;
     #Week;
     #Dates = [];
-    #Schedules = [];
     #Today;
     #SelectedDate;
 
@@ -57,7 +56,8 @@ export default class Calendar {
             for(let j = 0; j < 7; j++){
                 let putIn = {};
                 const temp = new Date(year, month, dp);
-                putIn.id = DataUtil.uuidv4();
+                // putIn.id = DataUtil.uuidv4();
+                putIn.dateText = DataUtil.formatDateInput(temp)
                 putIn.date = temp;
                 putIn.different = temp.getMonth() !== month;
                 putIn.holiday = temp.getDay() === 0 || temp.getDay() === 6
@@ -75,9 +75,6 @@ export default class Calendar {
             this.#Week = 0;
             this.#SelectedDate = new Date(year, month, 1 ,0 ,0 ,0);
         };
-    }
-    setSchedules(){
-
     }
 
     get Year() {return this.#Year}
@@ -102,15 +99,11 @@ export default class Calendar {
         }
     }
 
-    get Dates() {return this.#Dates}
-    set Dates(x) {
-        console.error("Dates cannot be setted.");
-    }
+    get Week() {return this.#Week}
+    set Week(x) {console.error("Dates cannot be setted.");}
 
-    get Schedules() {return this.#Schedules}
-    set Schedules(x) {
-        console.error("Schedules cannot be setted.");
-    }
+    get Dates() {return this.#Dates}
+    set Dates(x) {console.error("Dates cannot be setted.");}
 
     get SelectedDate() {return this.#SelectedDate}
     set SelectedDate(date) {

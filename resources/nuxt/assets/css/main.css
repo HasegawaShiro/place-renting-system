@@ -4,6 +4,9 @@ body {
 [data-tooltip]::before{
     display: none;
 }
+.ts.form .field label {
+    text-align: left !important;
+}
 
 /* Scrollbar style */
 ::-webkit-scrollbar-track

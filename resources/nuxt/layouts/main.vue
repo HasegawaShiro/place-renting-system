@@ -1,9 +1,11 @@
 <template>
     <div class="nchu main">
+        <slot name="other"></slot>
         <Form
             v-if="isLogin"
             :form-mode="formMode"
             :form-data="formData"
+            ref="form"
         ></Form>
         <div class="ts static left sidebar">
             <div class="index">NCHU</div>
@@ -70,9 +72,14 @@
                     <dialog
                         class="ts tiny closable modal login"
                     >
-                        <div class="ts icon content grid">
-                            <div class="icon three wide column"><i class="big user circle icon"></i></div>
-                            <div class="thirteen wide column">
+                        <div class="ts inverted negative segment" v-if="authExpired">
+                            <p>{{MESSAGES['auth-expired']}}</p>
+                        </div>
+                        <div class="ts icon content">
+                            <!-- <div class="icon three wide column large device only">
+                                <i class="big user circle icon"></i>
+                            </div> -->
+                            <div class="">
                                 <form class="ts form" @keydown.enter="login()">
                                     <div class="fluid field">
                                         <label>{{CONSTANTS.TEXT.username}}</label>
@@ -143,15 +150,19 @@ export default {
                 info: null,
                 success: null,
                 error: null,
-            }
+            },
+            authExpired: false,
         };
     },
     mounted() {
-        API.sendRequest("/api/user").then(response => {
+        API.sendRequest("/api/user","get",null,{doNotRelogin: true}).then(response => {
             this.user = response.data.user;
+            this.$store.commit("userStore/set", this.user);
         }).catch(e => {
             this.user = this.guest;
         });
+
+        window.mainLayout = this;
     },
     computed: {
         isLogin() {
@@ -164,10 +175,7 @@ export default {
             ts('.left.sidebar').sidebar('toggle');
         },
         openLoginModal() {
-            ts('.login.modal').modal({
-                onApprove: () => {console.log('A')},
-                onDeny: () => {console.log('D')},
-            }).modal('show');
+            ts('.login.modal').modal('show');
         },
         closeLoginModal() {
             ts('.login.modal').modal('hide');
@@ -197,14 +205,23 @@ export default {
             });
             this.input.username = null;
             this.input.password = null;
+            this.authExpired = false;
         },
         logout() {
             this.$axios.get("/api/logout").then(async _ => {
-                this.user = this.guest;
-                API.refreshCSRFToken();
+                location.reload();
             }).catch(e => console.log(e));
         },
-
+        relogin() {
+            this.user = this.guest;
+            this.authExpired = true;
+            this.openLoginModal();
+        },
+        showSnackbar(type, messages){
+            ts(`.${type}.snackbar`).snackbar({
+                content: DataUtil.parseResponseMessages(messages)
+            });
+        },
     },
     props: {
         'has-form': {
@@ -278,13 +295,9 @@ export default {
         color: white;
         border-left: .5em solid rgb(94, 43, 43);
     }
-
+    @media only screen and (max-width:767px){}
     @media(hover: hover) and (pointer: fine) {
-        .nchu.main .login.modal #forget-password:hover {
-            color: rgb(46, 119, 255);
-            cursor: pointer;
-        }
-        .nchu.main header .text.button:hover {
+        .nchu.main header .text.button:hover, .nchu.main .login.modal #forget-password:hover {
             color: rgb(8, 138, 120);
             cursor: pointer;
         }

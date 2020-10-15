@@ -26,10 +26,11 @@ class CreateUsersTable extends Migration
                 $table->bigInteger('util_id');
                 $table->bigInteger('created_by')->default(-1);
                 $table->bigInteger('updated_by')->default(-1);
+                $table->text('remarks')->nullable();
                 // $table->rememberToken();
                 $table->timestamps();
 
-                $table->index(['user_id','username', 'email'],'users_index');
+                // $table->index(['user_id','username', 'email'],'users_index');
         });
         User::create(['username' => 'admin', 'password' => Hash::make('admin'), 'name' => 'Admin', 'util_id' => 1, 'user_disabled' => false]);
     }

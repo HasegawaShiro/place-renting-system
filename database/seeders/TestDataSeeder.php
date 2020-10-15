@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Places;
+use App\Models\Place;
 
 class TestDataSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class TestDataSeeder extends Seeder
      */
     public function run()
     {
-        Places::insert([
+        Place::insert([
             ['place_name' => '測試場地1', 'place_disabled' => false],
             ['place_name' => '測試場地2', 'place_disabled' => false],
             ['place_name' => '測試場地3', 'place_disabled' => false],

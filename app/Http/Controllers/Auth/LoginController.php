@@ -57,7 +57,7 @@ class LoginController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'user-disabled',
-            ], 200);
+            ], 401);
         }
     }
     protected function unauthenticated($request, $exception)

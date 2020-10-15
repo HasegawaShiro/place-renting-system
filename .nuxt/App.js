@@ -7,8 +7,6 @@ import NuxtBuildIndicator from './components/nuxt-build-indicator'
 
 import '..\\resources\\nuxt\\assets\\css\\main.css'
 
-import '..\\resources\\nuxt\\assets\\css\\calendar.css'
-
 import _2d23adba from '..\\resources\\nuxt\\layouts\\form.vue'
 import _2d26a6af from '..\\resources\\nuxt\\layouts\\main.vue'
 import _6f6c098b from './layouts/default.vue'
