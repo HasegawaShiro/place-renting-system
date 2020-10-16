@@ -7,15 +7,25 @@
             :form-data="formData"
             ref="form"
         ></Form>
-        <div class="ts static left sidebar">
-            <div class="index">NCHU</div>
-            <div class="ts divider"></div>
-            <div class="ts divider"></div>
-            <div class="ts divider"></div>
-            <div class="ts divider"></div>
-            <div class="ts divider"></div>
+        <div class="ts static left sidebar inverted vertical menu" id="main-sidebar">
+            <div class="item">
+                本校
+                <div class="menu">
+                    <a class="item" target="_blank" href="https://www.nchu.edu.tw/">官網</a>
+                    <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a>
+                </div>
+            </div>
+            <!-- <a class="item" target="_blank" href="https://www.nchu.edu.tw/">官網</a>
+            <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a> -->
+            <a class="item">公告</a>
+            <a class="item">使用手冊</a>
+
+            <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
-        <div class="squeezable pusher">
+        <div class="squeezable pusher" id="sidebar-pusher">
+            <div class="ts dimmer" id="global-loading">
+                <div class="ts loader"></div>
+            </div>
             <header>
                 <div class="ts pointing secondary large icon menu">
                     <a
@@ -27,6 +37,7 @@
                     ><i class="list icon"></i></a>
                     <n-link
                         to="/"
+                        id="menu-index"
                         class="item nchu header title"
                         style="z-index: 2;"
                         :data-tooltip="CONSTANTS.TEXT.index"
@@ -162,6 +173,18 @@ export default {
             this.user = this.guest;
         });
 
+        window.globalLoading = {
+            $el: document.querySelector("#global-loading"),
+            loading() {
+                const el = window.globalLoading.$el;
+                if(!el.classList.contains("active")) el.classList.add("active");
+            },
+            unloading() {
+                const el = window.globalLoading.$el;
+                if(el.classList.contains("active")) el.classList.remove("active");
+            },
+        };
+
         window.mainLayout = this;
     },
     computed: {
@@ -172,7 +195,31 @@ export default {
     },
     methods: {
         toggleSidebar() {
-            ts('.left.sidebar').sidebar('toggle');
+            const sidebar = document.querySelector('#main-sidebar');
+            const pusher = document.querySelector('#sidebar-pusher');
+            const mediaQueryList = window.matchMedia('(max-width: 767px)');
+
+            function responsivePusher(e) {
+                if (e.matches) {
+                    if(pusher.classList.contains("squeezable")) pusher.classList.remove("squeezable");
+                    // if(!sidebar.classList.contains("overlapped")) sidebar.classList.add("overlapped");
+
+                    ts('#main-sidebar').sidebar({
+                        dimPage: true,
+                        closable: true,
+                    }).sidebar('toggle');
+                    // ts('#main-sidebar').sidebar('toggle');
+                } else {
+                    if(!pusher.classList.contains("squeezable")) pusher.classList.add("squeezable");
+                    // if(sidebar.classList.contains("overlapped")) sidebar.classList.remove("overlapped");
+                    ts('#main-sidebar').sidebar('toggle');
+                }
+            }
+            responsivePusher(mediaQueryList);
+            // mediaQueryList.addListener(responsivePusher);
+        },
+        closeSidebar() {
+            ts('#main-sidebar').sidebar('hide');
         },
         openLoginModal() {
             ts('.login.modal').modal('show');
@@ -253,18 +300,24 @@ export default {
     .nchu.main>.pusher {
         overflow-x: hidden;
     }
+    #global-loading {
+        position: fixed;
+    }
 
     /* sidebar */
     .nchu.main .sidebar {
         color: white;
         background-color:  rgb(8, 138, 120);
     }
-    .nchu.main .sidebar .index {
-        text-align: center;
-        font-size: 4em;
-        font-weight: bolder;
-        display: block;
+    .nchu.main .sidebar>.item {
+        border-bottom: 1px solid rgba(221, 221, 221, 0.363) !important;
     }
+    .nchu.main .sidebar .item .menu a.item {
+        font-size: .94555em;
+    }
+    /* .nchu.main .sidebar .menu .item{
+        border-bottom: 0px !important;
+    } */
 
     /* .nchu.main .login.modal .icon.column, .nchu.main .login.modal form {
         display: inline-grid;
@@ -295,8 +348,16 @@ export default {
         color: white;
         border-left: .5em solid rgb(94, 43, 43);
     }
-    @media only screen and (max-width:767px){}
+    @media only screen and (max-width:767px){
+        #menu-index {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+    }
     @media(hover: hover) and (pointer: fine) {
+        .nchu.main .sidebar a.item:hover {
+            background-color:  rgb(8, 112, 98) !important;
+        }
         .nchu.main header .text.button:hover, .nchu.main .login.modal #forget-password:hover {
             color: rgb(8, 138, 120);
             cursor: pointer;
