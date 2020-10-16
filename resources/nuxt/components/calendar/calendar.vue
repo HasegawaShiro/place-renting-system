@@ -197,7 +197,7 @@
                                     <div
                                         v-if="schedulesByDay()[dateObj.dateText].length > 2"
                                         class="schedule overflow"
-                                        @click=""
+                                        @click="scheduleClick(dateObj.dateText)"
                                     >
                                         <i class="ellipsis vertical icon"></i>
                                     </div>
