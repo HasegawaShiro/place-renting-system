@@ -185,7 +185,7 @@ export default {
     },
     methods: {
         async openModal(inputData = {}) {
-            document.querySelector("body").style.cursor = "progress !important";
+            window.globalLoading.loading();
             function putData(putIn, data) {
                 for(let k in data){
                     if(putIn[k] !== undefined) putIn[k] = data[k];
@@ -195,10 +195,11 @@ export default {
             this.selects.user = await API.getReferenceSelect("user");
             this.selects.place = await API.getReferenceSelect("place");
             this.selects.util = await API.getReferenceSelect("util");
+            window.globalLoading.unloading();
             ts('dialog.schedule-events').modal("show");
-            document.querySelector("body").style.cursor = "initial";
-            this.onAccordionClick(null, this.active_id);
-            // this.toHideAdd();
+            if(!DataUtil.isEmpty(inputData.active_id)){
+                this.onAccordionClick(null, this.active_id);
+            }
         },
         closeModal() {
             ts('dialog.schedule-events').modal("hide");
@@ -243,6 +244,7 @@ export default {
                     toParseDate = this.showDate;
                 }
                 this.$parent.$refs["form"].openModal({schedule_date: DataUtil.formatDateInput(toParseDate)});
+                this.closeModal();
             }
         },
     },

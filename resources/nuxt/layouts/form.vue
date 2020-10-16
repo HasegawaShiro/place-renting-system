@@ -45,8 +45,11 @@ export default {
     },
     methods: {
         async openModal(defaultData = {}) {
+            console.log(window.globalLoading);
+            window.globalLoading.loading();
             this.dataChanged = false;
             await this.$refs['form-modal'].add(defaultData);
+            window.globalLoading.unloading();
             ts('dialog.new').modal({
                 onDeny() {
                     return confirm(CONSTANTS.messages["cancel-confirmation"]);
