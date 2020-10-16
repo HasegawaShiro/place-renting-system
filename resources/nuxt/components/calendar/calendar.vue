@@ -106,6 +106,7 @@
                                             :key="'select-'+name"
                                             v-model="filters[name]"
                                         >
+                                            <option :value="null"></option>
                                             <option
                                                 v-for="(text, value) in options"
                                                 :key="name+'-'+value"
@@ -160,7 +161,7 @@
                                 :class="{
                                     different: dateObj.different,
                                     holiday: dateObj.holiday,
-                                    clickable: schedulesByDay[dateObj.dateText].length <= 0
+                                    clickable: schedulesByDay()[dateObj.dateText].length <= 0 && isLogin
                                 }"
                                 :key="dateObj.dateText"
                                 :id="dateObj.dateText"
@@ -171,31 +172,32 @@
                                 >{{dateObj.date.getDate()}}</h2>
                                 <div
                                     class="schedules"
-                                    v-if="schedulesByDay[dateObj.dateText].length > 0"
+                                    v-if="schedulesByDay()[dateObj.dateText].length > 0"
                                 >
                                     <div
-                                        v-for="i in countDayCellSchedule(dateObj.dateText)"
+                                        v-for="i in countDayCellSchedule(schedulesByDay()[dateObj.dateText])"
                                         :key="dateObj.dateText+'-'+i"
-                                        :class="schedulesByDay[dateObj.dateText][i-1].schedule_type"
-                                        @click="scheduleClick(dateObj.dateText, schedulesByDay[dateObj.dateText][i-1].schedule_id)"
+                                        :class="schedulesByDay()[dateObj.dateText][i-1].schedule_type"
+                                        @click="scheduleClick(dateObj.dateText, schedulesByDay()[dateObj.dateText][i-1].schedule_id)"
                                     >
                                         <div class="tablet or large device only text">
                                             <i>
-                                                {{schedulesByDay[dateObj.dateText][i-1].schedule_from}}
+                                                {{schedulesByDay()[dateObj.dateText][i-1].schedule_from}}
                                                 -
-                                                {{schedulesByDay[dateObj.dateText][i-1].schedule_to}}
+                                                {{schedulesByDay()[dateObj.dateText][i-1].schedule_to}}
                                             </i><br>
                                             <i>
-                                                {{selects.places[schedulesByDay[dateObj.dateText][i-1].place_id]}}
+                                                {{selects.place[schedulesByDay()[dateObj.dateText][i-1].place_id]}}
                                             </i>
                                         </div>
                                         <div class="mobile only text">
-                                            <i>{{schedulesByDay[dateObj.dateText][i-1].schedule_from}}</i>
+                                            <i>{{schedulesByDay()[dateObj.dateText][i-1].schedule_from}}</i>
                                         </div>
                                     </div>
                                     <div
-                                        v-if="schedulesByDay.length > 2"
+                                        v-if="schedulesByDay()[dateObj.dateText].length > 2"
                                         class="schedule overflow"
+                                        @click=""
                                     >
                                         <i class="ellipsis vertical icon"></i>
                                     </div>
@@ -205,40 +207,42 @@
                     </tbody>
                     <tbody v-else-if="config.mode === 'week'">
                         <tr
-                            v-for="(text, id) in selects.places"
+                            v-for="(text, id) in placeOfWeek"
                             :key="'week-place-'+id"
                         >
                             <td class="colorful place cell">{{text}}</td>
                             <td
                                 class="day cell"
-                                v-for="(schedules, day) in schedulesByWeek"
+                                v-for="(schedules, day) in schedulesByWeekWithPlace(id)"
                                 :key="'week-day-'+day"
-                                :class="{clickable: schedules.length <= 0}"
+                                :class="{clickable: schedules.length <= 0 && isLogin}"
                             >
-                                <!-- <div class="schedules">
-                                    <template></template>
-                                    <div class="conference" id="4as56d4e">
-                                        <div class="tablet or large device only text">
-                                            <i>10:00-11:00</i><br>
-                                            <i>薛小謙</i>
+                                <div class="schedules" v-if="schedules.length > 0">
+                                    <template
+                                        v-for="index in countDayCellSchedule(schedules)"
+                                    >
+                                        <div
+                                            :class="schedules[index-1].schedule_type"
+                                            :key="schedules[index-1].schedule_date+'-'+index"
+                                        >
+                                            <div class="tablet or large device only text">
+                                                <i>
+                                                    {{schedules[index-1].schedule_from}}
+                                                    -
+                                                    {{schedules[index-1].schedule_to}}
+                                                </i>
+                                                <br>
+                                                <i>{{selects.user[schedules[index-1].user_id]}}</i>
+                                            </div>
+                                            <div class="mobile only text">
+                                                <i>{{schedules[index-1].schedule_from}}</i>
+                                            </div>
                                         </div>
-                                        <div class="mobile only text">
-                                            <i>10:00</i>
-                                        </div>
-                                    </div>
-                                    <div class="tablet or large device only test" id="s6a5d41e">
-                                        <div class="tablet or large device only text">
-                                            <i>13:00-14:30</i><br>
-                                        <i>王小明</i>
-                                        </div>
-                                        <div class="mobile only text">
-                                            <i>13:00</i>
-                                        </div>
-                                    </div>
+                                    </template>
                                 </div>
-                                <div class="schedule overflow">
+                                <div class="schedule overflow" v-if="schedules.length > 2">
                                     <i class="ellipsis vertical icon"></i>
-                                </div> -->
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -269,10 +273,10 @@ export default {
                 list: 7
             },
             selects: {
-                types: CONSTANTS.calendar.selects.types,
-                utils: [],
-                users: [],
-                places: [],
+                type: CONSTANTS.calendar.selects.types,
+                util: [],
+                user: [],
+                place: [],
             },
             filters: {
                 user: null,
@@ -286,30 +290,63 @@ export default {
         };
     },
     async mounted() {
-        this.$emit("mounted", this.calendar);
-        this.selects.users = await API.getReferenceSelect("user");
-        this.selects.places = await API.getReferenceSelect("place");
-        this.selects.utils = await API.getReferenceSelect("util");
+        this.selects.user = await API.getReferenceSelect("user");
+        this.selects.place = await API.getReferenceSelect("place");
+        this.selects.util = await API.getReferenceSelect("util");
         this.getListDatas();
     },
     props:{},
     computed:{
+        placeOfWeek() {
+            if(DataUtil.isEmpty(this.filters.place)){
+                return this.selects.place;
+            }else{
+                let result = {};
+                result[this.filters.place] = this.selects.place[this.filters.place];
+                return result;
+            }
+        },
+        isLogin() {
+            return this.$parent.isLogin;
+        }
+    },
+    methods:{
         schedulesByWeek() {
             let result = [[], [], [], [], [], [], []];
             for(let day of this.calendar.Dates[this.calendar.Week]){
                 let dateText = DataUtil.formatDateInput(day.date);
-                result[day.date.getDay()] = this.schedules.filter(x => x.schedule_date == dateText);
+                result[day.date.getDay()] = this.schedules.filter(x => {
+                    let toShow = true;
+                    if(x.schedule_date != dateText) toShow = false;
+                    for(let f in this.filters){
+                        if(f != 'type' && !DataUtil.isEmpty(this.filters[f]) && x[`${f}_id`] != this.filters[f]){
+                            toShow = false;
+                        }else if(f == 'type' && !DataUtil.isEmpty(this.filters[f]) && x.schedule_type != this.filters[f]){
+                            toShow = false;
+                        }
+                    }
+                    return toShow;
+                });
             }
             return result;
         },
         schedulesByDay() {
-            console.log(this.schedules);
             let result = {};
             for(let week of this.calendar.Dates) {
                 for(let day of week) {
                     let dateText = DataUtil.formatDateInput(day.date);
-                    result[dateText] = this.schedules.filter(x => x.schedule_date == dateText);
-                    result[dateText].sort((a,b) => {
+                    result[dateText] = this.schedules.filter(x => {
+                        let toShow = true;
+                        if(x.schedule_date != dateText) toShow = false;
+                        for(let f in this.filters) {
+                            if(f != 'type' && !DataUtil.isEmpty(this.filters[f]) && x[`${f}_id`] != this.filters[f]) {
+                                toShow = false;
+                            }else if(f == 'type' && !DataUtil.isEmpty(this.filters[f]) && x.schedule_type != this.filters[f]){
+                                toShow = false;
+                            }
+                        }
+                        return toShow;
+                    }).sort((a,b) => {
                         let dateA = a.date;
                         let dateB = b.date;
                         let timeA = a.schedule_from.split(":");
@@ -335,8 +372,18 @@ export default {
 
             return result;
         },
-    },
-    methods:{
+        schedulesByWeekWithPlace(place_id) {
+            let byWeek = this.schedulesByWeek();
+            console.log(place_id,byWeek)
+            let result = [[], [], [], [], [], [], []];
+            for(let day in byWeek) {
+                for(let sd of byWeek[day]) {
+                    if(sd.place_id == place_id) result[day].push(sd);
+                }
+            }
+            console.log(result)
+            return result;
+        },
         calendarChange(method = null, ...params) {
             if(method !== null) this.calendar[method](...params);
 
@@ -373,21 +420,20 @@ export default {
                 this.schedules = temp;
             }).catch(e => {});
         },
-        countDayCellSchedule(dateText) {
-            if(this.schedulesByDay[dateText].length >= 2) {
+        countDayCellSchedule(schedules) {
+            if(schedules.length >= 2) {
                 return 2;
             }else{
                 return 1;
             }
         },
         dayCellClick(dateText) {
-            if(this.schedulesByDay[dateText].length <= 0) {
+            if(this.schedulesByDay()[dateText].length <= 0 && this.$parent.isLogin) {
                 this.$parent.$refs["form"].openModal({schedule_date: dateText});
             }
         },
         scheduleClick(dateText, id = 0) {
-            console.log(this.$parent.$parent)
-            let schedule = this.schedulesByDay[dateText];
+            let schedule = this.schedulesByDay()[dateText];
             this.$parent.$parent.$refs["schedule-events"].openModal({
                 schedules: schedule,
                 showDate: schedule[0].date,
@@ -478,7 +524,8 @@ export default {
 .nchu.calendar div.main .month.mode .day.cell h2.holiday {
     color: red;
 }
-.nchu.calendar div.main .month.mode .day.cell .schedules div, .nchu.calendar div.main .week.mode .day.cell .schedules div{
+.nchu.calendar div.main .month.mode .day.cell .schedules>div:not(.overflow), .nchu.calendar div.main .week.mode .day.cell .schedules>div:not(.overflow){
+    padding-left: .05em;
     border-left: 3px solid;
     border-radius: 3px;
     overflow: hidden;
@@ -498,23 +545,23 @@ export default {
     font-size: 18px;
 }
 .nchu.calendar div.main .month.mode .day.cell .schedules .conference, .nchu.calendar div.main .week.mode .day.cell .schedules .conference {
-    border-color: rgb(190, 81, 7);
+    border-color: rgb(190, 81, 7) !important;
     background-color: rgba(240, 132, 61, 0.692);
 }
 .nchu.calendar div.main .month.mode .day.cell .schedules .activity, .nchu.calendar div.main .week.mode .day.cell .schedules .activity {
-    border-color: rgb(212, 194, 32);
+    border-color: rgb(212, 194, 32) !important;
     background-color: rgba(255, 233, 110, 0.863);
 }
-.nchu.calendar div.main .month.mode .day.cell .schedules .course, .nchu.calendar div.main .week.mode .day.cell .schedules .lesson {
-    border-color: rgb(25, 57, 117);
+.nchu.calendar div.main .month.mode .day.cell .schedules .lesson, .nchu.calendar div.main .week.mode .day.cell .schedules .lesson {
+    border-color: rgb(25, 57, 117) !important;
     background-color: rgba(54, 99, 182, 0.466);
 }
-.nchu.calendar div.main .month.mode .day.cell .schedules .test, .nchu.calendar div.main .week.mode .day.cell .schedules .exam {
-    border-color: rgb(150, 21, 155);
+.nchu.calendar div.main .month.mode .day.cell .schedules .exam, .nchu.calendar div.main .week.mode .day.cell .schedules .exam {
+    border-color: rgb(150, 21, 155) !important;
     background-color: rgba(217, 41, 223, 0.534);
 }
 .nchu.calendar div.main .month.mode .day.cell .schedules .other, .nchu.calendar div.main .week.mode .day.cell .schedules .other {
-    border-color: rgb(22, 129, 22);
+    border-color: rgb(22, 129, 22) !important;
     background-color:  rgba(56, 216, 56, 0.527);
 }
 
@@ -596,7 +643,7 @@ export default {
         padding: .3em;
         height: 5em;
     }
-    .nchu.calendar div.main .month.mode .day.cell .schedules div, .nchu.calendar div.main .week.mode .day.cell .schedules div{
+    .nchu.calendar div.main .month.mode .day.cell .schedules>div:not(.overflow), .nchu.calendar div.main .week.mode .day.cell .schedules>div:not(.overflow){
         vertical-align: middle;
         height: 1.5em;
         margin-bottom: 0.3em;

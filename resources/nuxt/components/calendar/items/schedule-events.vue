@@ -17,41 +17,128 @@
                 {{ CONSTANTS.TEXT.day }}
             </h3>
 
-            <div class="plus-icon">
+            <div v-if="isLogin" class="plus-icon" @click="addClick()">
                 <i class="plus icon"></i>
             </div>
         </section>
 
         <section class="upcoming-events">
             <div class="container">
-                <h3>{{CONSTANTS.TEXT.today_event}}</h3>
+                <!-- <h3>{{CONSTANTS.TEXT.today_event}}</h3> -->
                 <div class="events-wrapper">
-                    <div class="ts flatted borderless segment event">
-                        <details class="ts accordion">
-                            <summary>
-                                <span>主題主題主題</span><br>
-                                <span>場地場地場地場地場地</span>
-                                <i class="dropdown icon"></i>
-                            </summary>
-                            <div class="ts fluid insetted slate">
-                                <p>內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容</p>
+                    <template
+                        v-for="(sd) in schedules"
+                    >
+                        <div
+                            class="custom-accordion"
+                            :class="sd.schedule_type"
+                            :key="'schedule-event-'+sd.schedule_id"
+                            :id="'schedule-accordion-'+sd.schedule_id"
+                            @click="onAccordionClick($event, sd.schedule_id)"
+                        >
+                            <span>{{sd.schedule_from}} - {{sd.schedule_to}}</span><br>
+                            <span>{{sd.schedule_title}}</span>
+                            <i class="dropdown icon"></i>
+                        </div>
+                        <div
+                            class="ts fluid segment grid schedule-detail"
+                            :key="'schedule-detail-'+sd.schedule_id"
+                            :id="'schedule-detail-'+sd.schedule_id"
+                        >
+                            <div v-if="isLogin" class="two wide column form-items">
+                                <div class="item">
+                                    <i class="write icon"></i>
+                                    <span class="item-text tablet or large device only text">編輯</span>
+                                </div>
+                                <div class="item">
+                                    <i class="trash icon"></i>
+                                    <span class="item-text tablet or large device only text">刪除</span>
+                                </div>
                             </div>
-                        </details>
-                    </div>
-                    <div class="ts divider"></div>
-                    <div class="ts flatted borderless segment event">
-                        <details class="ts accordion">
-                            <summary @click="eventUnfold()">
-                                <span>主題主題主題</span><br>
-                                <span>場地場地場地場地場地</span>
-                                <i class="dropdown icon"></i>
-                            </summary>
-                            <div class="ts fluid insetted slate">
-                                <p>內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容</p>
+                            <div class="fourteen wide column schedule-main">
+                                <!-- <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_from}}：
+                                        {{sd.schedule_from}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_to}}：
+                                        {{sd.schedule_to}}
+                                    </div>
+                                </div> -->
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.repeat}}：
+                                        {{parseScheduleRepeat(sd)}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.place_id}}：
+                                        {{selects.place[sd.place_id]}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_registrant}}：
+                                        {{sd.schedule_registrant}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_type}}：
+                                        {{selects.type[sd.schedule_type]}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_content}}：
+                                        {{sd.schedule_content}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.user_id}}：
+                                        {{selects.user[sd.user_id]}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.util}}：
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.phone}}：
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.mail}}：
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_contact}}：
+                                        {{sd.schedule_contact}}
+                                    </div>
+                                </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_url}}：
+                                        {{sd.schedule_url}}
+                                    </div>
+                                </div>
                             </div>
-                        </details>
-                    </div>
-                    <div class="ts divider"></div>
+                        </div>
+                        <div
+                            class="ts divider"
+                            :key="'schedule-event-divider-'+sd.schedule_id"
+                        ></div>
+                    </template>
+
                 </div>
             </div>
         </section>
@@ -62,11 +149,18 @@
 <script>
 import CONSTANTS from "../../../constants.js";
 import DataUtil from '../../../utils/DataUtil.js';
+import API from '../../../api.js';
 
 export default {
     data() {
         return {
             CONSTANTS: CONSTANTS.schedule,
+            selects: {
+                user: {},
+                place: {},
+                util: {},
+                type: CONSTANTS.schedule.selects.types
+            },
             showDate: null,
             schedules: [],
             active_id: 0,
@@ -84,29 +178,73 @@ export default {
 
             result.push(toParseDate.getFullYear(), toParseDate.getMonth()+1, toParseDate.getDate());
             return result;
-        }
+        },
+        isLogin() {
+            return this.$parent.isLogin;
+        },
     },
     methods: {
         async openModal(inputData = {}) {
+            document.querySelector("body").style.cursor = "progress !important";
             function putData(putIn, data) {
                 for(let k in data){
                     if(putIn[k] !== undefined) putIn[k] = data[k];
                 }
             }
             await putData(this, inputData);
-            console.log(this)
+            this.selects.user = await API.getReferenceSelect("user");
+            this.selects.place = await API.getReferenceSelect("place");
+            this.selects.util = await API.getReferenceSelect("util");
             ts('dialog.schedule-events').modal("show");
+            document.querySelector("body").style.cursor = "initial";
+            this.onAccordionClick(null, this.active_id);
             // this.toHideAdd();
         },
         closeModal() {
             ts('dialog.schedule-events').modal("hide");
             // this.toShowAdd();
         },
-        eventUnfold() {
+        onAccordionClick(event = null, id = null) {
+            let clicked = DataUtil.isEmpty(event) ? document.querySelector(`#schedule-accordion-${id}`) : event.target;
+            if(DataUtil.isEmpty(event) && !clicked.classList.contains("active")){
+                clicked.classList.add("active");
+            }else if(!DataUtil.isEmpty(event)){
+                clicked.classList.toggle("active");
+            }
+            this.active_id = id;
+            let toOpen = clicked.classList.contains("active");
+            for(let el of document.querySelectorAll(".custom-accordion")){
+                if(el !== clicked){
+                    el.classList.remove("active");
+                }
+            }
+            for(let el of document.querySelectorAll(".schedule-detail")){
+                el.style['max-height'] = '0px';
+                el.style['padding'] = '0px';
+            }
 
+            if(toOpen){
+                let detail = document.querySelector(`#schedule-detail-${id}`);
+                // console.log(detail.querySelector(".schedule-main").scrollHeight)
+                detail.style['max-height'] = detail.querySelector(".schedule-main").scrollHeight + 50 + 'px';
+                detail.style['padding'] = '1em .25em';
+            }
         },
-    },
-    watch: {
+        parseScheduleRepeat(schedule) {
+            if(schedule.schedule_repeat) {}else {
+                return "否";
+            }
+            return "";
+        },
+        addClick() {
+            if(this.$parent.isLogin) {
+                let toParseDate = new Date();
+                if(!DataUtil.isEmpty(this.showDate) && this.showDate.constructor == Date) {
+                    toParseDate = this.showDate;
+                }
+                this.$parent.$refs["form"].openModal({schedule_date: DataUtil.formatDateInput(toParseDate)});
+            }
+        },
     },
 };
 </script>
@@ -260,35 +398,121 @@ export default {
 .schedule-events .upcoming-events .container .events-wrapper {
     margin-bottom: 30px;
 }
-.schedule-events .upcoming-events .container .events-wrapper .event {
-    margin: 0;
-    padding: 0;
-}
-.schedule-events .upcoming-events .container .events-wrapper .event .accordion summary {
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion {
     color: #222;
     font-weight: 500;
     padding-left: 2.5em;
     padding-right: 2.5em;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
 }
-.schedule-events .upcoming-events .container .events-wrapper .event .accordion[open] summary {
-    background-color: rgba(63, 255, 182, 0.774);
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion::before {
+    content: "";
+    display: block;
+    width: .8em;
+    height: 100%;
+    background-color: #e8e8e8;
+    position: absolute;
+    /* transform: translatey(-60%); */
+    top: 0px;
+    left: 0px;
+}
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion.conference::before {
+    background-color: rgb(240, 133, 61);
+}
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion.activity::before {
+    background-color: rgb(255, 233, 110);
+}
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion.lesson::before {
+    background-color: rgb(54, 99, 182);
+}
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion.exam::before {
+    background-color: rgb(217, 41, 223);
+}
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion.other::before {
+    background-color: rgb(56, 216, 56);
+}
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion.active {
+    background-color:  rgb(198, 255, 233);
 }
 @media(hover: hover) and (pointer: fine) {
-    .schedule-events .upcoming-events .container .events-wrapper .event .accordion[open] summary,
-    .schedule-events .upcoming-events .container .events-wrapper .event .accordion summary:hover {
-        background-color: rgba(63, 255, 182, 0.774);
+    .schedule-events .upcoming-events .container .events-wrapper .custom-accordion:hover {
+        background-color: rgba(130, 226, 189, 0.774);
+    }
+    .schedule-events .upcoming-events .container .events-wrapper .form-items .item:hover {
+        color: rgb(8, 138, 120);
+        cursor: pointer;
     }
 }
-.schedule-events .upcoming-events .container .events-wrapper .event .accordion summary i {
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion i {
+    transform: rotate(90deg);
     position: absolute;
     right: 0;
     font-size: 1.5em;
     top: 30%;
+    transition: 0.4s;
 }
-.schedule-events .upcoming-events .container .events-wrapper .slate{
+.schedule-events .upcoming-events .container .events-wrapper .custom-accordion.active i {
+    transition: 0.4s;
+    transform: rotate(0deg);
+}
+.schedule-events .upcoming-events .container .events-wrapper .form-items {
+    color: #888;
+    font-size: 1.25em;
+    text-align: right;
+    border-right: 1px solid #ccc;
+    padding-right: .25em;
+    padding-left: .15em;
+}
+.schedule-events .upcoming-events .container .events-wrapper .form-items .item {
+    text-align: right;
+    margin-bottom: .5em;
+}
+.schedule-events .upcoming-events .container .events-wrapper .form-items .item:active {
+        color: rgb(8, 138, 120);
+        cursor: pointer;
+    }
+.schedule-events .upcoming-events .container .events-wrapper .form-items .icon {
+    margin-right: .05em;
+    display: inline;
+}
+.schedule-events .upcoming-events .container .events-wrapper .form-items .item-text {
+    display: inline;
+    font-size: .85em;
+    max-width: 0px;
+}
+.schedule-events .upcoming-events .container .events-wrapper .schedule-detail {
     box-shadow: 0px 0px 8px 3px #b3b3b3 inset;
+    border-radius: 0px;
+    margin: 0px;
+    padding: 0px;
+    max-height: 0px;
+    overflow: hidden;
+    transition: padding 0.2s ease-out, max-height 0.4s ease-out;
 }
 .schedule-events .upcoming-events .container .events-wrapper .divider{
     margin: 0;
+}
+
+@media only screen and (max-width:767px){
+    .schedule-events .today-box {
+    background: linear-gradient(
+        to left,
+        rgb(8, 138, 120),
+        rgba(54, 255, 188, 0.479)
+    ),
+    #1f6585;
+    color: #ffffff;
+    padding: 2.5em 1.5em;
+    position: relative;
+    box-shadow: 0px 0px 40px -9px #026b6e;
+    margin-bottom: 50px;
+}
 }
 </style>

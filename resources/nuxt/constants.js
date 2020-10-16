@@ -75,10 +75,10 @@ export default {
         DAY_TEXT: ['一','二','三','四','五','六','日'],
         selects:{
             TEXT: {
-                types: '借用型態',
-                places: '場地',
-                utils: '承辦單位',
-                users: '承辦人'
+                type: '借用型態',
+                place: '場地',
+                util: '承辦單位',
+                user: '承辦人'
             },
             types: {
                 conference: '會議',
