@@ -41,7 +41,6 @@ class Schedule extends Model
         'schedule_repeat_days' => 'integer',
         'schedule_end_at' => 'datetime:Y-m-d',
         'schedule_end_times' => 'integer',
-        'schedule_registrant' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'
     ];
