@@ -1,12 +1,6 @@
 <template>
     <div class="nchu main">
         <slot name="other"></slot>
-        <Form
-            v-if="isLogin"
-            :form-mode="formMode"
-            :form-data="formData"
-            ref="form"
-        ></Form>
         <div class="ts static left sidebar inverted vertical menu" id="main-sidebar">
             <div class="item">
                 本校
@@ -23,6 +17,12 @@
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
         <div class="squeezable pusher" id="sidebar-pusher">
+            <Form
+                v-if="isLogin"
+                :form-mode="formMode"
+                :form-data="formData"
+                ref="form"
+            ></Form>
             <div class="ts dimmer" id="global-loading">
                 <div class="ts loader"></div>
             </div>
@@ -190,7 +190,6 @@ export default {
     computed: {
         isLogin() {
             return this.user.id !== 0 && this.user.name !== 'Guest' && !DataUtil.isAnyEmpty(this.user.id, this.user.name);
-            // return false;
         },
     },
     methods: {
@@ -257,7 +256,7 @@ export default {
         logout() {
             this.$axios.get("/api/logout").then(async _ => {
                 location.reload();
-            }).catch(e => console.log(e));
+            }).catch(e => {});
         },
         relogin() {
             this.user = this.guest;
@@ -266,8 +265,12 @@ export default {
         },
         showSnackbar(type, messages){
             ts(`.${type}.snackbar`).snackbar({
-                content: DataUtil.parseResponseMessages(messages)
+                content: DataUtil.parseResponseMessages(messages),
+                hoverStay: true,
             });
+        },
+        auth(user_id) {
+            return this.user.id === 1 || this.user.id === user_id;
         },
     },
     props: {
@@ -288,10 +291,6 @@ export default {
         }
     },
     watch: {
-        formData: function(newVal, oldVal){
-            console.log("data changed.")
-            this.formData = newVal;
-        }
     },
 }
 </script>
