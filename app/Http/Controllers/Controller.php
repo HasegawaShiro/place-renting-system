@@ -34,7 +34,8 @@ class Controller extends BaseController
         dd($result);
     }
 
-    public static function getReferenceSelect($table) {
+    public static function getReferenceSelect(Request $request, $table) {
+        $showDisabled = isset($request->showDisabled) ? $request->showDisabled : false;
         $allData = Controller::getDataAsModel($table);
         $id = "{$table}_id";
         $disabled = "{$table}_disabled";
@@ -43,7 +44,7 @@ class Controller extends BaseController
         foreach ($allData as $model){
             $data = $model->toArray();
             $putable = true;
-            if(array_key_exists($disabled, $data) && $data[$disabled]){ $putable = false; }
+            if(!$showDisabled && array_key_exists($disabled, $data) && $data[$disabled]){ $putable = false; }
             if($putable) $result[$data[$id]] = array_key_exists($name, $data) ? $data[$name] : $data[$id];
         }
 
@@ -60,6 +61,7 @@ class Controller extends BaseController
 
     public static function getData(Request $request, $table, $id = null) {
         $table = "App\\Models\\".ucfirst($table);
+        $filters = isset($request->filters) ? $request->filters : [];
         $model = new $table();
         $result = [
             'datas' => [],
@@ -85,32 +87,48 @@ class Controller extends BaseController
     public static function postData(Request $request, $table) {
         DB::beginTransaction();
         // dd($request->all());
-        $table = "App\\Models\\".ucfirst($table);
-        $model = new $table();
+        $class = "App\\Models\\".ucfirst($table);
+        $model = new $class();
+
         $data = $request->all();
-        $validate = PageUtil::validateForSave($table, $data, "add");
+        // $validate = PageUtil::validateForSave($table, $data, 'add');
         $result = [
             'datas' => [],
-            'messages' => null
+            'messages' => []
         ];
+        $validationPass = PageUtil::validateForSave($table, $data, 'add', $result);
         $status = 200;
-        if($validate) {
+
+        /* if($validate->fails()){
+            $status = 422;
+            foreach($validate->errors()->toArray() as $error){
+                foreach($error as $message){
+                    array_push($result['messages'], $message);
+                }
+            }
+        }else{
+            $data["created_by"] = $request->user()->user_id;
+            $data["updated_by"] = $request->user()->user_id;
+            $created = $model::create($data);
+            $result['messages'] = 'save-success';
+        } */
+        if($validationPass) {
             $data["created_by"] = $request->user()->user_id;
             $data["updated_by"] = $request->user()->user_id;
             $created = $model::create($data);
             $result['messages'] = 'save-success';
         }else{
-            $status = 400;
-            $result['messages'] = '驗證未通過';
+            $status = 422;
         }
-        // dd($created);
+        // $status = 422;
+
         if($status === 200) {
             DB::commit();
         }else{
             DB::rollBack();
         }
 
-        return response()->json($result,200);
+        return response()->json($result,$status);
     }
     public static function putData(Request $request, $table, $id) {}
     public static function deleteData(Request $request, $table, $id) {}
