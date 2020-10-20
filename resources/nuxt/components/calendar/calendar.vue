@@ -29,7 +29,10 @@
             <div class="main">
                 <table
                     class="ts fixed eight column table mode"
-                    :class="config.mode"
+                    :class="[
+                        config.mode,
+                        {top: config.mode == 'list', attach: config.mode == 'list'}
+                    ]"
                 >
                     <thead>
                         <tr>
@@ -291,7 +294,7 @@ export default {
     },
     async mounted() {
         this.selects.user = await API.getReferenceSelect("user");
-        this.selects.place = await API.getReferenceSelect("place");
+        this.selects.place = await API.getReferenceSelect("place", {showDisabled: true});
         this.selects.util = await API.getReferenceSelect("util");
         this.getListDatas();
     },
@@ -449,6 +452,9 @@ export default {
 
 <style>
 /* public */
+.nchu.calendar {
+    user-select: none;
+}
 .nchu.calendar, .nchu.calendar>div {
     margin-top: .5em;
 }
