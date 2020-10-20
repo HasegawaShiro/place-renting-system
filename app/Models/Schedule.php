@@ -45,4 +45,11 @@ class Schedule extends Model
         'updated_by' => 'integer'
     ];
 
+    public function user(){
+        return $this->belongsTo('App\Models\User', 'user_id', 'user_id');
+    }
+
+    public function place(){
+        return $this->belongsTo('App\Models\Place');
+    }
 }
