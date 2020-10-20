@@ -80,7 +80,7 @@ export default {
                 this.closeModal();
             }).catch(e => {
                 try {
-                    this.$parent.showSnackbar("error", e.data.messages);
+                    this.$parent.showSnackbar("error", e.response.data.messages);
                 } catch (error) {
                     let msg = DataUtil.getMessage('unknown-error')+DataUtil.getMessage('contact-maintenance');
                     this.$parent.showSnackbar("error", msg);
@@ -119,7 +119,7 @@ export default {
         right: 1.5em;
         bottom: 1.5em;
         font-size: 2.5em;
-        z-index: 2;
+        z-index: 5;
     }
     .nchu.form .add {
         background-color: rgb(8, 188, 135) !important;
