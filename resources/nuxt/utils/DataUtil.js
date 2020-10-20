@@ -13,7 +13,7 @@ export default class DataUtil{
             if (typeof a === "object" && typeof b === "object") {
                 for (let key in a) {
                     if (b[key] !== undefined) {
-                        equalityComparison(a[key], b[key], strict);
+                        DataUtil.equalityComparison(a[key], b[key], strict);
                     } else {
                         result = false;
                         break;
@@ -76,7 +76,7 @@ export default class DataUtil{
 
     static parseResponseMessages(msg) {
         if(typeof msg == "object" && msg.constructor === Array){
-            for(let i of msg){
+            for(let i in msg){
                 msg[i] = DataUtil.getMessage(msg[i]);
             }
             return DataUtil.unionString("", msg, "\r\n");
@@ -97,7 +97,7 @@ export default class DataUtil{
                     result = {};
                 }
                 for (let key in obj) {
-                    result[key] = deepClone(obj[key]);
+                    result[key] = DataUtil.deepClone(obj[key]);
                 }
                 return result;
             } else {
@@ -137,7 +137,7 @@ export default class DataUtil{
                     let compared = 0;
                     if ((a.constructor === Array || a.constructor === Object) && (b.constructor === Array || b.constructor === Object)) {
                         for (let k of key) {
-                            compared = compareToSort(a[k], b[k], order);
+                            compared = DataUtil.compareToSort(a[k], b[k], order);
                             if (compared === 0) {
                                 continue;
                             } else {
@@ -155,35 +155,15 @@ export default class DataUtil{
         }
     }
 
-    static sortDatasetByCustomKey(dataset, key = [], order = "ASC") {
-        if (typeof key === "string" || (typeof key === "number" && Number.isInteger(key))) {
-            key = [key];
-        }
-
-        dataset.sort((a, b) => {
-            let compared = 0;
-
-            for (let k of key) {
-                compared = compareToSort(a.data[k], b.data[k], order);
-                if (compared === 0) {
-                    continue;
-                } else {
-                    break;
-                }
-            }
-
-            return compared;
-        });
-    }
-
     static unionString(string, union, delimiter = ",") {
+        console.log(string, union);
         string = string.toString();
         if (typeof union === "object") {
             for (let i in union) {
-                string = unionString(string, union[i], delimiter);
+                string = DataUtil.unionString(string, union[i], delimiter);
             }
         } else {
-            if (!isEmpty(string)) {
+            if (!DataUtil.isEmpty(string)) {
                 string += delimiter;
             }
             string += union;
