@@ -4,8 +4,10 @@ export default class API {
     static sendRequest(url, method = 'get', data = null, options = {}) {
         const allowedMethods = ['get', 'post', 'put', 'delete'];
         method = method.toLowerCase();
+        const toSendData = method == "get" ? {params: data} : data;
+
         if(allowedMethods.includes(method)){
-            return window.$nuxt.$axios[method](url, data)
+            return window.$nuxt.$axios[method](url, toSendData)
                 .then((response) => {
                     if(options.onlyData === true){
                         return response.data;
@@ -35,9 +37,9 @@ export default class API {
     static async refreshCSRFToken() {
         window.$nuxt.$axios.defaults.headers.common['X-CSRF-TOKEN'] = (await window.$nuxt.$axios.get("/api/csrf")).data;
     }
-    static async getReferenceSelect(table){
+    static async getReferenceSelect(table, options = {}){
         let result = [];
-        await API.sendRequest(`/api/select/${table}`).then(response => {
+        await API.sendRequest(`/api/select/${table}`,'get',options).then(response => {
             result = response.data;
         });
         return result;
