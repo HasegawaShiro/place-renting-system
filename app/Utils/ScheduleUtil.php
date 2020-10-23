@@ -11,17 +11,30 @@ class ScheduleUtil {
         $from = $data['schedule_from'];
         $to = $data['schedule_to'];
 
-        $query = _MODEL::where('schedule_date', $date)
+        $query = _MODEL::whereDate('schedule_date', $date)
             ->where('place_id', $place)
             ->where(function ($q) use ($from, $to) {
                 $q->orWhere(function($q) use ($from, $to) {
-                    $q->where('schedule_to', '>=', $from)
-                    ->where('schedule_to', '<=', $to);
+                    $q->whereTime('schedule_to', '>', $from)
+                    ->whereTime('schedule_to', '<', $to);
                 })->orWhere(function($q) use ($from, $to) {
-                    $q->where('schedule_from', '>=', $from)
-                    ->where('schedule_from', '<=', $to);
+                    $q->whereTime('schedule_from', '>', $from)
+                    ->whereTime('schedule_from', '<', $to);
+                })->orWhere(function($q) use ($from, $to) {
+                    $q->whereTime('schedule_from', '>=', $from)
+                    ->whereTime('schedule_from', '<=', $to)
+                    ->whereTime('schedule_to', '>=', $from)
+                    ->whereTime('schedule_to', '<=', $to);
+                })->orWhere(function($q) use ($from, $to) {
+                    $q->whereTime('schedule_from', '<=', $from)
+                    ->whereTime('schedule_to', '>=', $from)
+                    ->whereTime('schedule_from', '<=', $to)
+                    ->whereTime('schedule_to', '>=', $to);
                 });
             })->get();
+
+            // dd($query);
+            // dd($query->getQuery()->tosql(), $query->getQuery()->getBindings());
         $available = sizeof($query) === 0;
         if(!$available){
             $schedule = $query->first()->toArray();

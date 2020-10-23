@@ -1,6 +1,7 @@
 <?php
 namespace App\Pages;
 
+use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 
 use App\Models\User;
@@ -26,7 +27,6 @@ class Schedule {
                 'schedule_date' => [
                     'required',
                     'date_format:Y-m-d',
-                    'after:today'
                 ],
                 'schedule_from' => [
                     'required',
@@ -118,6 +118,7 @@ class Schedule {
         $models = [];
         $collect = collect([]);
         $datas = [];
+        $orders = empty($orders) ? ['schedule_date', 'schedule_from'] : $orders;
 
         if(is_null($id)) {
             if(isset($filters["schedule_date_from"])) {
@@ -137,30 +138,39 @@ class Schedule {
             }
 
             $models = $query->get();
-        }else {
+        } else {
             array_push($models, $query::find($id));
         }
 
-        foreach ($models as $model){
+        foreach ($models as $model) {
             $schedule = $model->toArray();
-            $user = $model->user()->toArray();
-            $util = $model->user()->util()->toArray();
-            $place = $model->place()->toArray();
+            $user_MODEL = $model->user()->first();
+            $user = $user_MODEL->toArray();
+            $util = $user_MODEL->util()->first()->toArray();
+            $place = $model->place()->first()->toArray();
 
             $schedule["user_name"] = $user["name"];
+            $schedule["phone"] = $user["phone"];
+            $schedule["email"] = $user["email"];
             $schedule["util_name"] = $util["util_name"];
             $schedule["util_id"] = $util["util_id"];
             $schedule["place_name"] = $place["place_name"];
             $collect->add($schedule);
         }
 
-        if(is_null($id) && isset($filters["util_id"])){}
+        if(is_null($id) && isset($filters["util_id"])) {
+            dd($collect->where('util_id', $filters["util_id"])->all());
+        }
+
+        return $collect->toArray();
     }
 
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
+        $today = Carbon::yesterday()->hour(23)->minute(59)->toDateTimeString();
         array_push($rules["schedule_to"], "after:{$data['schedule_from']}");
+        array_push($rules["schedule_date"], "after:{$today}");
         $messages["schedule_to.after"] = Schedule::fields()['attributes']['schedule_to']." 必須要晚於 ".Schedule::fields()['attributes']['schedule_from'];
-        $messages["schedule_date.after"] = Schedule::fields()['attributes']['schedule_to']." 必須要晚於今天日期";
+        $messages["schedule_date.after"] = Schedule::fields()['attributes']['schedule_date']." 必須要晚於今天日期";
     }
 
     public static function afterValidation(Array &$data, Array &$result, String $status) {
