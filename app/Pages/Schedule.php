@@ -26,6 +26,7 @@ class Schedule {
                 'schedule_date' => [
                     'required',
                     'date_format:Y-m-d',
+                    'after:today'
                 ],
                 'schedule_from' => [
                     'required',
@@ -110,6 +111,56 @@ class Schedule {
             // "from-to-unavailable" => '此時段已被 :user 預約： :title',
             "from-to-unavailable" => '此時段已被 :user 預約',
         ];
+    }
+
+    public static function getData($filters, $orders, $id = null) {
+        $query = new _MODEL();
+        $models = [];
+        $collect = collect([]);
+        $datas = [];
+
+        if(is_null($id)) {
+            if(isset($filters["schedule_date_from"])) {
+                $query->whereDate("schedule_date", '>=', $filters["schedule_date_from"]);
+            }
+            if(isset($filters["schedule_date_to"])) {
+                $query->whereDate("schedule_date", '<=', $filters["schedule_date_to"]);
+            }
+            if(isset($filters["user_id"])) {
+                $query->where("user_id", $filters["user_id"]);
+            }
+            if(isset($filters["place_id"])) {
+                $query->where("place_id", $filters["place_id"]);
+            }
+            if(isset($filters["schedule_type"])) {
+                $query->where("schedule_type", $filters["schedule_type"]);
+            }
+
+            $models = $query->get();
+        }else {
+            array_push($models, $query::find($id));
+        }
+
+        foreach ($models as $model){
+            $schedule = $model->toArray();
+            $user = $model->user()->toArray();
+            $util = $model->user()->util()->toArray();
+            $place = $model->place()->toArray();
+
+            $schedule["user_name"] = $user["name"];
+            $schedule["util_name"] = $util["util_name"];
+            $schedule["util_id"] = $util["util_id"];
+            $schedule["place_name"] = $place["place_name"];
+            $collect->add($schedule);
+        }
+
+        if(is_null($id) && isset($filters["util_id"])){}
+    }
+
+    public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
+        array_push($rules["schedule_to"], "after:{$data['schedule_from']}");
+        $messages["schedule_to.after"] = Schedule::fields()['attributes']['schedule_to']." 必須要晚於 ".Schedule::fields()['attributes']['schedule_from'];
+        $messages["schedule_date.after"] = Schedule::fields()['attributes']['schedule_to']." 必須要晚於今天日期";
     }
 
     public static function afterValidation(Array &$data, Array &$result, String $status) {
