@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 
 use App\Models\User;
+use App\Models\Place;
 use App\Models\Schedule as _MODEL;
 
 use App\Utils\DataUtil;
@@ -110,6 +111,7 @@ class Schedule {
         return [
             // "from-to-unavailable" => '此時段已被 :user 預約： :title',
             "from-to-unavailable" => '此時段已被 :user 預約',
+            "place-is-disabled" => '此場地不存在或已被停用',
         ];
     }
 
@@ -155,6 +157,7 @@ class Schedule {
             $schedule["util_name"] = $util["util_name"];
             $schedule["util_id"] = $util["util_id"];
             $schedule["place_name"] = $place["place_name"];
+            $schedule["place_disabled"] = $place["place_disabled"];
             $collect->add($schedule);
         }
 
@@ -188,6 +191,29 @@ class Schedule {
 
                 $pass = false;
             }
+        }else if($status == 'edit') {}
+
+        $place = Place::find($data['place_id']);
+        if(is_null($place) || $place->place_disabled) {
+            $pass = false;
+            array_push(
+                $result['messages'],
+                Schedule::messages()['place-is-disabled']
+            );
+        }
+
+        return $pass;
+    }
+
+    public static function beforeDelete(&$data, &$result) {
+        $pass = true;
+
+        $today = strtotime("today");
+        $deleteDate = strtotime($data["schedule_date"]);
+        // dd($today, $deleteDate);
+        if($deleteDate < $today) {
+            array_push($result['messages'],'無法刪除已過期資料');
+            $pass = false;
         }
 
         return $pass;
