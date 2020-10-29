@@ -24,7 +24,7 @@
                 :form-data="formData"
                 ref="form"
             ></Form>
-            <div @hook:created="created" class="ts dimmer" id="global-loading">
+            <div class="ts dimmer" id="global-loading">
                 <div class="ts loader"></div>
             </div>
             <header>
@@ -111,7 +111,7 @@
                     </dialog>
                 </div>
             </header>
-            <slot name="content" ref="content"></slot>
+            <slot @hook:created="created" name="content" ref="content"></slot>
             <!-- <slot name="loading"></slot> -->
         </div>
         <div class="ts bottom left snackbar">
@@ -167,6 +167,9 @@ export default {
         };
     },
     beforeMount() {
+
+    },
+    async mounted() {
         window.mainLayout = this;
         window.globalLoading = {
             $el: document.querySelector("#global-loading"),
@@ -179,9 +182,6 @@ export default {
                 if(el.classList.contains("active")) el.classList.remove("active");
             },
         };
-    },
-    async mounted() {
-
         API.sendRequest("/api/user","get",null,{doNotRelogin: true}).then(response => {
             this.user = response.data.user;
             this.$store.commit("userStore/set", this.user);

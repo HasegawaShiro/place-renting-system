@@ -302,7 +302,7 @@ export default {
         };
     },
     async mounted() {
-        /* if(!DataUtil.isEmpty(window.globalLoading)) */ window.globalLoading.loading();
+        if(!DataUtil.isEmpty(window.globalLoading)) window.globalLoading.loading();
         this.selects.user = await API.getReferenceSelect("user");
         this.selects.place = await API.getReferenceSelect("place", {showDisabled: true});
         this.selects.util = await API.getReferenceSelect("util");
@@ -315,7 +315,7 @@ export default {
                 that.config.mode = 'month';
             }
         });
-        /* if(!DataUtil.isEmpty(window.globalLoading)) */ window.globalLoading.unloading();
+        if(!DataUtil.isEmpty(window.globalLoading)) window.globalLoading.unloading();
     },
     props:{},
     computed:{
