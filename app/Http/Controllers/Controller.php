@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\System\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller as BaseController;
@@ -9,20 +10,16 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-use App\Models\User;
-use App\Models\Util;
-use App\Models\Place;
-use App\Models\Opinion;
-use App\Models\Schedule;
-use App\Models\Announcement;
-
 use App\Utils\PageUtil;
+use App\Utils\SessionUtil;
+
+use function PHPUnit\Framework\isEmpty;
 
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     public static function test() {
-        $result = [[],[],[],[],[],[],[]];
+        /* $result = [[],[],[],[],[],[],[]];
         for ($i=0; $i < 128; $i++) {
             $bin = sprintf("%'07b",$i);
             for ($j=0; $j < 7; $j++) {
@@ -31,7 +28,8 @@ class Controller extends BaseController
                 }
             }
         }
-        dd($result);
+        dd($result); */
+        dd(\App\Models\Place::find(1)->place_disabled);
     }
 
     public static function getReferenceSelect(Request $request, $table) {
@@ -60,25 +58,36 @@ class Controller extends BaseController
     }
 
     public static function getData(Request $request, $table, $id = null) {
-        $table = "App\\Models\\".ucfirst($table);
-        $filters = isset($request->filters) ? $request->filters : [];
-        $model = new $table();
         $result = [
             'datas' => [],
             'message' => '',
         ];
         $status = 200;
-        if(is_null($id)){
-            foreach($model::all() as $data){
-                array_push($result['datas'], $data->toArray());
+        $filters = isset($request->filters) ? $request->filters : [];
+        $orders = isset($request->orders) ? $request->orders : [];
+
+        $class = "App\\Pages\\".ucfirst($table);
+        if(class_exists($class)){
+            $page = new $class();
+            if(method_exists($page, 'getData')){
+                $result["datas"] = $page::getData($filters, $orders, $id);
             }
         }else{
-            $data = $model::find($id);
-            if(is_null($data)){
-                $status = 404;
-                $result['message'] = 'data-not-found';
+            $class = "App\\Models\\".ucfirst($table);
+            $model = new $class();
+
+            if(is_null($id)){
+                foreach($model::all() as $data){
+                    array_push($result['datas'], $data->toArray());
+                }
             }else{
-                array_push($result['datas'], $data->toArray());
+                $data = $model::find($id);
+                if(is_null($data)){
+                    $status = 404;
+                    $result['message'] = 'data-not-found';
+                }else{
+                    array_push($result['datas'], $data->toArray());
+                }
             }
         }
 
@@ -86,12 +95,10 @@ class Controller extends BaseController
     }
     public static function postData(Request $request, $table) {
         DB::beginTransaction();
-        // dd($request->all());
         $class = "App\\Models\\".ucfirst($table);
         $model = new $class();
 
         $data = $request->all();
-        // $validate = PageUtil::validateForSave($table, $data, 'add');
         $result = [
             'datas' => [],
             'messages' => []
@@ -99,19 +106,6 @@ class Controller extends BaseController
         $validationPass = PageUtil::validateForSave($table, $data, 'add', $result);
         $status = 200;
 
-        /* if($validate->fails()){
-            $status = 422;
-            foreach($validate->errors()->toArray() as $error){
-                foreach($error as $message){
-                    array_push($result['messages'], $message);
-                }
-            }
-        }else{
-            $data["created_by"] = $request->user()->user_id;
-            $data["updated_by"] = $request->user()->user_id;
-            $created = $model::create($data);
-            $result['messages'] = 'save-success';
-        } */
         if($validationPass) {
             $data["created_by"] = $request->user()->user_id;
             $data["updated_by"] = $request->user()->user_id;
@@ -131,5 +125,45 @@ class Controller extends BaseController
         return response()->json($result,$status);
     }
     public static function putData(Request $request, $table, $id) {}
-    public static function deleteData(Request $request, $table, $id) {}
+    public static function deleteData(Request $request, $table, $id) {
+        DB::beginTransaction();
+        $result = [
+            'messages' => [],
+        ];
+        $status = 200;
+        $class = "App\\Models\\".ucfirst($table);
+        $model = new $class();
+        $data = $model::find($id);
+
+        if(is_null($data)) {
+            $status = 404;
+        }else {
+            $userValidate = UserController::permissionValidate($data);
+            if($userValidate) {
+                $class = "App\\Pages\\".ucfirst($table);
+                if(class_exists($class)){
+                    $page = new $class();
+                    if(method_exists($page, 'beforeDelete')){
+                        if(!$page::beforeDelete($data, $result)) {
+                            $status = 400;
+                        }else {
+                            $model::destroy($id);
+                        }
+                    }
+                }
+            }else {
+                $status = 403;
+                array_push($result['messages'], 'delete-permission-denied');
+            }
+        }
+
+        if($status === 200){
+            array_push($result['messages'], 'delete-success');
+            DB::commit();
+        }else {
+            DB::rollBack();
+        }
+
+        return response()->json($result, $status);
+    }
 }
