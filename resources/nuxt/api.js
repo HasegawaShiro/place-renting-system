@@ -1,4 +1,5 @@
 import DataUtil from './utils/DataUtil.js';
+import CONSTANTS from './constants.js';
 
 export default class API {
     static sendRequest(url, method = 'get', data = null, options = {}) {
@@ -25,6 +26,8 @@ export default class API {
                         }else{
                             throw error;
                         }
+                    }else if(error.response.status === 500 && !DataUtil.isEmpty(window.mainLayout)) {
+                        window.mainLayout.showSnackbar('error', CONSTANTS.messages['unknown-error']+CONSTANTS.messages["contact-maintenance"]);
                     }else{
                         throw error;
                     }
