@@ -51,4 +51,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'created_by' => 'integer',
         'updated_by' => 'integer',
     ];
+
+    public function util(){
+        return $this->belongsTo('App\Models\Util', 'util_id', 'util_id');
+    }
 }
