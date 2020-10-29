@@ -50,6 +50,6 @@ class Schedule extends Model
     }
 
     public function place(){
-        return $this->belongsTo('App\Models\Place');
+        return $this->belongsTo('App\Models\Place', 'place_id', 'place_id');
     }
 }
