@@ -40,13 +40,11 @@ class LoginController extends Controller
                 'id' => $user->user_id,
                 'name' => $user->name,
                 'util' => $user->util,
-                'mail' => $user->mail,
+                'email' => $user->email,
                 'phone' => $user->phone,
             ];
             $request->session()->put("user", $userObj);
-            /* $request->session()->put("username", $user->username);
-            $request->session()->put("user_name", $user->name);
-            $request->session()->put("user_id", $user->user_id); */
+
             return response()->json([
                 'success' => true,
                 'message' => 'login-success',

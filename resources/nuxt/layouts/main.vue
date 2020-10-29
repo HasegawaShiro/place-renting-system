@@ -150,8 +150,8 @@ export default {
             guest:{
                 id: 0,
                 name: 'Guest',
-                util: null,
-                mail: null,
+                util: {},
+                email: null,
                 phone: null,
             },
             input: {
@@ -187,6 +187,7 @@ export default {
             this.$store.commit("userStore/set", this.user);
         }).catch(e => {
             this.user = this.guest;
+            this.$store.commit("userStore/set", this.guest);
         });
 
         const selects = DataUtil.deepClone(CONSTANTS.common.selects);
