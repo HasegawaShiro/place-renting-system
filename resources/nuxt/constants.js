@@ -1,3 +1,5 @@
+import API from './api.js';
+
 export default {
     main:{
         TEXT: {
@@ -80,13 +82,6 @@ export default {
                 util: '承辦單位',
                 user: '承辦人'
             },
-            types: {
-                conference: '會議',
-                activity: '活動',
-                lesson: '課程',
-                exam: '考試',
-                other: '其他'
-            },
         },
     },
     messages: {
@@ -97,12 +92,26 @@ export default {
         'cancel-confirmation': '取消將不保留已輸入或修改之資料，確定取消嗎？',
         'save-success': '儲存成功',
         'unknown-error': '發生未知錯誤',
-        'contact-maintenance': '，請洽維護人員'
+        'contact-maintenance': '，請洽維護人員',
+        'delete-success': '刪除成功',
+        'delete-permission-denied': '您沒有權限刪除此資料',
     },
     common: {
         TEXT: {
             save: '儲存',
             cancel: '取消',
-        }
+        },
+        selects: {
+            type: {
+                conference: '會議',
+                activity: '活動',
+                lesson: '課程',
+                exam: '考試',
+                other: '其他'
+            },
+            user: {},
+            place: {},
+            util: {},
+        },
     }
 }

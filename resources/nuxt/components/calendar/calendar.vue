@@ -28,10 +28,10 @@
             </div>
             <div class="main">
                 <table
-                    class="ts fixed eight column table mode"
+                    class="ts fixed table mode"
                     :class="[
                         config.mode,
-                        {top: config.mode == 'list', attach: config.mode == 'list'}
+                        {top: config.mode == 'list', attached: config.mode == 'list'}
                     ]"
                 >
                     <thead>
@@ -227,6 +227,7 @@
                                         <div
                                             :class="schedules[index-1].schedule_type"
                                             :key="schedules[index-1].schedule_date+'-'+index"
+                                            @click="scheduleClick(schedules[index-1].schedule_date, schedules[index-1].schedule_id)"
                                         >
                                             <div class="tablet or large device only text">
                                                 <i>
@@ -244,13 +245,20 @@
                                     </template>
                                 </div>
                                 <div class="schedule overflow" v-if="schedules.length > 2">
-                                    <i class="ellipsis vertical icon"></i>
+                                    <i class="ellipsis vertical icon" @click="schedules[index-1].schedule_date"></i>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+                <List
+                    v-if="config.mode === 'list'"
+                    :table-class="['bottom','attached']"
+                    page="schedule"
+                    ref="list"
+                ></List>
             </div>
+            <div class="sixteen wide column footer"></div>
         </div>
     </div>
 </template>
@@ -260,6 +268,7 @@
 import CONSTANTS from '../../constants.js';
 import Calendar from '../../classes/calendar.js';
 import MonthSelector from './items/month-selector.vue';
+import List from '../lists/universal.vue';
 import API from '../../api.js';
 import DataUtil from '../../utils/DataUtil.js';
 
@@ -276,7 +285,7 @@ export default {
                 list: 7
             },
             selects: {
-                type: CONSTANTS.calendar.selects.types,
+                type: CONSTANTS.common.selects.type,
                 util: [],
                 user: [],
                 place: [],
@@ -293,10 +302,20 @@ export default {
         };
     },
     async mounted() {
+        /* if(!DataUtil.isEmpty(window.globalLoading)) */ window.globalLoading.loading();
         this.selects.user = await API.getReferenceSelect("user");
         this.selects.place = await API.getReferenceSelect("place", {showDisabled: true});
         this.selects.util = await API.getReferenceSelect("util");
-        this.getListDatas();
+        await this.getListDatas();
+
+        const that = this;
+        let screen = window.matchMedia('(max-width: 767px)');
+        screen.addEventListener("change", (e) => {
+            if(e.matches && that.config.mode == 'week') {
+                that.config.mode = 'month';
+            }
+        });
+        /* if(!DataUtil.isEmpty(window.globalLoading)) */ window.globalLoading.unloading();
     },
     props:{},
     computed:{
@@ -412,15 +431,19 @@ export default {
         toggleMonthSelector() {
             this.monthSelectorOpen = !this.monthSelectorOpen;
         },
-        getListDatas() {
-            API.sendRequest('/api/get/schedule').then(response => {
+        async getListDatas() {
+            await API.sendRequest('/api/get/schedule').then(async response => {
                 let temp = DataUtil.deepClone(response.data.datas);
                 for(let sd in temp){
                     let dateSplit = temp[sd].schedule_date.split("-");
                     let date = new Date(dateSplit[0], parseInt(dateSplit[1])-1, dateSplit[2]);
                     temp[sd].date = date;
                 }
+
                 this.schedules = temp;
+                if(!DataUtil.isEmpty(this.$refs["list"])) await this.$refs["list"].getListDatas();
+                return temp;
+                // this.$refs["list"].listData = temp;
             }).catch(e => {});
         },
         countDayCellSchedule(schedules) {
@@ -437,7 +460,7 @@ export default {
         },
         scheduleClick(dateText, id = 0) {
             let schedule = this.schedulesByDay()[dateText];
-            this.$parent.$parent.$refs["schedule-events"].openModal({
+            window.mainLayout.$parent.$refs["schedule-events"].openModal({
                 schedules: schedule,
                 showDate: schedule[0].date,
                 active_id: id,
@@ -446,6 +469,7 @@ export default {
     },
     components:{
         MonthSelector,
+        List,
     },
 }
 </script>
@@ -461,7 +485,7 @@ export default {
 .nchu.calendar table {
     border-collapse:collapse;
     border: 1px solid rgba(204, 204, 204, 0.24) !important;
-    margin-bottom: .5em !important;
+    /* margin-bottom: .5em !important; */
 }
 .nchu.calendar div.header {
     color: #000;
@@ -606,6 +630,13 @@ export default {
     left: .3em;
 }
 
+.nchu.calendar div.footer {
+    line-height: 2.5em;
+    margin-top: 2em;
+    vertical-align: middle;
+    text-align: center;
+}
+
 @media only screen and (max-width:767px){
     /* public */
     .nchu.calendar div.header {
@@ -622,9 +653,9 @@ export default {
         display: none;
     }
     .nchu.calendar div.main .month .prev.button, .nchu.calendar div.main .month .next.button, .nchu.calendar div.main .date .prev.button, .nchu.calendar div.main .date .next.button {
-        font-size: 1.6em;
-        margin-left: .5em;
-        margin-right: .5em;
+        font-size: 1.3em;
+        margin-left: .35em;
+        margin-right: .35em;
     }
     .nchu.calendar div.main td.search {
         font-size: .5em;

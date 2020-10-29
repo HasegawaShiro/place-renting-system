@@ -73,10 +73,10 @@ export default {
         onModalCancel() {
             confirm(CONSTANTS.messages["cancel-confirmation"]);
         },
-        onModalSave(event) {
-            API.sendRequest(`/api/post/${event.name}`, 'post', event.input, {onlyData: true}).then(response => {
+        async onModalSave(event) {
+            API.sendRequest(`/api/post/${event.name}`, 'post', event.input, {onlyData: true}).then(async response => {
                 this.$parent.showSnackbar("success", response.messages);
-                this.$parent.$parent.$refs['content'].getListDatas();
+                await window.mainLayout.$parent.$refs['content'].getListDatas();
                 this.closeModal();
             }).catch(e => {
                 try {
@@ -89,6 +89,9 @@ export default {
         },
     },
     props: {
+        'page': {
+            type: String,
+        },
         'form-mode': {
             type: String,
             default() {

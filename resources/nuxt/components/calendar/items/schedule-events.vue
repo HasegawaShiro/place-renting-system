@@ -46,11 +46,17 @@
                             :id="'schedule-detail-'+sd.schedule_id"
                         >
                             <div v-if="isLogin" class="two wide column form-items">
-                                <div class="item">
+                                <div
+                                    class="item"
+                                    @click="editClick(sd.schedule_id)"
+                                >
                                     <i class="write icon"></i>
                                     <span class="item-text tablet or large device only text">編輯</span>
                                 </div>
-                                <div class="item">
+                                <div
+                                    class="item"
+                                    @click="deleteClick(sd.schedule_id)"
+                                >
                                     <i class="trash icon"></i>
                                     <span class="item-text tablet or large device only text">刪除</span>
                                 </div>
@@ -94,8 +100,13 @@
                                 </div>
                                 <div class="ts list">
                                     <div class="item">
-                                        {{CONSTANTS.FORM_TEXT.schedule_content}}：
-                                        {{sd.schedule_content}}
+                                        <div style="width: 100%; display:block">{{CONSTANTS.FORM_TEXT.schedule_content}}：</div>
+                                        <div
+                                            v-if="!isEmpty(sd.schedule_content)"
+                                            style="margin-left: 1.2em; margin-top: .5em"
+                                        >
+                                            {{sd.schedule_content}}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="ts list">
@@ -107,16 +118,19 @@
                                 <div class="ts list">
                                     <div class="item">
                                         {{CONSTANTS.FORM_TEXT.util}}：
+                                        {{sd.util_name}}
                                     </div>
                                 </div>
                                 <div class="ts list">
                                     <div class="item">
                                         {{CONSTANTS.FORM_TEXT.phone}}：
+                                        {{sd.phone}}
                                     </div>
                                 </div>
                                 <div class="ts list">
                                     <div class="item">
                                         {{CONSTANTS.FORM_TEXT.mail}}：
+                                        {{sd.email}}
                                     </div>
                                 </div>
                                 <div class="ts list">
@@ -237,6 +251,9 @@ export default {
             }
             return "";
         },
+        isEmpty(obj) {
+            return DataUtil.isEmpty(obj);
+        },
         addClick() {
             if(this.$parent.isLogin) {
                 let toParseDate = new Date();
@@ -246,6 +263,25 @@ export default {
                 this.$parent.$refs["form"].openModal({schedule_date: DataUtil.formatDateInput(toParseDate)});
                 this.closeModal();
             }
+        },
+        async editClick(id) {
+
+        },
+        async deleteClick(id) {
+            await API.sendRequest(`/api/delete/schedule/${id}`,'delete').then(response => {
+                function deleteSchedule(source, id) {
+                    const toDelete = source.findIndex(x => x.schedule_id == id);
+                    if(toDelete != -1) delete source[toDelete];
+                    return source.filter(() => true);
+                };
+                this.schedules = deleteSchedule(this.schedules, id);
+                window.mainLayout.$parent.$refs["content"].schedules = deleteSchedule(window.mainLayout.$parent.$refs["content"].schedules, id);
+                window.mainLayout.showSnackbar("success", response.data.messages);
+            }).catch(e => {
+                if(!DataUtil.isEmpty(e.response.data.messages)) {
+                    window.mainLayout.showSnackbar("error", e.response.data.messages);
+                }
+            });
         },
     },
 };

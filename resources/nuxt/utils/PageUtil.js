@@ -1,21 +1,38 @@
 import API from '../api.js';
 import DataUtil from './DataUtil.js';
 
-export default class PageUtil {}
+export default class PageUtil {
+    static getPageData(page) {
+        const classes = {
+            user: User,
+            schedule: Schedule,
+        }
+
+        page = page.toLowerCase();
+        if(!DataUtil.isEmpty(classes[page])){
+            return classes[page];
+        }else{
+            console.error("The page is not found.");
+        }
+    }
+}
 
 class User {}
 
 class Schedule {
     static fields() {
+        /* let places = [];
+        API.getReferenceSelect("place").then(response => places = response).catch(e => {}); */
+
         return [
             (new Field(
-                'schedule_id',
-                '',
-                'number',
+                'schedule_date',
+                '日期',
+                'date',
                 {
-                    showOnForm: false,
-                    readOnly: true,
-                    sync: false,
+                    editable: false,
+                    listOrder: 0,
+                    formOrder: 0,
                 }
             )),
             (new Field(
@@ -24,23 +41,81 @@ class Schedule {
                 'text',
                 {
                     editable: false,
-                }
-            )),
-            (new Field(
-                'schedule_date',
-                '日期',
-                'date',
-                {
-                    editable: false,
+                    listOrder: 0,
+                    formOrder: 0,
                 }
             )),
             (new Field(
                 'schedule_from',
                 '開始時間',
                 'time',
-                {}
+                {
+                    listOrder: 0,
+                    formOrder: 0,
+                }
             )),
             (new Field(
+                'place_id',
+                '使用地點',
+                'select',
+                {
+                    selectOptions: 'place',
+                    listOrder: 0,
+                    formOrder: 0,
+                }
+            )),
+            (new Field(
+                'schedule_type',
+                '借用型態',
+                'select',
+                {
+                    selectOptions: {
+                        conference: '會議',
+                        activity: '活動',
+                        lesson: '課程',
+                        exam: '考試',
+                        other: '其他'
+                    },
+                    listOrder: 0,
+                    formOrder: 0,
+                }
+            )),
+            (new Field(
+                'place_disabled',
+                '場地狀態',
+                'boolean',
+                {
+                    trueText: '已停用',
+                    falseText: '啟用中',
+                    trueStyle: {
+                        color: 'red'
+                    },
+                    falseStyle: {
+                        color: 'green'
+                    },
+                    listOrder: 0,
+                    formOrder: 0,
+                }
+            )),
+            (new Field(
+                'util_name',
+                '承辦單位',
+                'string',
+                {
+                    listOrder: 0,
+                    formOrder: 0,
+                }
+            )),
+            (new Field(
+                'user_name',
+                '承辦人',
+                'string',
+                {
+                    listOrder: 0,
+                    formOrder: 0,
+                }
+            )),
+            /* (new Field(
                 'schedule_to',
                 '結束時間',
                 'time',
@@ -71,14 +146,6 @@ class Schedule {
                 }
             )),
             (new Field(
-                'place_id',
-                '使用地點',
-                'select',
-                {
-                    selectOptions: API.getReferenceSelect("place"),
-                }
-            )),
-            (new Field(
                 'schedule_registrant',
                 '登記人',
                 'text',
@@ -87,55 +154,20 @@ class Schedule {
                 }
             )),
             (new Field(
-                'schedule_type',
-                '借用型態',
-                'select',
-                {
-                    selectOptions: {
-                        conference: '會議',
-                        activity: '活動',
-                        lesson: '課程',
-                        exam: '考試',
-                        other: '其他'
-                    }
-                }
-            )),
-            (new Field(
                 'schedule_content',
                 '內容',
                 'textarea',
                 {}
-            )),
-            (new Field(
-                '',
-                '',
-                '',
-                {}
-            )),
-            (new Field(
-                '',
-                '',
-                '',
-                {}
-            )),
-            (new Field(
-                '',
-                '',
-                '',
-                {}
-            )),
-            (new Field(
-                '',
-                '',
-                '',
-                {}
-            )),
+            )), */
         ];
     }
     static text() { return '行程' }
+    static listData() {
+        return {};
+    }
 }
 
-export class Form {
+class Form {
     #Name;
     #Text;
     #Fields = [];
@@ -163,14 +195,20 @@ class Field {
     #Text;
     #Type;
     #Options = {
-        readOnly: false,
-        editable: true,
-        showOnList: true,
-        showOnForm: true,
-        selectOptions: [],
+        readOnly: false,    // 是否唯獨
+        editable: true,     // 新增可以輸入，修改不能動
+        showOnList: true,   // 是否出現在列表畫面
+        showOnForm: true,   // 是否出現在表單畫面
+        selectOptions: [],  // 下拉選項：如果是動態下拉，就直接寫table名稱'user', 若為固定下拉，則寫Array: [1,2, '字串']
         onlyFrontend: false,
-        remarks: null,
+        remarks: null,      // 顯示於欄位下方的備註文字
         sync: true,
+        trueText: null,     // boolean型態，出現在列表時，若為True，則顯示的文字
+        falseText: null,    // boolean型態，出現在列表時，若為False，則顯示的文字
+        trueStyle: {},
+        falseStyle: {},
+        listOrder: 0,       // 列表欄位排序
+        formOrder: 0,       // 表單欄位排序
     };
     static allowType = ['text', 'textarea', 'number', 'boolean', 'date', 'time', 'datetime', 'select', 'custom'];
 
@@ -181,9 +219,11 @@ class Field {
         for(let key in options){
             if(key == 'selectOptions'){
                 let o = options[key];
-                if(typeof o == 'string'){
-
-                }
+                // console.log(o);
+                /* if(typeof o == 'string'){
+                    this.#Options.selectOptions.push(o);
+                } */
+                this.#Options[key] = options[key];
             }else if(this.#Options[key] !== undefined){
                 this.#Options[key] = options[key];
             }

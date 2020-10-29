@@ -139,7 +139,7 @@
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.util}}</label>
-                    <input class="disabled" type="text" disabled v-model="user.util">
+                    <input class="disabled" type="text" disabled v-model="user.util.util_name">
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.phone}}</label>
@@ -185,13 +185,15 @@ export default {
             config: {
                 mode: 'add',
             },
-            form: new Form('schedule'),
+            // form: new Form('schedule'),
             selects: {
                 places: {},
                 users: {},
                 types: CONSTANTS.schedule.selects.types,
             },
-            user: this.$store.state.userStore.user,
+            user: {
+                util: {},
+            },
             input: {},
             defaultInput() {
                 return {
@@ -224,8 +226,8 @@ export default {
         };
     },
     async mounted() {
-
-        console.log(this.input);
+        this.user = this.$store.state.userStore.user;
+        // console.log(this.input);
     },
     props: {
         'form-data': {

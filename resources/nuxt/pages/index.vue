@@ -1,5 +1,6 @@
 <template>
 <MainLayout
+    page="schedule"
     :has-form="true"
     form-mode="schedule"
     :form-data="dataForForm"

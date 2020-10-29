@@ -1,9 +1,9 @@
 <template>
     <div class="nchu main">
-        <slot name="other"></slot>
+        <slot name="other" ref="other"></slot>
         <div class="ts static left sidebar inverted vertical menu" id="main-sidebar">
             <div class="item">
-                本校
+                中興大學
                 <div class="menu">
                     <a class="item" target="_blank" href="https://www.nchu.edu.tw/">官網</a>
                     <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a>
@@ -19,11 +19,12 @@
         <div class="squeezable pusher" id="sidebar-pusher">
             <Form
                 v-if="isLogin"
+                :page="page"
                 :form-mode="formMode"
                 :form-data="formData"
                 ref="form"
             ></Form>
-            <div class="ts dimmer" id="global-loading">
+            <div @hook:created="created" class="ts dimmer" id="global-loading">
                 <div class="ts loader"></div>
             </div>
             <header>
@@ -110,7 +111,7 @@
                     </dialog>
                 </div>
             </header>
-            <slot name="content"></slot>
+            <slot name="content" ref="content"></slot>
             <!-- <slot name="loading"></slot> -->
         </div>
         <div class="ts bottom left snackbar">
@@ -165,14 +166,8 @@ export default {
             authExpired: false,
         };
     },
-    mounted() {
-        API.sendRequest("/api/user","get",null,{doNotRelogin: true}).then(response => {
-            this.user = response.data.user;
-            this.$store.commit("userStore/set", this.user);
-        }).catch(e => {
-            this.user = this.guest;
-        });
-
+    beforeMount() {
+        window.mainLayout = this;
         window.globalLoading = {
             $el: document.querySelector("#global-loading"),
             loading() {
@@ -184,8 +179,25 @@ export default {
                 if(el.classList.contains("active")) el.classList.remove("active");
             },
         };
+    },
+    async mounted() {
 
-        window.mainLayout = this;
+        API.sendRequest("/api/user","get",null,{doNotRelogin: true}).then(response => {
+            this.user = response.data.user;
+            this.$store.commit("userStore/set", this.user);
+        }).catch(e => {
+            this.user = this.guest;
+        });
+
+        const selects = DataUtil.deepClone(CONSTANTS.common.selects);
+        for(let s in selects) {
+            if(typeof selects[s] == "object" && selects[s].constructor == Object){
+                if(DataUtil.isEmpty(selects[s])){
+                    selects[s] = await API.getReferenceSelect(s);
+                }
+            }
+        }
+        window.globalSelects = selects;
     },
     computed: {
         isLogin() {
@@ -274,6 +286,9 @@ export default {
         },
     },
     props: {
+        'page': {
+            type: String,
+        },
         'has-form': {
             type: Boolean,
             default() {
