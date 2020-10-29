@@ -18,4 +18,10 @@ class Place extends Model
         'created_by',
         'updated_by',
     ];
+
+    protected $casts = [
+        'place_disabled' => 'boolean',
+        'created_by' => 'integer',
+        'updated_by' => 'integer',
+    ];
 }
