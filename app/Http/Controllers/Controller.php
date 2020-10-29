@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\System\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller as BaseController;
@@ -10,10 +9,9 @@ use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+use App\Utils\UserUtil;
 use App\Utils\PageUtil;
 use App\Utils\SessionUtil;
-
-use function PHPUnit\Framework\isEmpty;
 
 class Controller extends BaseController
 {
@@ -138,7 +136,7 @@ class Controller extends BaseController
         if(is_null($data)) {
             $status = 404;
         }else {
-            $userValidate = UserController::permissionValidate($data);
+            $userValidate = UserUtil::permissionValidate($data);
             if($userValidate) {
                 $class = "App\\Pages\\".ucfirst($table);
                 if(class_exists($class)){
