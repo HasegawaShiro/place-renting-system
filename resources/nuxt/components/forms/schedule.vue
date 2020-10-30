@@ -227,10 +227,18 @@
             </form>
         </div>
         <div class="actions" v-if="config.mode != 'view'">
-            <button class="ts deny button" @click="cancelClick()">
+            <button
+                class="ts deny button"
+                :class="{disabled: config.saving}"
+                @click="cancelClick()"
+            >
                 {{COMMON.TEXT.cancel}}
             </button>
-            <button class="ts positive button" @click="saveClick()">
+            <button
+                class="ts positive button"
+                :class="{disabled: config.saving, loading: config.saving}"
+                @click="saveClick()"
+            >
                 {{COMMON.TEXT.save}}
             </button>
         </div>
@@ -252,6 +260,7 @@ export default {
             config: {
                 mode: 'add',
                 id: 0,
+                saving: false,
             },
             // form: new Form('schedule'),
             selects: {
@@ -374,8 +383,6 @@ export default {
         saveClick() {
             if(['add', 'edit'].includes(this.config.mode)){
                 let toSave = DataUtil.deepClone(this.input);
-                /* console.log("input => ", this.input)
-                console.log("config => ", this.config) */
                 if(this.config.fullday){
                     toSave.schedule_from = "00:00";
                     toSave.schedule_to = "23:59";

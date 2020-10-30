@@ -36,7 +36,6 @@ export default {
     },
     mounted() {
         this.showAddMutation = this.showAdd;
-        console.log(this)
     },
     components: {
         Universal,
@@ -60,7 +59,7 @@ export default {
             }).modal("show");
         },
         closeModal() {
-            ts('dialog.new').modal("hide");
+            ts('dialog.form').modal("hide");
         },
         toShowAdd() {
             this.showAddMutation = true;
@@ -72,12 +71,13 @@ export default {
             confirm(CONSTANTS.messages["cancel-confirmation"]);
         },
         async onModalSave(event) {
-            let URL = `/api/data/${event.name}`
-            if(event.method == 'edit') URL + `/${event.id}`
-            API.sendRequest(URL, event.method, event.input, {onlyData: true}).then(async response => {
+            let URL = `/api/data/${event.name}`;
+            if(event.method == 'put') URL += `/${event.id}`;
+            this.$refs["form-modal"].config.saving = true;
+            await API.sendRequest(URL, event.method, event.input, {onlyData: true}).then(async response => {
                 this.$parent.showSnackbar("success", response.messages);
                 await window.mainLayout.$parent.$refs['content'].getListDatas();
-                // this.closeModal();
+                this.closeModal();
             }).catch(e => {
                 try {
                     this.$parent.showSnackbar("error", e.response.data.messages);
@@ -86,6 +86,7 @@ export default {
                     this.$parent.showSnackbar("error", msg);
                 }
             });
+            this.$refs["form-modal"].config.saving = false;
         },
     },
     props: {
