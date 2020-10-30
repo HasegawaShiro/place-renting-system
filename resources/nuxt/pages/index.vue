@@ -27,7 +27,6 @@ import ScheduleEvents from '../components/calendar/items/schedule-events.vue';
 export default {
     middleware: 'csrf',
     data() {
-        console.log(this)
         return {
             calendarObj: {},
         };

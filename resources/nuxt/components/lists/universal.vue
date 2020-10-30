@@ -21,8 +21,14 @@
             >
                 <td>
                     <div class="ts tiny stackable icon buttons">
-                        <button class="ts button"><i class="eye icon"></i></button>
-                        <button class="ts info button"><i class="write icon"></i></button>
+                        <button
+                            class="ts button"
+                            @click="viewData(data)"
+                        ><i class="eye icon"></i></button>
+                        <button
+                            class="ts info button"
+                            @click="editData(data)"
+                        ><i class="write icon"></i></button>
                         <button
                             class="ts negative button"
                             @click="deleteData(data[dataKey])"
@@ -93,12 +99,15 @@ export default {
         dataKey() {
             return this.page+"_id";
         },
+        form() {
+            return window.mainLayout.$refs.form;
+        }
     },
     mounted() {
         this.pageData = PageUtil.getPageData(this.page);
         this.selects = window.globalSelects;
         this.getListDatas();
-        console.log(this.pageData.fields());
+        // console.log(this.pageData.fields());
     },
     props: {
         "table-class": {
@@ -118,23 +127,25 @@ export default {
         },
     },
     methods: {
-        view(id) {
-            if(this.page === "schedule") {
-
-            }
-        },
-        getListDatas() {
-            const URL = "/api/get/"+this.page;
+        async getListDatas() {
+            const URL = "/api/data/"+this.page;
             let params = DataUtil.deepClone(this.params);
 
-            API.sendRequest(URL, 'get', params).then(response => {
+            await API.sendRequest(URL, 'get', params).then(response => {
                 this.listData = response.data.datas;
             }).catch(e => {});
+
+            window.globalLoading.unloading();
         },
-        async editData(id) {},
+        async viewData(data) {
+            this.form.openModal('view',data);
+        },
+        async editData(data) {
+            this.form.openModal('edit',data);
+        },
         async deleteData(id) {
             window.globalLoading.loading();
-            await API.sendRequest(`/api/delete/${this.page}/${id}`,'delete').then(async (response) => {
+            await API.sendRequest(`/api/data/${this.page}/${id}`,'delete').then(async (response) => {
                 /* function deleteSchedule(source, id) {
                     const toDelete = source.findIndex(x => x.schedule_id == id);
                     if(toDelete != -1) delete source[toDelete];
