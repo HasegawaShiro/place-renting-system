@@ -27,7 +27,7 @@ class Controller extends BaseController
             }
         }
         dd($result); */
-        dd(\App\Models\Place::find(1)->place_disabled);
+        dd(\App\Models\User::find(1));
     }
 
     public static function getReferenceSelect(Request $request, $table) {
@@ -108,7 +108,7 @@ class Controller extends BaseController
             $data["created_by"] = $request->user()->user_id;
             $data["updated_by"] = $request->user()->user_id;
             $created = $model::create($data);
-            $result['messages'] = 'save-success';
+            array_push($result['messages'], 'save-success');
         }else{
             $status = 422;
         }
@@ -122,7 +122,48 @@ class Controller extends BaseController
 
         return response()->json($result,$status);
     }
-    public static function putData(Request $request, $table, $id) {}
+    public static function putData(Request $request, $table, $id) {
+        DB::beginTransaction();
+        $class = "App\\Models\\".ucfirst($table);
+        $model = new $class();
+        $origin = $model::find($id);
+        $result = [
+            'datas' => [],
+            'messages' => []
+        ];
+        $status = 200;
+
+        if(is_null($origin)){
+            array_push($result['messages'],'data-not-found');
+            $status = 404;
+        }else{
+            $data = $request->all();
+            $data["{$table}_id"] = $id;
+
+            $validationPass = PageUtil::validateForSave($table, $data, 'edit', $result);
+
+            if($validationPass) {
+                unset($data["schedule_id"]);
+                $data["updated_by"] = $request->user()->user_id;
+                foreach($data as $key => $value){
+                    if(!$model->isEditable($key)) unset($data[$key]);
+                }
+                $origin->update($data);
+                array_push($result['messages'], 'save-success');
+            }else{
+                $status = 422;
+            }
+        }
+        // $status = 422;
+
+        if($status === 200) {
+            DB::commit();
+        }else{
+            DB::rollBack();
+        }
+
+        return response()->json($result,$status);
+    }
     public static function deleteData(Request $request, $table, $id) {
         DB::beginTransaction();
         $result = [

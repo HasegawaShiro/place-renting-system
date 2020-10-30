@@ -10,12 +10,18 @@ class PageUtil {
         $pass = true;
         if(class_exists($class)){
             $page = new $class();
-            $rules = $page::fields()[$status];
+            $rules = [];
+            $fields = $page::fields();
+            if(isset($fields[$status])){
+                $rules = $fields[$status];
+            }else if(isset($fields['add'])){
+                $rules = $fields['add'];
+            }
             $messages = [];
             if(method_exists($page, 'beforeValidation')){
                 $page::beforeValidation($data, $rules, $messages, $status);
             }
-            $validator = Validator::make($data, $rules, $messages, $page::fields()['attributes']);
+            $validator = Validator::make($data, $rules, $messages, $fields['attributes']);
 
             // return $validator;
             if($validator->fails()){
