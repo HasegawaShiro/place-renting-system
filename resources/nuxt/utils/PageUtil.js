@@ -196,13 +196,11 @@ class Field {
     #Type;
     #Options = {
         readOnly: false,    // 是否唯獨
-        editable: true,     // 新增可以輸入，修改不能動
+        editable: true,     // 新增可以輸入，若為false則修改不能動
         showOnList: true,   // 是否出現在列表畫面
         showOnForm: true,   // 是否出現在表單畫面
         selectOptions: [],  // 下拉選項：如果是動態下拉，就直接寫table名稱'user', 若為固定下拉，則寫Array: [1,2, '字串']
-        onlyFrontend: false,
         remarks: null,      // 顯示於欄位下方的備註文字
-        sync: true,
         trueText: null,     // boolean型態，出現在列表時，若為True，則顯示的文字
         falseText: null,    // boolean型態，出現在列表時，若為False，則顯示的文字
         trueStyle: {},

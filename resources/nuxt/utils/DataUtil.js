@@ -156,7 +156,6 @@ export default class DataUtil{
     }
 
     static unionString(string, union, delimiter = ",") {
-        console.log(string, union);
         string = string.toString();
         if (typeof union === "object") {
             for (let i in union) {
