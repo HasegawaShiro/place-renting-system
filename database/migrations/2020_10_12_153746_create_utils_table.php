@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Util;
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,6 +23,7 @@ class CreateUtilsTable extends Migration
             $table->bigInteger('updated_by')->default(-1);
             $table->timestamps();
         });
+        Util::create(['util_name' => '創產學院辦公室']);
     }
 
     /**

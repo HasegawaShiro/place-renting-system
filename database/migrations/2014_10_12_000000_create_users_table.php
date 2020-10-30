@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Models\Util;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -34,7 +33,6 @@ class CreateUsersTable extends Migration
                 // $table->index(['user_id','username', 'email'],'users_index');
         });
         User::create(['username' => 'admin', 'password' => Hash::make('admin'), 'name' => 'Admin', 'util_id' => 1, 'phone' => '0999777888', 'email' => 'abc@zxc.com', 'user_disabled' => false]);
-        Util::create(['util_name' => '創產學院辦公室']);
     }
 
     /**
