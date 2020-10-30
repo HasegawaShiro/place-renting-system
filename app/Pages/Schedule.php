@@ -86,7 +86,6 @@ class Schedule {
                     'max:200'
                 ],
             ],
-            'edit' => [],
             'attributes' => [
                 'place_id' => '場地',
                 'schedule_title' => '主題',
@@ -112,6 +111,7 @@ class Schedule {
             // "from-to-unavailable" => '此時段已被 :user 預約： :title',
             "from-to-unavailable" => '此時段已被 :user 預約',
             "place-is-disabled" => '此場地不存在或已被停用',
+            "schedule-data-expired" => '不可修改已過期資料',
         ];
     }
 
@@ -144,6 +144,7 @@ class Schedule {
             array_push($models, $query::find($id));
         }
 
+        $today = Carbon::today()->timestamp;
         foreach ($models as $model) {
             $schedule = $model->toArray();
             $user_MODEL = $model->user()->first();
@@ -158,6 +159,8 @@ class Schedule {
             $schedule["util_id"] = $util["util_id"];
             $schedule["place_name"] = $place["place_name"];
             $schedule["place_disabled"] = $place["place_disabled"];
+            $schedule["editable"] = strtotime($schedule["schedule_date"]) > $today;
+            $schedule["deletable"] = strtotime($schedule["schedule_date"]) > $today;
             $collect->add($schedule);
         }
 
@@ -180,26 +183,39 @@ class Schedule {
         $pass = true;
         if($status == 'add'){
             $validateFromTo = _UTIL::validateFromTo($data);
-            if(!$validateFromTo['available']) {
+        }else {
+            $validateFromTo = _UTIL::validateFromTo($data, $data['schedule_id']);
+            $origin = _MODEL::find($data['schedule_id']);
+            $originalDate = strtotime($origin->schedule_date);
+            $today = Carbon::today()->timestamp;
+            if($originalDate < $today){
                 array_push(
                     $result['messages'],
-                    DataUtil::replaceKeysInMessage(Schedule::messages()['from-to-unavailable'], [
-                        ":user" => $validateFromTo['data']['name'],
-                        ":title" => $validateFromTo['data']['schedule_title']
-                    ])
+                    Schedule::messages()['schedule-data-expired']
                 );
-
                 $pass = false;
             }
-        }else if($status == 'edit') {}
+        }
+
+        if(!$validateFromTo['available']) {
+            array_push(
+                $result['messages'],
+                DataUtil::replaceKeysInMessage(Schedule::messages()['from-to-unavailable'], [
+                    ":user" => $validateFromTo['data']['name'],
+                    ":title" => $validateFromTo['data']['schedule_title']
+                ])
+            );
+
+            $pass = false;
+        }
 
         $place = Place::find($data['place_id']);
         if(is_null($place) || $place->place_disabled) {
-            $pass = false;
             array_push(
                 $result['messages'],
                 Schedule::messages()['place-is-disabled']
             );
+            $pass = false;
         }
 
         return $pass;

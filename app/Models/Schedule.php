@@ -44,6 +44,25 @@ class Schedule extends Model
         'updated_by' => 'integer'
     ];
 
+    protected $editable = [
+        'place_id',
+        'schedule_title',
+        'schedule_date',
+        'schedule_from',
+        'schedule_to',
+        'schedule_type',
+        'schedule_content',
+        'user_id',
+        'schedule_contact',
+        'schedule_url',
+        'schedule_repeat',
+        'schedule_repeat_days',
+        'schedule_end_at',
+        'schedule_end_times',
+        'schedule_registrant',
+        'updated_by',
+    ];
+
     public function user(){
         return $this->belongsTo('App\Models\User', 'user_id', 'user_id');
     }
