@@ -260,7 +260,7 @@ export default {
                 if(!DataUtil.isEmpty(this.showDate) && this.showDate.constructor == Date) {
                     toParseDate = this.showDate;
                 }
-                this.$parent.$refs["form"].openModal({schedule_date: DataUtil.formatDateInput(toParseDate)});
+                this.$parent.$refs["form"].openModal('add', {schedule_date: DataUtil.formatDateInput(toParseDate)});
                 this.closeModal();
             }
         },
@@ -268,7 +268,7 @@ export default {
 
         },
         async deleteClick(id) {
-            await API.sendRequest(`/api/delete/schedule/${id}`,'delete').then(response => {
+            await API.sendRequest(`/api/data/schedule/${id}`,'delete').then(response => {
                 function deleteSchedule(source, id) {
                     const toDelete = source.findIndex(x => x.schedule_id == id);
                     if(toDelete != -1) delete source[toDelete];

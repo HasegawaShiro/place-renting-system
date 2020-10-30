@@ -25,17 +25,14 @@ Route::group(['prefix' => 'api'], function () {
         return csrf_token();
     });
     Route::get('select/{table}', [Controller::class, 'getReferenceSelect']);
-    Route::get('get/{table}/{id?}', [Controller::class, 'getData']);
+    Route::get('data/{table}/{id?}', [Controller::class, 'getData']);
     Route::group(['middleware' => 'auth'], function() {
-        Route::get('user', [UserController::class, 'getUserSession']);
-        Route::post('post/{table}', [Controller::class, 'postData']);
-        Route::put('put/{table}/{id}', [Controller::class, 'putData']);
-        Route::delete('delete/{table}/{id}', [Controller::class, 'deleteData']);
+        Route::get('auth', [UserController::class, 'getUserSession']);
+        Route::post('data/{table}', [Controller::class, 'postData']);
+        Route::put('data/{table}/{id}', [Controller::class, 'putData']);
+        Route::delete('data/{table}/{id}', [Controller::class, 'deleteData']);
     });
 });
-/* Route::get('/api/pong', function (Request $request) {
-    return "ping";
-}); */
 
 
 Route::get(

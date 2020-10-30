@@ -6,23 +6,13 @@
                 <span class="mode buttons">
                     <div class="ts buttons">
                         <button
+                            v-for="md in ['month', 'week', 'list']"
+                            :key="'mode-button-'+md"
                             class="ts tiny button"
                             id="month-button"
-                            :class="{active:config.mode === 'month'}"
-                            @click="config.mode = 'month'"
-                        >{{CONSTANTS['MODE_BUTTON'].month}}</button>
-                        <button
-                            class="ts tiny button"
-                            id="week-button"
-                            :class="{active:config.mode === 'week'}"
-                            @click="config.mode = 'week'"
-                        >{{CONSTANTS['MODE_BUTTON'].week}}</button>
-                        <button
-                            class="ts tiny button"
-                            id="list-button"
-                            :class="{active:config.mode === 'list'}"
-                            @click="config.mode = 'list'"
-                        >{{CONSTANTS['MODE_BUTTON'].list}}</button>
+                            :class="{active:config.mode === md}"
+                            @click="changeMode(md);"
+                        >{{CONSTANTS['MODE_BUTTON'][md]}}</button>
                     </div>
                 </span>
             </div>
@@ -270,6 +260,7 @@ import Calendar from '../../classes/calendar.js';
 import MonthSelector from './items/month-selector.vue';
 import List from '../lists/universal.vue';
 import API from '../../api.js';
+import functions from '../../functions.js';
 import DataUtil from '../../utils/DataUtil.js';
 
 export default {
@@ -302,7 +293,6 @@ export default {
         };
     },
     async mounted() {
-        if(!DataUtil.isEmpty(window.globalLoading)) window.globalLoading.loading();
         this.selects.user = await API.getReferenceSelect("user");
         this.selects.place = await API.getReferenceSelect("place", {showDisabled: true});
         this.selects.util = await API.getReferenceSelect("util");
@@ -315,7 +305,8 @@ export default {
                 that.config.mode = 'month';
             }
         });
-        if(!DataUtil.isEmpty(window.globalLoading)) window.globalLoading.unloading();
+
+        window.mainLayout.contentLoaded();
     },
     props:{},
     computed:{
@@ -396,14 +387,12 @@ export default {
         },
         schedulesByWeekWithPlace(place_id) {
             let byWeek = this.schedulesByWeek();
-            console.log(place_id,byWeek)
             let result = [[], [], [], [], [], [], []];
             for(let day in byWeek) {
                 for(let sd of byWeek[day]) {
                     if(sd.place_id == place_id) result[day].push(sd);
                 }
             }
-            console.log(result)
             return result;
         },
         calendarChange(method = null, ...params) {
@@ -432,7 +421,7 @@ export default {
             this.monthSelectorOpen = !this.monthSelectorOpen;
         },
         async getListDatas() {
-            await API.sendRequest('/api/get/schedule').then(async response => {
+            await API.sendRequest('/api/data/schedule').then(async response => {
                 let temp = DataUtil.deepClone(response.data.datas);
                 for(let sd in temp){
                     let dateSplit = temp[sd].schedule_date.split("-");
@@ -455,7 +444,7 @@ export default {
         },
         dayCellClick(dateText) {
             if(this.schedulesByDay()[dateText].length <= 0 && this.$parent.isLogin) {
-                this.$parent.$refs["form"].openModal({schedule_date: dateText});
+                this.$parent.$refs["form"].openModal('add',{schedule_date: dateText});
             }
         },
         scheduleClick(dateText, id = 0) {
@@ -465,6 +454,16 @@ export default {
                 showDate: schedule[0].date,
                 active_id: id,
             });
+        },
+        async changeMode(mode) {
+            if(this.config.mode != mode){
+                window.globalLoading.loading();
+                this.config.mode = mode
+                if(mode != 'list'){
+                    await functions.delay(500);
+                    window.globalLoading.unloading();
+                }
+            }
         }
     },
     components:{

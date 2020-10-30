@@ -27,7 +27,8 @@ export default {
         FORM_TEXT: {
             title:{
                 add: '新增行程',
-                edit: '編輯行程'
+                edit: '編輯行程',
+                view: '查看行程'
             },
             schedule_title: '主題',
             schedule_date: '日期',

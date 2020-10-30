@@ -1,5 +1,5 @@
 <template>
-    <dialog class="ts tiny modal new schedule">
+    <dialog class="ts tiny modal form schedule" :class="{closable: config.mode == 'view'}">
         <div class="header">
             {{CONSTANTS.FORM_TEXT.title[config.mode]}}
         </div>
@@ -7,15 +7,23 @@
             <form class="ts horizontal form">
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_title}}</label>
-                    <input type="text" v-model="input.schedule_title">
+                    <input
+                        type="text"
+                        v-model="input.schedule_title"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_date}}</label>
-                    <input type="date" v-model.lazy="input.schedule_date">
+                    <input
+                        type="date"
+                        v-model.lazy="input.schedule_date"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.fullday}}</label>
-                    <div class="ts toggle checkbox">
+                    <div class="ts toggle checkbox" :class="{disabled: config.mode == 'view'}">
                         <input type="checkbox" id="fullday" v-model="config.fullday">
                         <label for="fullday"></label>
                     </div>
@@ -23,16 +31,24 @@
                 <template v-if="!config.fullday">
                     <div class="field">
                         <label>{{CONSTANTS.FORM_TEXT.schedule_from}}</label>
-                        <input type="time" v-model="input.schedule_from">
+                        <input
+                            type="time"
+                            v-model="input.schedule_from"
+                            v-bind="{disabled: config.mode == 'view'}"
+                        >
                     </div>
                     <div class="field">
                         <label>{{CONSTANTS.FORM_TEXT.schedule_to}}</label>
-                        <input type="time" v-model="input.schedule_to">
+                        <input
+                            type="time"
+                            v-model="input.schedule_to"
+                            v-bind="{disabled: config.mode == 'view'}"
+                        >
                     </div>
                 </template>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_repeat}}</label>
-                    <div class="ts toggle checkbox">
+                    <div class="ts toggle checkbox" :class="{disabled: config.mode == 'view'}">
                         <input type="checkbox" id="repeat" v-model="input.schedule_repeat">
                         <label for="repeat"></label>
                     </div>
@@ -48,6 +64,7 @@
                                     id="keep"
                                     value="keep"
                                     v-model="config.schedule_repeat_method"
+                                    v-bind="{disabled: config.mode == 'view'}"
                                 >
                                 <label for="keep">{{CONSTANTS.FORM_TEXT.keep}}</label>
                             </div>
@@ -58,13 +75,18 @@
                                     id="cycle"
                                     value="cycle"
                                     v-model="config.schedule_repeat_method"
+                                    v-bind="{disabled: config.mode == 'view'}"
                                 >
                                 <label for="cycle">{{CONSTANTS.FORM_TEXT.cycle}}</label>
                             </div>
                         </div>
                         <div
                             class="week-selector"
-                            :class="{disabled: config.schedule_repeat_method!='cycle'}"
+                            :class="{
+                                disabled:
+                                    config.schedule_repeat_method!='cycle' &&
+                                    config.mode != 'view'
+                            }"
                         >
                             <div
                                 class="week-button"
@@ -85,23 +107,43 @@
                     </div>
                     <div class="field">
                         <label>{{CONSTANTS.FORM_TEXT.schedule_end}}</label>
-                        <div class="ts checkboxes">
+                        <div class="ts checkboxes" :class="{disabled: config.mode == 'view'}">
                             <div class="ts checkbox">
-                                <input type="checkbox" id="at" v-model="config.schedule_end_at">
+                                <input
+                                    type="checkbox"
+                                    id="at"
+                                    v-model="config.schedule_end_at"
+                                >
                                 <label for="at">{{CONSTANTS.FORM_TEXT.at}}</label>
-                                <input type="date" class="ts input after checkbox" v-model="input.schedule_end_at">
+                                <input
+                                    type="date"
+                                    class="ts input after checkbox"
+                                    v-model="input.schedule_end_at"
+                                >
                             </div>
                             <div class="ts checkbox">
-                                <input type="checkbox" id="times" v-model="config.schedule_end_times">
+                                <input
+                                    type="checkbox"
+                                    id="times"
+                                    v-model="config.schedule_end_times"
+                                >
                                 <label for="times">{{CONSTANTS.FORM_TEXT.repeat}}</label>
-                                <input type="number" class="ts input after checkbox back word" v-model="input.schedule_end_times">{{CONSTANTS.FORM_TEXT.times}}
+                                <input
+                                    type="number"
+                                    class="ts input after checkbox back word"
+                                    v-model="input.schedule_end_times"
+                                >{{CONSTANTS.FORM_TEXT.times}}
                             </div>
                         </div>
                     </div>
                 </template>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.place_id}}</label>
-                    <select class="ts basic dropdown" v-model="input.place_id">
+                    <select
+                        class="ts basic dropdown"
+                        v-model="input.place_id"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                         <option
                             v-for="(text, value) in selects.places"
                             :key="'place-'+value"
@@ -111,11 +153,19 @@
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_registrant}}</label>
-                    <input type="text" v-model="input.schedule_registrant">
+                    <input
+                        type="text"
+                        v-model="input.schedule_registrant"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_type}}</label>
-                    <select class="ts basic dropdown" v-model="input.schedule_type">
+                    <select
+                        class="ts basic dropdown"
+                        v-model="input.schedule_type"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                         <option
                             v-for="(text, value) in selects.types"
                             :key="'place-'+value"
@@ -125,11 +175,20 @@
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_content}}</label>
-                    <textarea rows="5" v-model="input.schedule_content"></textarea>
+                    <textarea
+                        rows="5"
+                        v-model="input.schedule_content"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    ></textarea>
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.user_id}}</label>
-                    <select class="ts disabled basic dropdown" disabled v-model="input.user_id">
+                    <select
+                        class="ts disabled basic dropdown"
+                        disabled
+                        v-model="input.user_id"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                         <option
                             v-for="(text, value) in selects.users"
                             :key="'user-'+value"
@@ -147,19 +206,27 @@
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.mail}}</label>
-                    <input class="disabled" type="text" disabled v-model="user.mail">
+                    <input class="disabled" type="text" disabled v-model="user.email">
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_contact}}</label>
-                    <input class="disabled" type="text" v-model="input.schedule_contact">
+                    <input
+                        type="text"
+                        v-model="input.schedule_contact"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_url}}</label>
-                    <input class="disabled" type="text" v-model="input.schedule_url">
+                    <input
+                        type="text"
+                        v-model="input.schedule_url"
+                        v-bind="{disabled: config.mode == 'view'}"
+                    >
                 </div>
             </form>
         </div>
-        <div class="actions">
+        <div class="actions" v-if="config.mode != 'view'">
             <button class="ts deny button" @click="cancelClick()">
                 {{COMMON.TEXT.cancel}}
             </button>
@@ -184,6 +251,7 @@ export default {
             DAY_TEXT: CONSTANTS.calendar.DAY_TEXT,
             config: {
                 mode: 'add',
+                id: 0,
             },
             // form: new Form('schedule'),
             selects: {
@@ -226,8 +294,6 @@ export default {
         };
     },
     async mounted() {
-        this.user = this.$store.state.userStore.user;
-        // console.log(this.input);
     },
     props: {
         'form-data': {
@@ -240,10 +306,13 @@ export default {
         async add(defaultData = {}) {
             let dateToPut = new Date();
 
+            this.user = this.$store.state.userStore.user;
             this.config.mode = 'add';
+            this.config.id = 0;
             this.selects.places = await API.getReferenceSelect("place");
             this.selects.users = await API.getReferenceSelect("user");
 
+            this.input = {};
             for(let k in this.defaultInput()) {
                 if(DataUtil.isEmpty(defaultData[k])){
                     this.$set(this.input, k, this.defaultInput()[k]);
@@ -256,45 +325,79 @@ export default {
             }
 
             this.input.user_id = this.user.id;
-            if(!DataUtil.isEmpty(this.formData.selected_date) && DataUtil.isEmpty(defaultData.schedule_date)){
+            /* if(!DataUtil.isEmpty(this.formData.selected_date) && DataUtil.isEmpty(defaultData.schedule_date)){
                 dateToPut = this.formData.selected_date;
                 this.input.schedule_date = DataUtil.formatDateInput(dateToPut);
+            } */
+        },
+        async edit(data) {
+            this.config.mode = 'edit';
+            this.config.id = data.schedule_id;
+            await this.parseOriginData(data);
+        },
+        async view(data) {
+            this.config.mode = 'view';
+            this.config.id = data.schedule_id;
+            await this.parseOriginData(data);
+        },
+        async parseOriginData(data) {
+            this.selects.places = await API.getReferenceSelect("place");
+            this.selects.users = await API.getReferenceSelect("user");
+            this.user = {
+                user_name: data.user_name,
+                phone: data.phone,
+                email: data.email,
+                util: {
+                    util_name: data.util_name
+                },
+            };
+
+            this.input = {};
+            for(let k in this.defaultInput()) {
+                if(DataUtil.isEmpty(data[k])){
+                    this.$set(this.input, k, this.defaultInput()[k]);
+                }else{
+                    this.$set(this.input, k, data[k]);
+                }
             }
-
-
-            // this.$forceUpdate();
+            for(let k in this.defaultConfig()) {
+                this.$set(this.config, k, this.defaultConfig()[k]);
+            }
+            this.config.schedule_repeat_days = this.input.schedule_repeat_days.toString(2).split("");
+            if(this.input.schedule_from == "00:00" && this.input.schedule_to == "23:59"){
+                this.config.fullday = true;
+            }
         },
         cancelClick() {
             this.$emit("cancel");
         },
         saveClick() {
-            let toSave = DataUtil.deepClone(this.input);
-            console.log("input => ", this.input)
-            console.log("config => ", this.config)
-            if(this.config.fullday){
-                toSave.schedule_from = "00:00";
-                toSave.schedule_to = "23:59";
-            }
-
-            if(this.config.schedule_repeat_method == "keep"){
-                toSave.schedule_repeat_days = 127;
-            }else{
-                let days = "";
-                for(let i = 0; i < 7; i++){
-                    days += this.config.schedule_repeat_days[i];
+            if(['add', 'edit'].includes(this.config.mode)){
+                let toSave = DataUtil.deepClone(this.input);
+                /* console.log("input => ", this.input)
+                console.log("config => ", this.config) */
+                if(this.config.fullday){
+                    toSave.schedule_from = "00:00";
+                    toSave.schedule_to = "23:59";
                 }
-                toSave.schedule_repeat_days = parseInt(days,2);
-            }
 
-            this.$emit("save", {
-                name: 'schedule',
-                input: toSave,
-            });
-        },
-    },
-    watch: {
-        formData(newVal, oldVal){
-            this.formData = newVal;
+                if(this.config.schedule_repeat_method == "keep"){
+                    toSave.schedule_repeat_days = 127;
+                }else{
+                    let days = "";
+                    for(let i = 0; i < 7; i++){
+                        days += this.config.schedule_repeat_days[i];
+                    }
+                    toSave.schedule_repeat_days = parseInt(days,2);
+                }
+
+                this.$emit("save", {
+                    name: 'schedule',
+                    input: toSave,
+                    method: this.config.mode == 'add' ? 'post' : 'put',
+                    id: this.config.id,
+                });
+            }
         },
     },
     directives: {
@@ -312,12 +415,7 @@ export default {
 </script>
 
 <style>
-.week-selector {
-    position: absolute;
-    bottom: -0.15em;
-    left: 15em;
-}
-.week-selector.disabled::before {
+dialog.form .disabled::before {
     content: "";
     width: 100%;
     height: 100%;
@@ -326,7 +424,12 @@ export default {
     top: 0px;
     left: 0px;
     z-index: 12;
-    background-color: rgba(255, 255, 255, 0.589);
+    background-color: rgba(255, 255, 255, 0.205);
+}
+.week-selector {
+    position: absolute;
+    bottom: -0.15em;
+    left: 15em;
 }
 .week-selector .week-button {
     display: inline-block;
