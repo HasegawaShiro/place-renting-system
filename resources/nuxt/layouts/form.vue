@@ -9,11 +9,12 @@
         <Schedule
             v-if="formMode == 'schedule'"
             :form-data="formData"
-            :ref="'form-modal'"
+            ref="form-modal"
             @save="onModalSave($event)"
         ></Schedule>
         <Universal
             v-else
+            ref="form-modal"
         ></Universal>
 
     </div>
@@ -44,13 +45,12 @@ export default {
     computed: {
     },
     methods: {
-        async openModal(defaultData = {}) {
-            console.log(window.globalLoading);
+        async openModal(mode = 'add', defaultData = {}) {
             window.globalLoading.loading();
             this.dataChanged = false;
-            await this.$refs['form-modal'].add(defaultData);
+            await this.$refs['form-modal'][mode](defaultData);
             window.globalLoading.unloading();
-            ts('dialog.new').modal({
+            ts('dialog.form').modal({
                 onDeny() {
                     return confirm(CONSTANTS.messages["cancel-confirmation"]);
                 },
@@ -58,11 +58,9 @@ export default {
                     return false;
                 },
             }).modal("show");
-            // this.toHideAdd();
         },
         closeModal() {
             ts('dialog.new').modal("hide");
-            // this.toShowAdd();
         },
         toShowAdd() {
             this.showAddMutation = true;
@@ -74,10 +72,12 @@ export default {
             confirm(CONSTANTS.messages["cancel-confirmation"]);
         },
         async onModalSave(event) {
-            API.sendRequest(`/api/post/${event.name}`, 'post', event.input, {onlyData: true}).then(async response => {
+            let URL = `/api/data/${event.name}`
+            if(event.method == 'edit') URL + `/${event.id}`
+            API.sendRequest(URL, event.method, event.input, {onlyData: true}).then(async response => {
                 this.$parent.showSnackbar("success", response.messages);
                 await window.mainLayout.$parent.$refs['content'].getListDatas();
-                this.closeModal();
+                // this.closeModal();
             }).catch(e => {
                 try {
                     this.$parent.showSnackbar("error", e.response.data.messages);
