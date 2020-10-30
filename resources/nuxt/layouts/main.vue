@@ -16,7 +16,7 @@
 
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
-        <div class="squeezable pusher" id="sidebar-pusher">
+        <div class="squeezable pusher" id="sidebar-pusher" @scroll="windowScroll($event)">
             <Form
                 v-if="isLogin"
                 :page="page"
@@ -111,7 +111,7 @@
                     </dialog>
                 </div>
             </header>
-            <slot @hook:created="created" name="content" ref="content"></slot>
+            <slot @hook:mounted="mounted" name="content" ref="content"></slot>
             <!-- <slot name="loading"></slot> -->
         </div>
         <div class="ts bottom left snackbar">
@@ -170,6 +170,8 @@ export default {
 
     },
     async mounted() {
+        const that = this;
+
         window.mainLayout = this;
         window.globalLoading = {
             $el: document.querySelector("#global-loading"),
@@ -182,7 +184,8 @@ export default {
                 if(el.classList.contains("active")) el.classList.remove("active");
             },
         };
-        API.sendRequest("/api/user","get",null,{doNotRelogin: true}).then(response => {
+        window.globalLoading.loading();
+        API.sendRequest("/api/auth","get",null,{doNotRelogin: true}).then(response => {
             this.user = response.data.user;
             this.$store.commit("userStore/set", this.user);
         }).catch(e => {
@@ -199,6 +202,7 @@ export default {
             }
         }
         window.globalSelects = selects;
+        // window.globalLoading.unloading();
     },
     computed: {
         isLogin() {
@@ -285,6 +289,21 @@ export default {
         auth(user_id) {
             return this.user.id === 1 || this.user.id === user_id;
         },
+        contentLoaded() {
+            window.globalLoading.unloading();
+        },
+        windowScroll(event) {
+            const el = event.target;
+            const that = this;
+            const header = document.querySelector("header .menu");
+            const headerFixed = document.querySelector("header .menu.fix-top");
+
+            if(el.scrollTop > header.clientHeight && headerFixed == undefined){
+                if(!header.classList.contains('fix-top')) header.classList.add('fix-top');
+            }else if(el.scrollTop < header.clientHeight && headerFixed != undefined){
+                if(header.classList.contains('fix-top')) header.classList.remove('fix-top');
+            }
+        }
     },
     props: {
         'page': {
@@ -317,6 +336,13 @@ export default {
     }
     #global-loading {
         position: fixed;
+    }
+    header .menu.fix-top {
+        position: fixed;
+        width: 100%;
+        background: white !important;
+        z-index: 5;
+        box-shadow: -3px -4px 14px black !important;
     }
 
     /* sidebar */
