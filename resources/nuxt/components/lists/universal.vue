@@ -27,10 +27,12 @@
                         ><i class="eye icon"></i></button>
                         <button
                             class="ts info button"
+                            :class="{disabled:data.editable === false}"
                             @click="editData(data)"
                         ><i class="write icon"></i></button>
                         <button
                             class="ts negative button"
+                            :class="{disabled: data.deletable === false}"
                             @click="deleteData(data[dataKey])"
                         ><i class="trash icon"></i></button>
                     </div>
@@ -38,7 +40,6 @@
                 <td
                     v-for="field in pageData.fields()"
                     :key="'column-'+field.Name"
-
                 >
                     <template
                         v-if="field.Type == 'boolean'"
