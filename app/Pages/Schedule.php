@@ -115,12 +115,12 @@ class Schedule {
         ];
     }
 
-    public static function getData($filters, $orders, $id = null) {
+    public static function getData($request, $id = null) {
         $query = new _MODEL();
         $models = [];
         $collect = collect([]);
-        $datas = [];
-        $orders = empty($orders) ? ['schedule_date', 'schedule_from'] : $orders;
+        $filters = isset($request->filters) ? $request->filters : [];
+        $orders = isset($request->orders) ? $request->orders : ['schedule_date', 'schedule_from'];
 
         if(is_null($id)) {
             if(isset($filters["schedule_date_from"])) {
@@ -159,14 +159,24 @@ class Schedule {
             $schedule["util_id"] = $util["util_id"];
             $schedule["place_name"] = $place["place_name"];
             $schedule["place_disabled"] = $place["place_disabled"];
-            $schedule["editable"] = strtotime($schedule["schedule_date"]) > $today;
-            $schedule["deletable"] = strtotime($schedule["schedule_date"]) > $today;
+            $schedule["editable"] = strtotime($schedule["schedule_date"]) >= $today;
+            $schedule["deletable"] = strtotime($schedule["schedule_date"]) >= $today;
+            $schedule["showOnList"] = true;
             $collect->add($schedule);
         }
 
         if(is_null($id) && isset($filters["util_id"])) {
             dd($collect->where('util_id', $filters["util_id"])->all());
         }
+
+        /* $collect->where('schedule_repeat',true)->each(function($s) use ($collect) {
+            $date = Carbon::createFromFormat('Y-m-d', $s['schedule_date']);
+            $weekdays = _UTIL::weekdayChart($s['schedule_repeat_day']);
+            $weekMap = [6,0,1,2,3,4,5];
+            dd($weekMap[$date->dayOfWeek]);
+        }); */
+
+        // dd($collect);
 
         return $collect->toArray();
     }
@@ -175,8 +185,8 @@ class Schedule {
         $today = Carbon::yesterday()->hour(23)->minute(59)->toDateTimeString();
         array_push($rules["schedule_to"], "after:{$data['schedule_from']}");
         array_push($rules["schedule_date"], "after:{$today}");
-        $messages["schedule_to.after"] = Schedule::fields()['attributes']['schedule_to']." 必須要晚於 ".Schedule::fields()['attributes']['schedule_from'];
-        $messages["schedule_date.after"] = Schedule::fields()['attributes']['schedule_date']." 必須要晚於今天日期";
+        $messages["schedule_to.after"] = self::fields()['attributes']['schedule_to']." 必須要晚於 ".self::fields()['attributes']['schedule_from'];
+        $messages["schedule_date.after"] = self::fields()['attributes']['schedule_date']." 必須要晚於今天日期";
     }
 
     public static function afterValidation(Array &$data, Array &$result, String $status) {
@@ -191,7 +201,7 @@ class Schedule {
             if($originalDate < $today){
                 array_push(
                     $result['messages'],
-                    Schedule::messages()['schedule-data-expired']
+                    self::messages()['schedule-data-expired']
                 );
                 $pass = false;
             }
@@ -200,7 +210,7 @@ class Schedule {
         if(!$validateFromTo['available']) {
             array_push(
                 $result['messages'],
-                DataUtil::replaceKeysInMessage(Schedule::messages()['from-to-unavailable'], [
+                DataUtil::replaceKeysInMessage(self::messages()['from-to-unavailable'], [
                     ":user" => $validateFromTo['data']['name'],
                     ":title" => $validateFromTo['data']['schedule_title']
                 ])
@@ -213,7 +223,7 @@ class Schedule {
         if(is_null($place) || $place->place_disabled) {
             array_push(
                 $result['messages'],
-                Schedule::messages()['place-is-disabled']
+                self::messages()['place-is-disabled']
             );
             $pass = false;
         }
@@ -221,7 +231,11 @@ class Schedule {
         return $pass;
     }
 
-    public static function beforeDelete(&$data, &$result) {
+    public static function afterSave(Array &$data, Array &$result, String $status) {
+
+    }
+
+    public static function beforeDelete(Array &$data, Array &$result) {
         $pass = true;
 
         $today = strtotime("today");

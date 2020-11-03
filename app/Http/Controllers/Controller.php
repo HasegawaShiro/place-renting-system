@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Utils\UserUtil;
 use App\Utils\PageUtil;
 use App\Utils\SessionUtil;
+use App\Utils\ScheduleUtil;
 
 class Controller extends BaseController
 {
@@ -27,7 +28,9 @@ class Controller extends BaseController
             }
         }
         dd($result); */
-        dd(\App\Models\User::find(1));
+        // dd(\App\Models\User::find(1));
+        dump(ScheduleUtil::weekdayChart());
+        dd(ScheduleUtil::getDayRepeat(1));
     }
 
     public static function getReferenceSelect(Request $request, $table) {
@@ -68,7 +71,7 @@ class Controller extends BaseController
         if(class_exists($class)){
             $page = new $class();
             if(method_exists($page, 'getData')){
-                $result["datas"] = $page::getData($filters, $orders, $id);
+                $result["datas"] = $page::getData($request, $id);
             }
         }else{
             $class = "App\\Models\\".ucfirst($table);
@@ -95,6 +98,8 @@ class Controller extends BaseController
         DB::beginTransaction();
         $class = "App\\Models\\".ucfirst($table);
         $model = new $class();
+        $class = "App\\Pages\\".ucfirst($table);
+        $page = new $class();
 
         $data = $request->all();
         $result = [
@@ -108,6 +113,9 @@ class Controller extends BaseController
             $data["created_by"] = $request->user()->user_id;
             $data["updated_by"] = $request->user()->user_id;
             $created = $model::create($data);
+            if(method_exists($page,'afterSave')){
+                $page::afterSave($data, $result, 'add');
+            }
             array_push($result['messages'], 'save-success');
         }else{
             $status = 422;
@@ -126,6 +134,8 @@ class Controller extends BaseController
         DB::beginTransaction();
         $class = "App\\Models\\".ucfirst($table);
         $model = new $class();
+        $class = "App\\Pages\\".ucfirst($table);
+        $page = new $class();
         $origin = $model::find($id);
         $result = [
             'datas' => [],
@@ -143,12 +153,14 @@ class Controller extends BaseController
             $validationPass = PageUtil::validateForSave($table, $data, 'edit', $result);
 
             if($validationPass) {
-                unset($data["schedule_id"]);
-                $data["updated_by"] = $request->user()->user_id;
-                foreach($data as $key => $value){
-                    if(!$model->isEditable($key)) unset($data[$key]);
+                $toUpdate = $data;
+                unset($toUpdate["schedule_id"]);
+                $toUpdate["updated_by"] = $request->user()->user_id;
+                foreach($toUpdate as $key => $value){
+                    if(!$model->isEditable($key)) unset($toUpdate[$key]);
                 }
-                $origin->update($data);
+                $origin->update($toUpdate);
+                // $page::afterSave()
                 array_push($result['messages'], 'save-success');
             }else{
                 $status = 422;
