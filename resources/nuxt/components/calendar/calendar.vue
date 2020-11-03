@@ -590,8 +590,8 @@ export default {
     background-color: rgba(217, 41, 223, 0.534);
 }
 .nchu.calendar div.main .month.mode .day.cell .schedules .other, .nchu.calendar div.main .week.mode .day.cell .schedules .other {
-    border-color: rgb(22, 129, 22) !important;
-    background-color:  rgba(56, 216, 56, 0.527);
+    border-color: rgb(45, 171, 202) !important;
+    background-color: rgba(61, 216, 255, 0.589);
 }
 
 /* week mode */

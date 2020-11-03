@@ -48,7 +48,7 @@
                             <div v-if="isLogin" class="two wide column form-items">
                                 <div
                                     class="item"
-                                    @click="editClick(sd.schedule_id)"
+                                    @click="editClick(sd)"
                                 >
                                     <i class="write icon"></i>
                                     <span class="item-text tablet or large device only text">編輯</span>
@@ -264,8 +264,9 @@ export default {
                 this.closeModal();
             }
         },
-        async editClick(id) {
-
+        async editClick(data) {
+            this.$parent.$refs["form"].openModal('edit', data);
+            this.closeModal();
         },
         async deleteClick(id) {
             await API.sendRequest(`/api/data/schedule/${id}`,'delete').then(response => {
@@ -474,7 +475,7 @@ export default {
     background-color: rgb(217, 41, 223);
 }
 .schedule-events .upcoming-events .container .events-wrapper .custom-accordion.other::before {
-    background-color: rgb(56, 216, 56);
+    background-color: rgb(61, 216, 255);
 }
 .schedule-events .upcoming-events .container .events-wrapper .custom-accordion.active {
     background-color:  rgb(198, 255, 233);
