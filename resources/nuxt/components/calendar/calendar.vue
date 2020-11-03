@@ -158,10 +158,10 @@
                                 }"
                                 :key="dateObj.dateText"
                                 :id="dateObj.dateText"
-                                @click="dayCellClick(dateObj.dateText)"
                             >
                                 <h2
                                     :class="{holiday: dateObj.holiday}"
+                                    @click="dayCellClick(dateObj.dateText)"
                                 >{{dateObj.date.getDate()}}</h2>
                                 <div
                                     class="schedules"
@@ -432,7 +432,6 @@ export default {
                 this.schedules = temp;
                 if(!DataUtil.isEmpty(this.$refs["list"])) await this.$refs["list"].getListDatas();
                 return temp;
-                // this.$refs["list"].listData = temp;
             }).catch(e => {});
         },
         countDayCellSchedule(schedules) {
@@ -443,7 +442,7 @@ export default {
             }
         },
         dayCellClick(dateText) {
-            if(this.schedulesByDay()[dateText].length <= 0 && this.$parent.isLogin) {
+            if(this.$parent.isLogin) {
                 this.$parent.$refs["form"].openModal('add',{schedule_date: dateText});
             }
         },
@@ -715,7 +714,7 @@ export default {
         background-color: rgba(255, 255, 255, 0.322);
         cursor: pointer;
     }
-    .nchu.calendar div.main .day.cell.clickable:not(.different):hover{
+    .nchu.calendar div.main .day.cell:not(.different) h2:hover{
         cursor: pointer;
     }
     .nchu.calendar div.main .month.mode .day.cell .schedules div:hover::after, .nchu.calendar div.main .week.mode .day.cell .schedules div:hover::after {
