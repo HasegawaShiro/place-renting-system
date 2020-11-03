@@ -23,9 +23,11 @@ class Schedule extends Model
         'schedule_url',
         'schedule_repeat',
         'schedule_repeat_days',
+        'schedule_end',
         'schedule_end_at',
         'schedule_end_times',
         'schedule_registrant',
+        'repeat_id',
         'created_by',
         'updated_by',
     ];
@@ -40,6 +42,7 @@ class Schedule extends Model
         'schedule_repeat_days' => 'integer',
         'schedule_end_at' => 'datetime:Y-m-d',
         'schedule_end_times' => 'integer',
+        'repeat_id' => 'integer',
         'created_by' => 'integer',
         'updated_by' => 'integer'
     ];
@@ -57,9 +60,11 @@ class Schedule extends Model
         'schedule_url',
         'schedule_repeat',
         'schedule_repeat_days',
+        'schedule_end',
         'schedule_end_at',
         'schedule_end_times',
         'schedule_registrant',
+        'repeat_id',
         'updated_by',
     ];
 
