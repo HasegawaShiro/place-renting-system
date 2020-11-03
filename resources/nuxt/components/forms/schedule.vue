@@ -108,11 +108,13 @@
                     <div class="field">
                         <label>{{CONSTANTS.FORM_TEXT.schedule_end}}</label>
                         <div class="ts checkboxes" :class="{disabled: config.mode == 'view'}">
-                            <div class="ts checkbox">
+                            <div class="ts radio checkbox">
                                 <input
-                                    type="checkbox"
+                                    type="radio"
                                     id="at"
-                                    v-model="config.schedule_end_at"
+                                    name="schedule_end"
+                                    value="at"
+                                    v-model="input.schedule_end"
                                 >
                                 <label for="at">{{CONSTANTS.FORM_TEXT.at}}</label>
                                 <input
@@ -121,11 +123,13 @@
                                     v-model="input.schedule_end_at"
                                 >
                             </div>
-                            <div class="ts checkbox">
+                            <div class="ts radio checkbox">
                                 <input
-                                    type="checkbox"
+                                    type="radio"
                                     id="times"
-                                    v-model="config.schedule_end_times"
+                                    name="schedule_end"
+                                    value="times"
+                                    v-model="input.schedule_end"
                                 >
                                 <label for="times">{{CONSTANTS.FORM_TEXT.repeat}}</label>
                                 <input
@@ -280,6 +284,7 @@ export default {
                     schedule_to: '00:00',
                     schedule_repeat: false,
                     schedule_repeat_days: 127,
+                    schedule_end: 'at',
                     schedule_end_at: null,
                     schedule_end_times: 0,
                     place_id: null,
@@ -296,8 +301,6 @@ export default {
                     fullday: false,
                     schedule_repeat_method: 'keep',
                     schedule_repeat_days: ['0', '0', '0', '0', '0', '0', '0'],
-                    schedule_end_at: true,
-                    schedule_end_times: false,
                 };
             }
         };
