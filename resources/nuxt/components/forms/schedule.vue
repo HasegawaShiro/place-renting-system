@@ -6,7 +6,7 @@
         <div class="content">
             <form class="ts horizontal form">
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.schedule_title}}</label>
+                    <label>{{CONSTANTS.FORM_TEXT.schedule_title}}<sup class="required">*</sup></label>
                     <input
                         type="text"
                         v-model="input.schedule_title"
@@ -14,7 +14,7 @@
                     >
                 </div>
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.schedule_date}}</label>
+                    <label>{{CONSTANTS.FORM_TEXT.schedule_date}}<sup class="required">*</sup></label>
                     <input
                         type="date"
                         v-model.lazy="input.schedule_date"
@@ -142,7 +142,10 @@
                     </div>
                 </template>
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.place_id}}</label>
+                    <label>
+                        {{CONSTANTS.FORM_TEXT.place_id}}
+                        <sup class="required">*</sup>
+                    </label>
                     <select
                         class="ts basic dropdown"
                         v-model="input.place_id"
@@ -156,7 +159,10 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.schedule_registrant}}</label>
+                    <label>
+                        {{CONSTANTS.FORM_TEXT.schedule_registrant}}
+                        <sup class="required">*</sup>
+                    </label>
                     <input
                         type="text"
                         v-model="input.schedule_registrant"
@@ -164,7 +170,10 @@
                     >
                 </div>
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.schedule_type}}</label>
+                    <label>
+                        {{CONSTANTS.FORM_TEXT.schedule_type}}
+                        <sup class="required">*</sup>
+                    </label>
                     <select
                         class="ts basic dropdown"
                         v-model="input.schedule_type"
@@ -213,7 +222,10 @@
                     <input class="disabled" type="text" disabled v-model="user.email">
                 </div>
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.schedule_contact}}</label>
+                    <label>
+                        {{CONSTANTS.FORM_TEXT.schedule_contact}}
+                        <sup class="required">*</sup>
+                    </label>
                     <input
                         type="text"
                         v-model="input.schedule_contact"
@@ -266,7 +278,6 @@ export default {
                 id: 0,
                 saving: false,
             },
-            // form: new Form('schedule'),
             selects: {
                 places: {},
                 users: {},
@@ -435,6 +446,11 @@ dialog.form .disabled::before {
     left: 0px;
     z-index: 12;
     background-color: rgba(255, 255, 255, 0.205);
+}
+label .required {
+    top: -0.2em;
+    font-size: 1.7em;
+    color: red;
 }
 .week-selector {
     position: absolute;
