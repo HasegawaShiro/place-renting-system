@@ -207,6 +207,7 @@ class Field {
         falseStyle: {},
         listOrder: 0,       // 列表欄位排序
         formOrder: 0,       // 表單欄位排序
+        required: true,     // 是否必填
     };
     static allowType = ['text', 'textarea', 'number', 'boolean', 'date', 'time', 'datetime', 'select', 'custom'];
 
