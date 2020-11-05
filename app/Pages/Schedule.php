@@ -70,20 +70,24 @@ class Schedule {
                     'integer',
                     'between:0,127'
                 ],
+                'schedule_end' => [
+                    'string',
+                    Rule::in(['at','times'])
+                ],
                 'schedule_end_at' => [
-                    'nullable',
                     'date_format:Y-m-d',
-                    'after:today'
                 ],
                 'schedule_end_times' => [
-                    'nullable',
                     'integer',
-                    'min:0'
+                    'max:40'
                 ],
                 'schedule_registrant' => [
                     'required',
                     'string',
                     'max:200'
+                ],
+                'repeat_id' => [
+                    'integer'
                 ],
             ],
             'attributes' => [
@@ -112,6 +116,7 @@ class Schedule {
             "from-to-unavailable" => '此時段已被 :user 預約',
             "place-is-disabled" => '此場地不存在或已被停用',
             "schedule-data-expired" => '不可修改已過期資料',
+            "date-unavailable" => ':date 同一時段已被 :user 預約'
         ];
     }
 
@@ -145,6 +150,7 @@ class Schedule {
         }
 
         $today = Carbon::today()->timestamp;
+        $repeated = [];
         foreach ($models as $model) {
             $schedule = $model->toArray();
             $user_MODEL = $model->user()->first();
@@ -161,7 +167,14 @@ class Schedule {
             $schedule["place_disabled"] = $place["place_disabled"];
             $schedule["editable"] = strtotime($schedule["schedule_date"]) >= $today;
             $schedule["deletable"] = strtotime($schedule["schedule_date"]) >= $today;
-            $schedule["showOnList"] = true;
+            if(!is_null($schedule["repeat_id"])) {
+                if(array_search($schedule["repeat_id"], $repeated) === false) {
+                    array_push($repeated, $schedule["repeat_id"]);
+                } else {
+                    $schedule["showOnList"] = false;
+
+                }
+            }
             $collect->add($schedule);
         }
 
@@ -182,11 +195,33 @@ class Schedule {
     }
 
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
-        $today = Carbon::yesterday()->hour(23)->minute(59)->toDateTimeString();
+        $fields = self::fields();
+        $today = Carbon::yesterday()->endOfDay()->toDateTimeString();
         array_push($rules["schedule_to"], "after:{$data['schedule_from']}");
         array_push($rules["schedule_date"], "after:{$today}");
-        $messages["schedule_to.after"] = self::fields()['attributes']['schedule_to']." 必須要晚於 ".self::fields()['attributes']['schedule_from'];
-        $messages["schedule_date.after"] = self::fields()['attributes']['schedule_date']." 必須要晚於今天日期";
+
+        if($data['schedule_repeat']){
+            array_push($rules["schedule_end"], "required");
+            if(array_search($data['schedule_end'], ['at','times']) !== false) {
+                $type = $data['schedule_end'];
+                $atLimit = Carbon::today()->addMonthsNoOverflow(6)->toDateString();
+                array_push($rules["schedule_end_$type"], "required");
+                if($type == 'at') {
+                    array_push($rules["schedule_end_at"], "after:{$data['schedule_date']}");
+                    array_push($rules["schedule_end_at"], "before:{$atLimit}");
+                    array_push($rules["schedule_end_times"], "nullable");
+                } else {
+                    array_push($rules["schedule_end_at"], "nullable");
+                    array_push($rules["schedule_end_times"], 'min:1');
+                }
+            }
+        } else {
+            array_push($rules["schedule_end_at"], "nullable");
+            array_push($rules["schedule_end_times"], "nullable");
+        }
+
+        $messages["schedule_to.after"] = ":attribute 必須要晚於 ".$fields['attributes']['schedule_from'];
+        $messages["schedule_date.after"] = ":attribute 必須要晚於今天日期";
     }
 
     public static function afterValidation(Array &$data, Array &$result, String $status) {
@@ -232,7 +267,35 @@ class Schedule {
     }
 
     public static function afterSave(Array &$data, Array &$result, String $status) {
+        $success = true;
+        if($data['schedule_repeat']) {
+            if($status == 'add') {
+                $repeatId = _UTIL::computeRepeatId();
+                $tempToCreated = $data;
+                $dates = _UTIL::computeRepeatDate($data);
+                foreach($dates as $d) {
+                    $tempToCreated["schedule_date"] = $d;
+                    $tempToCreated["repeat_id"] = $repeatId;
 
+                    $created = _MODEL::create($tempToCreated);
+                    if($created->isFailed()) {
+                        $err = $created->getError();
+                        array_push(
+                            $result['messages'],
+                            DataUtil::replaceKeysInMessage(self::messages()['date-unavailable'], [
+                                ":date" => $err['data']['schedule_date'],
+                                ":user" => $err['data']['name']
+                            ])
+                        );
+                        $success = false;
+                    }
+                }
+                $origin = _MODEL::find($data["schedule_id"]);
+                $origin->repeat_id = $repeatId;
+                $origin->save();
+            }
+        }
+        return $success;
     }
 
     public static function beforeDelete(Array &$data, Array &$result) {
