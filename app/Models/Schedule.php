@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utils\ScheduleUtil;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Schedule extends Model
@@ -43,6 +44,8 @@ class Schedule extends Model
         'schedule_end_at' => 'datetime:Y-m-d',
         'schedule_end_times' => 'integer',
         'repeat_id' => 'integer',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
         'created_by' => 'integer',
         'updated_by' => 'integer'
     ];
@@ -74,5 +77,19 @@ class Schedule extends Model
 
     public function place(){
         return $this->belongsTo('App\Models\Place', 'place_id', 'place_id');
+    }
+
+    public static function boot(){
+        parent::boot();
+
+        self::saving(function(&$schedule) {
+            $validator = ScheduleUtil::validateFromTo($schedule->toArray());
+            if(!$validator["available"]){
+                $schedule->fails();
+                $schedule->setError($validator);
+            }
+
+            return $validator["available"];
+        });
     }
 }
