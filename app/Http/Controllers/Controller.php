@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Utils\UserUtil;
 use App\Utils\PageUtil;
 use App\Utils\SessionUtil;
+use App\Utils\ValidateUtil;
 use App\Utils\ScheduleUtil;
 
 class Controller extends BaseController
@@ -100,29 +101,38 @@ class Controller extends BaseController
         $model = new $class();
         $class = "App\\Pages\\".ucfirst($table);
         $page = new $class();
+        $permissionPass = method_exists($page, 'permission') ? $page::permission('add') : true;
 
-        $data = $request->all();
+        $status = 200;
         $result = [
             'datas' => [],
             'messages' => []
         ];
-        $validationPass = PageUtil::validateForSave($table, $data, 'add', $result);
-        $status = 200;
+        if($permissionPass){
+            $data = $request->all();
+            $validationPass = ValidateUtil::validateForSave($table, $data, 'add', $result);
 
-        if($validationPass) {
-            $data["created_by"] = $request->user()->user_id;
-            $data["updated_by"] = $request->user()->user_id;
-            $created = $model::create($data);
-            if(method_exists($page,'afterSave')){
-                $page::afterSave($data, $result, 'add');
+            if($validationPass) {
+                $data["created_by"] = $request->user()->user_id;
+                $data["updated_by"] = $request->user()->user_id;
+                $created = $model::create($data);
+                $data[$created->getKeyName()] = $created->getKey();
+
+                if(method_exists($page,'afterSave')){
+                    if(!$page::afterSave($data, $result, 'add')) $status = 422;
+                }
+            }else{
+                $status = 422;
             }
-            array_push($result['messages'], 'save-success');
-        }else{
-            $status = 422;
+        } else {
+            $status = 403;
+            array_push($result['messages'], 'permission-dinied');
         }
+
         // $status = 422;
 
         if($status === 200) {
+            array_push($result['messages'], 'save-success');
             DB::commit();
         }else{
             DB::rollBack();
@@ -150,23 +160,24 @@ class Controller extends BaseController
             $data = $request->all();
             $data["{$table}_id"] = $id;
 
-            $validationPass = PageUtil::validateForSave($table, $data, 'edit', $result);
+            $validationPass = ValidateUtil::validateForSave($table, $data, 'edit', $result);
 
             if($validationPass) {
                 $toUpdate = $data;
-                unset($toUpdate["schedule_id"]);
                 $toUpdate["updated_by"] = $request->user()->user_id;
                 foreach($toUpdate as $key => $value){
                     if(!$model->isEditable($key)) unset($toUpdate[$key]);
                 }
                 $origin->update($toUpdate);
-                // $page::afterSave()
+                if(method_exists($page,'afterSave')){
+                    $page::afterSave($data, $result, 'edit');
+                }
                 array_push($result['messages'], 'save-success');
             }else{
                 $status = 422;
             }
         }
-        // $status = 422;
+        $status = 422;
 
         if($status === 200) {
             DB::commit();
