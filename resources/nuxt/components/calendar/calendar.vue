@@ -254,7 +254,6 @@
 </template>
 
 <script>
-// import calendarMonthMode from "./items/calendarMonthMode.vue";
 import CONSTANTS from '../../constants.js';
 import Calendar from '../../classes/calendar.js';
 import MonthSelector from './items/month-selector.vue';
@@ -341,20 +340,24 @@ export default {
                     return toShow;
                 });
             }
+
+            const temp = result.shift();
+            result.push(temp);
             return result;
         },
         schedulesByDay() {
             let result = {};
-            for(let week of this.calendar.Dates) {
+            let that = this;
+            for(let week of that.calendar.Dates) {
                 for(let day of week) {
                     let dateText = DataUtil.formatDateInput(day.date);
-                    result[dateText] = this.schedules.filter(x => {
+                    result[dateText] = that.schedules.filter(x => {
                         let toShow = true;
                         if(x.schedule_date != dateText) toShow = false;
-                        for(let f in this.filters) {
-                            if(f != 'type' && !DataUtil.isEmpty(this.filters[f]) && x[`${f}_id`] != this.filters[f]) {
+                        for(let f in that.filters) {
+                            if(f != 'type' && !DataUtil.isEmpty(that.filters[f]) && x[`${f}_id`] != that.filters[f]) {
                                 toShow = false;
-                            }else if(f == 'type' && !DataUtil.isEmpty(this.filters[f]) && x.schedule_type != this.filters[f]){
+                            }else if(f == 'type' && !DataUtil.isEmpty(that.filters[f]) && x.schedule_type != that.filters[f]){
                                 toShow = false;
                             }
                         }
@@ -548,6 +551,8 @@ export default {
 }
 .nchu.calendar div.main .month.mode .day.cell h2 {
     margin-bottom: .02em;
+    padding-left: .2em;
+    border-radius: 3px;
 }
 .nchu.calendar div.main .month.mode .day.cell h2.holiday {
     color: red;
@@ -716,6 +721,7 @@ export default {
     }
     .nchu.calendar div.main .day.cell:not(.different) h2:hover{
         cursor: pointer;
+        background-color: rgba(85, 255, 161, 0.452)
     }
     .nchu.calendar div.main .month.mode .day.cell .schedules div:hover::after, .nchu.calendar div.main .week.mode .day.cell .schedules div:hover::after {
         content: "";
@@ -737,6 +743,9 @@ export default {
 .nchu.calendar div.main .month i.button:active, .nchu.calendar div.main .date i.button:active {
     background-color: rgba(255, 255, 255, 0.596);
     cursor: pointer;
+}
+.nchu.calendar div.main .day.cell:not(.different) h2:active{
+    background-color: rgba(72, 216, 137, 0.658)
 }
 .nchu.calendar div.main .month.mode .day.cell .schedules div:active::after, .nchu.calendar div.main .week.mode .day.cell .schedules div:active::after {
     content: "";
