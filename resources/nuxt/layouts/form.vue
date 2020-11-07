@@ -72,20 +72,40 @@ export default {
         },
         async onModalSave(event) {
             let URL = `/api/data/${event.name}`;
+            let pass = true;
+            let before = {
+                pass: true,
+                data: {},
+                message: null,
+            };
             if(event.method == 'put') URL += `/${event.id}`;
-            this.$refs["form-modal"].config.saving = true;
-            await API.sendRequest(URL, event.method, event.input, {onlyData: true}).then(async response => {
-                this.$parent.showSnackbar("success", response.messages);
-                await window.mainLayout.$parent.$refs['content'].getListDatas();
-                this.closeModal();
-            }).catch(e => {
-                try {
-                    this.$parent.showSnackbar("error", e.response.data.messages);
-                } catch (error) {
-                    let msg = DataUtil.getMessage('unknown-error')+DataUtil.getMessage('contact-maintenance');
-                    this.$parent.showSnackbar("error", msg);
-                }
-            });
+
+            if(typeof window.$page.$refs.content.beforeSave == "function"){
+                before = await window.$page.$refs.content.beforeSave(event.input, method);
+                if(before.pass === false) {
+                    pass = false;
+                    window.mainLayout.showSnackbar('error', before.message);
+                } else {
+                    event.input.options = before.data;
+                };
+            }
+
+            if(pass){
+                this.$refs["form-modal"].config.saving = true;
+                await API.sendRequest(URL, event.method, event.input, {onlyData: true}).then(async response => {
+                    this.$parent.showSnackbar("success", response.messages);
+                    await window.$page.$refs['content'].getListDatas();
+                    this.closeModal();
+                }).catch(e => {
+                    try {
+                        this.$parent.showSnackbar("error", e.response.data.messages);
+                    } catch (error) {
+                        let msg = DataUtil.getMessage('unknown-error')+DataUtil.getMessage('contact-maintenance');
+                        this.$parent.showSnackbar("error", msg);
+                    }
+                });
+            }
+
             this.$refs["form-modal"].config.saving = false;
         },
     },
