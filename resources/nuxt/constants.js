@@ -1,5 +1,3 @@
-import API from './api.js';
-
 export default {
     main:{
         TEXT: {
@@ -63,12 +61,18 @@ export default {
                 other: '其他'
             },
         },
+        messages: {
+            'repeat-edit': '編輯週期性資料',
+            'repeat-delete': '刪除週期性資料',
+            'repeat-all': '包含本項以後的全部活動',
+            'repeat-one': '僅限這項活動'
+        },
     },
     calendar:{
         MODE_BUTTON: {
-            'month': '月表',
-            'week': '週表',
-            'list': '列表'
+            month: '月表',
+            week: '週表',
+            list: '列表'
         },
         HEADER_TEXT: {
             title: '場地使用查詢',
@@ -76,7 +80,7 @@ export default {
             place: '場地'
         },
         DAY_TEXT: ['一','二','三','四','五','六','日'],
-        selects:{
+        selects: {
             TEXT: {
                 type: '借用型態',
                 place: '場地',
@@ -96,6 +100,7 @@ export default {
         'contact-maintenance': '，請洽維護人員',
         'delete-success': '刪除成功',
         'delete-permission-denied': '您沒有權限刪除此資料',
+        'permission-denied': '您沒有權限進行此操作'
     },
     common: {
         TEXT: {
