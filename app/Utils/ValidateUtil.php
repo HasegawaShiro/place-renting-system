@@ -49,4 +49,21 @@ class ValidateUtil {
 
         return $str;
     }
+
+    public static function setRules(Array &$rules, ...$toSet) {
+        foreach ($toSet as $rule) {
+            if(array_search($rule, $rules) === false) {
+                array_push($rules, $rule);
+            }
+        }
+    }
+
+    public static function unsetRules(Array &$rules, ...$toUnset) {
+        foreach($toUnset as $rule) {
+            $unsetIndex = array_search($rule, $rules);
+            if($unsetIndex !== false) {
+                unset($rules[$unsetIndex]);
+            }
+        };
+    }
 }
