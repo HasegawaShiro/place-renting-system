@@ -67,7 +67,7 @@ class ScheduleUtil {
             $endDate = Carbon::createFromFormat("Y-m-d", $data["schedule_end_at"]);
             $count = $d->diffInDays($endDate);
         } else {
-            $count = $data["schedule_end_times"];
+            $count = $data["schedule_end_times"]-1;
         }
 
         while ($count > 0) {
