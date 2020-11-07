@@ -33,6 +33,7 @@ export default {
     },
     mounted() {
         // console.log(this);
+        window.$page = this;
     },
     components: {
         MainLayout,
