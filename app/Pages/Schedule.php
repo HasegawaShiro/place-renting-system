@@ -9,6 +9,7 @@ use App\Models\Place;
 use App\Models\Schedule as _MODEL;
 
 use App\Utils\DataUtil;
+use App\Utils\ValidationUtil;
 use App\Utils\ScheduleUtil as _UTIL;
 
 class Schedule {
@@ -87,6 +88,7 @@ class Schedule {
                     'max:200'
                 ],
                 'repeat_id' => [
+                    'nullable',
                     'integer'
                 ],
             ],
@@ -118,6 +120,12 @@ class Schedule {
             "schedule-data-expired" => '不可修改已過期資料',
             "date-unavailable" => ':date 同一時段已被 :user 預約'
         ];
+    }
+
+    public static function permission($status, $id = null) {
+        $pass = true;
+
+        return $pass;
     }
 
     public static function getData($request, $id = null) {
@@ -172,7 +180,6 @@ class Schedule {
                     array_push($repeated, $schedule["repeat_id"]);
                 } else {
                     $schedule["showOnList"] = false;
-
                 }
             }
             $collect->add($schedule);
@@ -181,15 +188,6 @@ class Schedule {
         if(is_null($id) && isset($filters["util_id"])) {
             dd($collect->where('util_id', $filters["util_id"])->all());
         }
-
-        /* $collect->where('schedule_repeat',true)->each(function($s) use ($collect) {
-            $date = Carbon::createFromFormat('Y-m-d', $s['schedule_date']);
-            $weekdays = _UTIL::weekdayChart($s['schedule_repeat_day']);
-            $weekMap = [6,0,1,2,3,4,5];
-            dd($weekMap[$date->dayOfWeek]);
-        }); */
-
-        // dd($collect);
 
         return $collect->toArray();
     }
@@ -226,14 +224,14 @@ class Schedule {
 
     public static function afterValidation(Array &$data, Array &$result, String $status) {
         $pass = true;
-        if($status == 'add'){
+        if($status == 'add') {
             $validateFromTo = _UTIL::validateFromTo($data);
-        }else {
+        } else {
             $validateFromTo = _UTIL::validateFromTo($data, $data['schedule_id']);
             $origin = _MODEL::find($data['schedule_id']);
             $originalDate = strtotime($origin->schedule_date);
             $today = Carbon::today()->timestamp;
-            if($originalDate < $today){
+            if($originalDate < $today) {
                 array_push(
                     $result['messages'],
                     self::messages()['schedule-data-expired']
@@ -266,18 +264,30 @@ class Schedule {
         return $pass;
     }
 
-    public static function afterSave(Array &$data, Array &$result, String $status) {
+    public static function afterSave(Array &$data, Array &$result, String $status, Array $old = []) {
         $success = true;
+
+        if(!empty($old)) {
+            $oldRepeatId = $old["repeat_id"];
+            if($old["schedule_repeat"] && !is_null($oldRepeatId)){
+                $today = Carbon::today()->toDateString();
+                _MODEL::where('repeat_id', $oldRepeatId)
+                ->where('schedule_id', '<>', $data["schedule_id"])
+                ->whereDate("schedule_date", ">=", $today)
+                ->delete();
+            }
+        }
+
+        $repeatId = null;
         if($data['schedule_repeat']) {
-            if($status == 'add') {
-                $repeatId = _UTIL::computeRepeatId();
-                $tempToCreated = $data;
+            $saveRepeat = function ($data, $repeatId) use (&$result, &$success) {
+                $tempToSave = $data;
                 $dates = _UTIL::computeRepeatDate($data);
                 foreach($dates as $d) {
-                    $tempToCreated["schedule_date"] = $d;
-                    $tempToCreated["repeat_id"] = $repeatId;
+                    $tempToSave["schedule_date"] = $d;
+                    $tempToSave["repeat_id"] = $repeatId;
 
-                    $created = _MODEL::create($tempToCreated);
+                    $created = _MODEL::create($tempToSave);
                     if($created->isFailed()) {
                         $err = $created->getError();
                         array_push(
@@ -290,11 +300,20 @@ class Schedule {
                         $success = false;
                     }
                 }
-                $origin = _MODEL::find($data["schedule_id"]);
-                $origin->repeat_id = $repeatId;
-                $origin->save();
+            };
+
+            if($status == 'add' || is_null($data["repeat_id"]) || $data["repeat_edit"] === "one") {
+                $repeatId = _UTIL::computeRepeatId();
+            } else {
+                $repeatId = $data["repeat_id"];
             }
+
+            $saveRepeat($data, $repeatId);
+            $origin = _MODEL::find($data["schedule_id"]);
+            $origin->repeat_id = $repeatId;
+            $origin->save();
         }
+
         return $success;
     }
 
