@@ -147,6 +147,7 @@ class Controller extends BaseController
         $class = "App\\Pages\\".ucfirst($table);
         $page = new $class();
         $origin = $model::find($id);
+
         $result = [
             'datas' => [],
             'messages' => []
@@ -157,29 +158,38 @@ class Controller extends BaseController
             array_push($result['messages'],'data-not-found');
             $status = 404;
         }else{
-            $data = $request->all();
-            $data["{$table}_id"] = $id;
+            $permissionPass = method_exists($page, 'permission') ? $page::permission('edit', $id) : true;
+            if($permissionPass){
+                $data = $request->all();
+                $data["{$table}_id"] = $id;
 
-            $validationPass = ValidateUtil::validateForSave($table, $data, 'edit', $result);
+                $validationPass = ValidateUtil::validateForSave($table, $data, 'edit', $result);
 
-            if($validationPass) {
-                $toUpdate = $data;
-                $toUpdate["updated_by"] = $request->user()->user_id;
-                foreach($toUpdate as $key => $value){
-                    if(!$model->isEditable($key)) unset($toUpdate[$key]);
+                if($validationPass) {
+                    $toUpdate = $data;
+                    $toUpdate["updated_by"] = $request->user()->user_id;
+                    foreach($toUpdate as $key => $value){
+                        if(!$model->isEditable($key)) unset($toUpdate[$key]);
+                    }
+                    $old = $origin->toArray();
+                    $origin->update($toUpdate);
+                    if(method_exists($page,'afterSave')){
+                        if(!$page::afterSave($data, $result, 'edit', $old)) $status = 422;
+                    }
+
+                }else{
+                    $status = 422;
                 }
-                $origin->update($toUpdate);
-                if(method_exists($page,'afterSave')){
-                    $page::afterSave($data, $result, 'edit');
-                }
-                array_push($result['messages'], 'save-success');
-            }else{
-                $status = 422;
+            } else {
+                $status = 403;
+                array_push($result['messages'], 'permission-dinied');
             }
+
         }
-        $status = 422;
+        // $status = 422;
 
         if($status === 200) {
+            array_push($result['messages'], 'save-success');
             DB::commit();
         }else{
             DB::rollBack();
