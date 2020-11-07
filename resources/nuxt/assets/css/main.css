@@ -44,3 +44,25 @@ body {
         font-size: 0.87em !important;
     }
 }
+
+/* modify ts checkbox, radio style */
+/* checkbox, toggle and radio checked */
+.ts.checkbox:not(.radio) input:checked+label:before, .ts.radio.checkbox input:checked+label:before, .ts.toggle.checkbox input:checked ~ .box:before, .ts.toggle.checkbox input:checked ~ label:before {
+    background-color: #70eec4 !important;
+}
+.ts.toggle.checkbox input:checked ~ .box:hover:before, .ts.toggle.checkbox input:checked ~ label:hover:before {
+    background-color: #4bdbab !important;
+}
+@media(hover: hover) and (pointer: fine) {
+    .ts.checkbox:not(.radio) input:checked+label:hover:before, .ts.radio.checkbox input:checked+label:hover:before {
+        background-color: #4bdbab !important;
+    }
+}
+/* checkbox and radio :not(checked) active */
+.ts.checkbox:not(.radio) label:active:before, .ts.radio.checkbox label:active:before {
+    background-color: #92fcd9 !important;
+}
+/* checkbox, toggle and radio checked active */
+.ts.checkbox:not(.radio) input:checked+label:active:before, .ts.radio.checkbox input:checked+label:active:before, .ts.toggle.checkbox input:checked ~ .box:active:before, .ts.toggle.checkbox input:checked ~ label:active:before {
+    background-color: #40b890 !important;
+}

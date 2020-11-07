@@ -6,7 +6,7 @@
         <div class="content">
             <form class="ts horizontal form">
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.schedule_title}}<sup class="required">*</sup></label>
+                    <label><sup class="required">*</sup>{{CONSTANTS.FORM_TEXT.schedule_title}}</label>
                     <input
                         type="text"
                         v-model="input.schedule_title"
@@ -14,7 +14,7 @@
                     >
                 </div>
                 <div class="field">
-                    <label>{{CONSTANTS.FORM_TEXT.schedule_date}}<sup class="required">*</sup></label>
+                    <label><sup class="required">*</sup>{{CONSTANTS.FORM_TEXT.schedule_date}}</label>
                     <input
                         type="date"
                         v-model.lazy="input.schedule_date"
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <template v-if="input.schedule_repeat">
-                        <div class="field">
+                    <div class="field">
                         <label>{{CONSTANTS.FORM_TEXT.schedule_repeat_method}}</label>
                         <div class="ts checkboxes">
                             <div class="ts radio checkbox">
@@ -141,10 +141,39 @@
                         </div>
                     </div>
                 </template>
+                <template
+                    v-if="config.mode === 'edit' && orginData.schedule_repeat && orginData.repeat_id != null"
+                >
+                    <div class="field">
+                        <label>{{CONSTANTS.messages['repeat-edit']}}</label>
+                        <div class="ts checkboxes">
+                            <div class="ts radio checkbox">
+                                <input
+                                    type="radio"
+                                    name="repeat-edit"
+                                    id="repeat-one"
+                                    value="one"
+                                    v-model="input.repeat_edit"
+                                >
+                                <label for="repeat-one">{{CONSTANTS.messages['repeat-one']}}</label>
+                            </div>
+                            <div class="ts radio checkbox">
+                                <input
+                                    type="radio"
+                                    name="repeat-edit"
+                                    id="repeat-all"
+                                    value="all"
+                                    v-model="input.repeat_edit"
+                                >
+                                <label for="repeat-all">{{CONSTANTS.messages['repeat-all']}}</label>
+                            </div>
+                        </div>
+                    </div>
+                </template>
                 <div class="field">
                     <label>
-                        {{CONSTANTS.FORM_TEXT.place_id}}
                         <sup class="required">*</sup>
+                        {{CONSTANTS.FORM_TEXT.place_id}}
                     </label>
                     <select
                         class="ts basic dropdown"
@@ -160,8 +189,8 @@
                 </div>
                 <div class="field">
                     <label>
-                        {{CONSTANTS.FORM_TEXT.schedule_registrant}}
                         <sup class="required">*</sup>
+                        {{CONSTANTS.FORM_TEXT.schedule_registrant}}
                     </label>
                     <input
                         type="text"
@@ -171,8 +200,8 @@
                 </div>
                 <div class="field">
                     <label>
-                        {{CONSTANTS.FORM_TEXT.schedule_type}}
                         <sup class="required">*</sup>
+                        {{CONSTANTS.FORM_TEXT.schedule_type}}
                     </label>
                     <select
                         class="ts basic dropdown"
@@ -223,8 +252,8 @@
                 </div>
                 <div class="field">
                     <label>
-                        {{CONSTANTS.FORM_TEXT.schedule_contact}}
                         <sup class="required">*</sup>
+                        {{CONSTANTS.FORM_TEXT.schedule_contact}}
                     </label>
                     <input
                         type="text"
@@ -287,6 +316,7 @@ export default {
                 util: {},
             },
             input: {},
+            orginData: {},
             defaultInput() {
                 return {
                     schedule_title: null,
@@ -304,7 +334,8 @@ export default {
                     schedule_content: null,
                     user_id: null,
                     schedule_contact: null,
-                    schedule_url: null
+                    schedule_url: null,
+                    repeat_id: null,
                 }
             },
             defaultConfig() {
@@ -348,14 +379,11 @@ export default {
             }
 
             this.input.user_id = this.user.id;
-            /* if(!DataUtil.isEmpty(this.formData.selected_date) && DataUtil.isEmpty(defaultData.schedule_date)){
-                dateToPut = this.formData.selected_date;
-                this.input.schedule_date = DataUtil.formatDateInput(dateToPut);
-            } */
         },
         async edit(data) {
             this.config.mode = 'edit';
             this.config.id = data.schedule_id;
+            if(data.repeat_id != null && data.schedule_repeat) {}
             await this.parseOriginData(data);
         },
         async view(data) {
@@ -378,17 +406,26 @@ export default {
             this.input = {};
             for(let k in this.defaultInput()) {
                 if(DataUtil.isEmpty(data[k])){
+                    this.$set(this.orginData, k, this.defaultInput()[k]);
                     this.$set(this.input, k, this.defaultInput()[k]);
                 }else{
+                    this.$set(this.orginData, k, data[k]);
                     this.$set(this.input, k, data[k]);
                 }
             }
             for(let k in this.defaultConfig()) {
                 this.$set(this.config, k, this.defaultConfig()[k]);
             }
-            this.config.schedule_repeat_days = this.input.schedule_repeat_days.toString(2).split("");
-            if(this.input.schedule_from == "00:00" && this.input.schedule_to == "23:59"){
+
+            this.config.schedule_repeat_days = DataUtil.decimalToBinary(this.input.schedule_repeat_days, 7).split("");
+            if(this.config.schedule_repeat_days.includes("0")) {
+                this.config.schedule_repeat_method = 'cycle';
+            }
+            if(this.input.schedule_from == "00:00" && this.input.schedule_to == "23:59") {
                 this.config.fullday = true;
+            }
+            if(this.config.mode === 'edit' && data.schedule_repeat && data.repeat_id != null) {
+                this.input.repeat_edit = "one";
             }
         },
         cancelClick() {
@@ -420,17 +457,6 @@ export default {
                 });
             }
         },
-    },
-    directives: {
-        'week-button': {
-            bind: function(el){
-                let input = el.querySelector('input');
-                let label = el.querySelector('label');
-                label.addEventListener('click', function(){
-                    input.dispatchEvent(new Event('click'));
-                });
-            }
-        }
     },
 };
 </script>
@@ -473,7 +499,7 @@ label .required {
     background-color: #f1f1f1;
 }
 /* checkbox, toggle and radio checked */
-.ts.checkbox:not(.radio) input:checked+label:before, .ts.radio.checkbox input:checked+label:before, .ts.toggle.checkbox input:checked ~ .box:before, .ts.toggle.checkbox input:checked ~ label:before, .week-selector .week-button input:checked ~ label {
+.week-selector .week-button input:checked ~ label {
     background-color: #70eec4 !important;
 }
 .ts.toggle.checkbox input:checked ~ .box:hover:before, .ts.toggle.checkbox input:checked ~ label:hover:before {
@@ -493,16 +519,16 @@ label .required {
         cursor: pointer;
         background-color: #d9d9d9;
     }
-    .ts.checkbox:not(.radio) input:checked+label:hover:before, .ts.radio.checkbox input:checked+label:hover:before, .week-selector .week-button input:checked ~ label:hover {
+    .week-selector .week-button input:checked ~ label:hover {
         background-color: #4bdbab !important;
     }
 }
 /* checkbox and radio :not(checked) active */
-.ts.checkbox:not(.radio) label:active:before, .ts.radio.checkbox label:active:before, .week-selector .week-button label:active {
+.week-selector .week-button label:active {
     background-color: #92fcd9 !important;
 }
 /* checkbox, toggle and radio checked active */
-.ts.checkbox:not(.radio) input:checked+label:active:before, .ts.radio.checkbox input:checked+label:active:before, .ts.toggle.checkbox input:checked ~ .box:active:before, .ts.toggle.checkbox input:checked ~ label:active:before, .week-selector .week-button input:checked ~ label:active {
+.week-selector .week-button input:checked ~ label:active {
     background-color: #40b890 !important;
 }
 @media only screen and (max-width:767px){
