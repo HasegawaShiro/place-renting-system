@@ -191,4 +191,14 @@ export default class DataUtil{
 
         return `${year}-${fillZero(month)}-${fillZero(day)}`
     }
+
+    static decimalToBinary(int, fill = 0) {
+        let bin = int.toString(2);
+        let len = fill - bin.length < 0 ? 0 : fill - bin.length;
+        for(let i = 0; i < len; i++) {
+            bin = "0"+bin;
+        }
+
+        return bin;
+    }
 }
