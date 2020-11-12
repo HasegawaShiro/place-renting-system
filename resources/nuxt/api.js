@@ -6,6 +6,15 @@ export default class API {
         const allowedMethods = ['get', 'post', 'put', 'delete'];
         method = method.toLowerCase();
         const toSendData = method == "get" ? {params: data} : data;
+        if(options.hasFile === true) {
+            let tmp = new FormData();
+            for(d in data) {
+                tmp.append(data[d]);
+            }
+            window.$nuxt.$axios.setHeader({'Content-Type': 'multipart/form-data'});
+        } else {
+            window.$nuxt.$axios.setHeader({'Content-Type': 'application/json'});
+        }
 
         if(allowedMethods.includes(method)){
             return window.$nuxt.$axios[method](url, toSendData)
