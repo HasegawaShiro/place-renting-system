@@ -9,8 +9,9 @@ use App\Models\Place;
 use App\Models\Schedule as _MODEL;
 
 use App\Utils\DataUtil;
-use App\Utils\ValidationUtil;
+use App\Utils\SessionUtil;
 use App\Utils\ScheduleUtil as _UTIL;
+use App\Utils\ValidationUtil;
 
 class Schedule {
     public static function fields() {
@@ -124,12 +125,19 @@ class Schedule {
 
     public static function permission($status, $id = null) {
         $pass = true;
+        if($status == 'edit') {
+            $origin = _MODEL::find($id);
+            $auth = SessionUtil::getLoginUser();
+            if($auth['id'] !== 1 && $auth['id'] !== $origin->created_by) $pass = false;
+            // dd($origin, $auth);
+        }
 
         return $pass;
     }
 
     public static function getData($request, $id = null) {
         $query = new _MODEL();
+        $auth = SessionUtil::getLoginUser();
         $models = [];
         $collect = collect([]);
         $filters = isset($request->filters) ? $request->filters : [];
@@ -173,14 +181,20 @@ class Schedule {
             $schedule["util_id"] = $util["util_id"];
             $schedule["place_name"] = $place["place_name"];
             $schedule["place_disabled"] = $place["place_disabled"];
-            $schedule["editable"] = strtotime($schedule["schedule_date"]) >= $today;
-            $schedule["deletable"] = strtotime($schedule["schedule_date"]) >= $today;
+
             if(!is_null($schedule["repeat_id"])) {
                 if(array_search($schedule["repeat_id"], $repeated) === false) {
                     array_push($repeated, $schedule["repeat_id"]);
                 } else {
                     $schedule["showOnList"] = false;
                 }
+            }
+            if($auth["id"] === 1 && $auth["id"] === $schedule["created_by"] && strtotime($schedule["schedule_date"]) >= $today) {
+                $schedule["editable"] = true;
+                $schedule["deletable"] = true;
+            } else {
+                $schedule["editable"] = false;
+                $schedule["deletable"] = false;
             }
             $collect->add($schedule);
         }
