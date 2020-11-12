@@ -69,15 +69,12 @@ class Controller extends BaseController
         $orders = isset($request->orders) ? $request->orders : [];
 
         $class = "App\\Pages\\".ucfirst($table);
-        if(class_exists($class)){
-            $page = new $class();
-            if(method_exists($page, 'getData')){
-                $result["datas"] = $page::getData($request, $id);
-            }
-        }else{
+        $page = new $class();
+        if(class_exists($class) && method_exists($page, 'getData')){
+            $result["datas"] = $page::getData($request, $id);
+        } else {
             $class = "App\\Models\\".ucfirst($table);
             $model = new $class();
-
             if(is_null($id)){
                 foreach($model::all() as $data){
                     array_push($result['datas'], $data->toArray());
@@ -126,7 +123,7 @@ class Controller extends BaseController
             }
         } else {
             $status = 403;
-            array_push($result['messages'], 'permission-dinied');
+            array_push($result['messages'], 'permission-denied');
         }
 
         // $status = 422;
@@ -182,7 +179,7 @@ class Controller extends BaseController
                 }
             } else {
                 $status = 403;
-                array_push($result['messages'], 'permission-dinied');
+                array_push($result['messages'], 'permission-denied');
             }
 
         }
