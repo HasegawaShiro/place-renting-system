@@ -11,6 +11,7 @@ class Place extends Model
     protected $primaryKey = 'place_id';
 
     protected $fillable = [
+        'place_code',
         'place_name',
         'place_disabled',
         'remarks',
@@ -22,5 +23,12 @@ class Place extends Model
         'place_disabled' => 'boolean',
         'created_by' => 'integer',
         'updated_by' => 'integer',
+    ];
+
+    protected $editable = [
+        'place_name',
+        'place_disabled',
+        'remarks',
+        'updated_by',
     ];
 }
