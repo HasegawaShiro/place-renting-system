@@ -11,14 +11,20 @@
             </div>
             <!-- <a class="item" target="_blank" href="https://www.nchu.edu.tw/">官網</a>
             <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a> -->
-            <a class="item">公告</a>
-            <a class="item">使用手冊</a>
+            <n-link
+                v-for="(text, page) in showMenu"
+                class="item"
+                :key="`menu-${page}`"
+                :to="`/${page}`"
+            >{{text}}</n-link>
+            <!-- <a class="item">公告</a>
+            <a class="item">使用手冊</a> -->
 
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
         <div class="squeezable pusher" id="sidebar-pusher" @scroll="windowScroll($event)">
             <Form
-                v-if="isLogin"
+                v-if="hasForm"
                 :page="page"
                 :form-mode="formMode"
                 :form-data="formData"
@@ -65,11 +71,19 @@
                             </div>
                         </template>
                         <template v-else-if="isLogin">
+                            <Form
+                                page="user"
+                                ref="profile"
+                                form-name="profile"
+                                :show-add="false"
+                                @saved="profileSaved()"
+                            ></Form>
                             <a
                                 href=""
                                 class="item"
                                 style="z-index: 2;"
                                 :data-tooltip="CONSTANTS.TEXT.profile"
+                                @click.prevent="editProfile()"
                             ><i class="user outline icon"></i></a>
                             <a
                                 class="item"
@@ -111,7 +125,27 @@
                     </dialog>
                 </div>
             </header>
-            <slot @hook:mounted="mounted" name="content" ref="content"></slot>
+            <content>
+                <slot @hook:mounted="mounted" name="content" ref="content"></slot>
+            </content>
+            <footer>
+                <div id="footer-top">
+                    {{CONSTANTS.FOOTER.top}}<br>
+                </div>
+                <div class="ts grid">
+                    <div class="eight wide column" id="footer-left">
+                        {{CONSTANTS.FOOTER.left1}}<br>
+                        {{CONSTANTS.FOOTER.left2}}<br>
+                    </div>
+                    <div class="eight wide column" id="footer-right">
+                        {{CONSTANTS.FOOTER.right1}}<br>
+                        {{CONSTANTS.FOOTER.right2}}<br>
+                    </div>
+                </div>
+                <div id="footer-bottom">
+                    {{CONSTANTS.FOOTER.bottom}}
+                </div>
+            </footer>
             <!-- <slot name="loading"></slot> -->
         </div>
         <div class="ts bottom left snackbar">
@@ -164,10 +198,8 @@ export default {
                 error: null,
             },
             authExpired: false,
+            saving: false,
         };
-    },
-    beforeMount() {
-
     },
     async mounted() {
         const that = this;
@@ -185,7 +217,7 @@ export default {
             },
         };
         window.globalLoading.loading();
-        API.sendRequest("/api/auth","get",null,{doNotRelogin: true}).then(response => {
+        await API.sendRequest("/api/auth","get",null,{doNotRelogin: true}).then(response => {
             this.user = response.data.user;
             this.$store.commit("userStore/set", this.user);
         }).catch(e => {
@@ -202,11 +234,26 @@ export default {
             }
         }
         window.globalSelects = selects;
+
+        this.$emit("mounted");
         // window.globalLoading.unloading();
     },
     computed: {
         isLogin() {
             return this.user.id !== 0 && this.user.name !== 'Guest' && !DataUtil.isAnyEmpty(this.user.id, this.user.name);
+        },
+        showMenu() {
+            let result = {};
+
+            for(let k in CONSTANTS.main.MENU) {
+                let page = CONSTANTS.main.MENU[k];
+                let show = true;
+
+                if(page.permission === 'admin' && this.user.id !== 1) show = false;
+                if(show) result[k] = page.text;
+            }
+
+            return result;
         },
     },
     methods: {
@@ -255,20 +302,40 @@ export default {
                 });
                 this.$store.commit("userStore/set", this.user);
             }).catch(e => {
-                try {
-                    let errorData = e.response.data;
-                    ts('.error.snackbar').snackbar({
-                        content: DataUtil.parseResponseMessages(errorData.message)
-                    });
-                } catch (error) {
+                let errorData = e.response.data;
+                if(errorData.message == "The given data was invalid."){
                     ts('.error.snackbar').snackbar({
                         content: DataUtil.getMessage('login-error')
+                    });
+                } else {
+                    ts('.error.snackbar').snackbar({
+                        content: DataUtil.parseResponseMessages(errorData.message)
                     });
                 }
             });
             this.input.username = null;
             this.input.password = null;
             this.authExpired = false;
+        },
+        async editProfile() {
+            const auth = await API.sendRequest(`/api/data/user/${this.user.id}`);
+            if(!DataUtil.isEmpty(auth.data)){
+                this.$refs["profile"].openModal('edit', auth.data.datas[0]);
+            } else {
+                showSnackbar('error', ['unknown-error','contact-maintenance'])
+            }
+
+        },
+        async profileSaved() {
+            window.globalLoading.loading();
+            await API.sendRequest("/api/auth","get",null,{doNotRelogin: true}).then(response => {
+                this.user = response.data.user;
+                this.$store.commit("userStore/set", this.user);
+            }).catch(e => {
+                this.user = this.guest;
+                this.$store.commit("userStore/set", this.guest);
+            });
+            window.globalLoading.unloading();
         },
         logout() {
             this.$axios.get("/api/logout").then(async _ => {
@@ -281,16 +348,19 @@ export default {
             this.openLoginModal();
         },
         showSnackbar(type, messages){
-            ts(`.${type}.snackbar`).snackbar({
-                content: DataUtil.parseResponseMessages(messages),
-                hoverStay: true,
-            });
+            if(!DataUtil.isEmpty(messages)) {
+                ts(`.${type}.snackbar`).snackbar({
+                    content: DataUtil.parseResponseMessages(messages),
+                    hoverStay: true,
+                });
+            }
         },
         auth(user_id) {
             return this.user.id === 1 || this.user.id === user_id;
         },
         contentLoaded() {
             window.globalLoading.unloading();
+            window.contentLoaded = true;
         },
         windowScroll(event) {
             const el = event.target;
@@ -344,6 +414,21 @@ export default {
         z-index: 5;
         box-shadow: -3px -4px 14px black !important;
     }
+    content {
+        height: 100vh;
+        display: block;
+    }
+    footer {
+        width: 100%;
+        position: relative;
+        bottom: 0px;
+        background-color:  rgb(8, 138, 120);
+        color: white;
+        padding: 1.5em;
+    }
+    /* footer #footer-top, footer #footer-bottom {
+        text-align: center;
+    } */
 
     /* sidebar */
     .nchu.main .sidebar {
@@ -356,13 +441,6 @@ export default {
     .nchu.main .sidebar .item .menu a.item {
         font-size: .94555em;
     }
-    /* .nchu.main .sidebar .menu .item{
-        border-bottom: 0px !important;
-    } */
-
-    /* .nchu.main .login.modal .icon.column, .nchu.main .login.modal form {
-        display: inline-grid;
-    } */
     .nchu.main .login.modal .icon.column {
         font-size: 2em;
         padding-top: 3.3em;
