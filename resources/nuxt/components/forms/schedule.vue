@@ -1,5 +1,9 @@
 <template>
-    <dialog class="ts tiny modal form schedule" :class="{closable: config.mode == 'view'}">
+    <dialog
+        class="ts tiny modal form schedule"
+        :class="{closable: config.mode == 'view'}"
+        id="form-schedule"
+    >
         <div class="header">
             {{CONSTANTS.FORM_TEXT.title[config.mode]}}
         </div>
@@ -56,7 +60,7 @@
                 <template v-if="input.schedule_repeat">
                     <div class="field">
                         <label>{{CONSTANTS.FORM_TEXT.schedule_repeat_method}}</label>
-                        <div class="ts checkboxes">
+                        <div class="ts checkboxes" :class="{disabled: config.mode == 'view'}">
                             <div class="ts radio checkbox">
                                 <input
                                     type="radio"
@@ -64,7 +68,6 @@
                                     id="keep"
                                     value="keep"
                                     v-model="config.schedule_repeat_method"
-                                    v-bind="{disabled: config.mode == 'view'}"
                                 >
                                 <label for="keep">{{CONSTANTS.FORM_TEXT.keep}}</label>
                             </div>
@@ -75,7 +78,6 @@
                                     id="cycle"
                                     value="cycle"
                                     v-model="config.schedule_repeat_method"
-                                    v-bind="{disabled: config.mode == 'view'}"
                                 >
                                 <label for="cycle">{{CONSTANTS.FORM_TEXT.cycle}}</label>
                             </div>
@@ -84,15 +86,14 @@
                             class="week-selector"
                             :class="{
                                 disabled:
-                                    config.schedule_repeat_method!='cycle' &&
-                                    config.mode != 'view'
+                                    config.schedule_repeat_method!='cycle' ||
+                                    config.mode === 'view'
                             }"
                         >
                             <div
                                 class="week-button"
                                 v-for="(day, key) in DAY_TEXT"
                                 :key="'week'+key"
-                                v-week-button
                             >
                                 <input
                                     type="checkbox"
@@ -115,12 +116,14 @@
                                     name="schedule_end"
                                     value="at"
                                     v-model="input.schedule_end"
+                                    v-bind="{disabled: config.mode == 'view'}"
                                 >
                                 <label for="at">{{CONSTANTS.FORM_TEXT.at}}</label>
                                 <input
                                     type="date"
                                     class="ts input after checkbox"
                                     v-model="input.schedule_end_at"
+                                    v-bind="{disabled: config.mode == 'view'}"
                                 >
                             </div>
                             <div class="ts radio checkbox">
@@ -130,12 +133,14 @@
                                     name="schedule_end"
                                     value="times"
                                     v-model="input.schedule_end"
+                                    v-bind="{disabled: config.mode == 'view'}"
                                 >
                                 <label for="times">{{CONSTANTS.FORM_TEXT.repeat}}</label>
                                 <input
                                     type="number"
                                     class="ts input after checkbox back word"
                                     v-model="input.schedule_end_times"
+                                    v-bind="{disabled: config.mode == 'view'}"
                                 >{{CONSTANTS.FORM_TEXT.times}}
                             </div>
                         </div>
@@ -428,9 +433,6 @@ export default {
                 this.input.repeat_edit = "one";
             }
         },
-        cancelClick() {
-            this.$emit("cancel");
-        },
         saveClick() {
             if(['add', 'edit'].includes(this.config.mode)){
                 let toSave = DataUtil.deepClone(this.input);
@@ -457,6 +459,9 @@ export default {
                 });
             }
         },
+        cancelClick() {
+            this.$emit("cancel");
+        },
     },
 };
 </script>
@@ -471,7 +476,7 @@ dialog.form .disabled::before {
     top: 0px;
     left: 0px;
     z-index: 12;
-    background-color: rgba(255, 255, 255, 0.205);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 label .required {
     top: -0.2em;
@@ -498,13 +503,11 @@ label .required {
     border-radius: 20px;
     background-color: #f1f1f1;
 }
-/* checkbox, toggle and radio checked */
+
 .week-selector .week-button input:checked ~ label {
     background-color: #70eec4 !important;
 }
-.ts.toggle.checkbox input:checked ~ .box:hover:before, .ts.toggle.checkbox input:checked ~ label:hover:before {
-    background-color: #4bdbab !important;
-}
+
 .input.after.checkbox {
     line-height: 1em;
     padding: .2em;

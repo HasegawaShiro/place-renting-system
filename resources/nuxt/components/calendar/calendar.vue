@@ -1,5 +1,44 @@
 <template>
     <div class="nchu calendar">
+        <!-- <div class="ts modals dimmer">
+            <dialog class="ts closable mini modal">
+                <div class="header">
+                    {{CONSTANTS.messages[`repeat-${config['repeat-action']}`]}}
+                </div>
+                <div class="content">
+                    <div class="ts checkboxes">
+                        <div class="ts radio checkbox">
+                            <input
+                                type="radio"
+                                name="repeat-mode"
+                                id="repeat-one"
+                                value="one"
+                                v-model="config['repeat-mode']"
+                            >
+                            <label for="repeat-one">{{CONSTANTS.messages['repeat-one']}}</label>
+                        </div>
+                        <div class="ts radio checkbox">
+                            <input
+                                type="radio"
+                                name="repeat-mode"
+                                id="repeat-all"
+                                value="all"
+                                v-model="config['repeat-mode']"
+                            >
+                            <label for="repeat-all">{{CONSTANTS.messages['repeat-all']}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="ts deny button">
+                        取消
+                    </button>
+                    <button class="ts positive button">
+                        確定
+                    </button>
+                </div>
+            </dialog>
+        </div> -->
         <div class="ts grid">
             <div class="header">
                 <span class="title">{{CONSTANTS.HEADER_TEXT.title}}</span>
@@ -244,6 +283,8 @@
                 <List
                     v-if="config.mode === 'list'"
                     :table-class="['bottom','attached']"
+                    :has-header="false"
+                    :show-buttons="listShowButtons"
                     page="schedule"
                     ref="list"
                 ></List>
@@ -268,6 +309,8 @@ export default {
             CONSTANTS: CONSTANTS.calendar,
             config: {
                 mode: 'month',
+                'repeat-action': 'edit',
+                'repeat-mode': 'one',
             },
             headerColspan: {
                 month: 7,
@@ -320,7 +363,14 @@ export default {
         },
         isLogin() {
             return this.$parent.isLogin;
-        }
+        },
+        listShowButtons() {
+            let user = this.$store.state.userStore.user;
+            let result = ['view'];
+            if(!DataUtil.isEmpty(user) && user.id !== 0) result = ['view', 'edit', 'delete'];
+
+            return result;
+        },
     },
     methods:{
         schedulesByWeek() {
@@ -451,7 +501,7 @@ export default {
         },
         scheduleClick(dateText, id = 0) {
             let schedule = this.schedulesByDay()[dateText];
-            window.mainLayout.$parent.$refs["schedule-events"].openModal({
+            window.$page.$refs["schedule-events"].openModal({
                 schedules: schedule,
                 showDate: schedule[0].date,
                 active_id: id,
@@ -466,7 +516,12 @@ export default {
                     window.globalLoading.unloading();
                 }
             }
-        }
+        },
+        async beforeDelete(data) {
+            if(data.schedule_repeat) {
+
+            }
+        },
     },
     components:{
         MonthSelector,

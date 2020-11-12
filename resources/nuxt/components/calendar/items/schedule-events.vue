@@ -276,7 +276,7 @@ export default {
                     return source.filter(() => true);
                 };
                 this.schedules = deleteSchedule(this.schedules, id);
-                window.mainLayout.$parent.$refs["content"].schedules = deleteSchedule(window.mainLayout.$parent.$refs["content"].schedules, id);
+                window.$page.$refs["content"].schedules = deleteSchedule(window.$page.$refs["content"].schedules, id);
                 window.mainLayout.showSnackbar("success", response.data.messages);
             }).catch(e => {
                 if(!DataUtil.isEmpty(e.response.data.messages)) {
