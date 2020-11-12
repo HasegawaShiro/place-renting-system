@@ -14,7 +14,15 @@ class CreateAnnouncementsTable extends Migration
     public function up()
     {
         Schema::create('announcements', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('announcement_id');
+            $table->text('announcement_title');
+            $table->enum('announcement_type', ['announcement', 'update']);
+            $table->date('announcement_date');
+            $table->longText('announcement_content')->nullable();
+            $table->bigInteger('user_id');
+            $table->longText('announcement_file')->nullable();
+            $table->bigInteger('created_by')->default(-1);
+            $table->bigInteger('updated_by')->default(-1);
             $table->timestamps();
         });
     }

@@ -26,7 +26,6 @@ class CreateUsersTable extends Migration
                 $table->bigInteger('util_id');
                 $table->bigInteger('created_by')->default(-1);
                 $table->bigInteger('updated_by')->default(-1);
-                $table->text('remarks')->nullable();
                 // $table->rememberToken();
                 $table->timestamps();
 

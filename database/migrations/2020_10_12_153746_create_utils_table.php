@@ -17,13 +17,15 @@ class CreateUtilsTable extends Migration
     {
         Schema::create('utils', function (Blueprint $table) {
             $table->bigIncrements('util_id');
+            $table->text('util_code');
             $table->text('util_name');
+            $table->boolean('util_disabled')->default(false);
             $table->longText('remarks')->nullable();
             $table->bigInteger('created_by')->default(-1);
             $table->bigInteger('updated_by')->default(-1);
             $table->timestamps();
         });
-        Util::create(['util_name' => '創產學院辦公室']);
+        Util::create(['util_code' => 'ZZZZ', 'util_name' => '創產學院辦公室']);
     }
 
     /**

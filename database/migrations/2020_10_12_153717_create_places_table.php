@@ -15,6 +15,7 @@ class CreatePlacesTable extends Migration
     {
         Schema::create('places', function (Blueprint $table) {
             $table->bigIncrements('place_id');
+            $table->text('place_code')->unique();
             $table->text('place_name');
             $table->boolean('place_disabled');
             $table->longText('remarks')->nullable();
