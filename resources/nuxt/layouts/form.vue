@@ -2,7 +2,7 @@
 <div class="nchu form">
     <i
         class="circular add icon"
-        :hidden.prop="!showAddMutation"
+        :hidden.prop="!isLogin || !showAddMutation"
         @click="openModal()"
     ></i>
     <div class="ts modals dimmer">
@@ -14,7 +14,10 @@
         ></Schedule>
         <Universal
             v-else
+            :page="page"
+            :form-name="formName"
             ref="form-modal"
+            @save="onModalSave($event)"
         ></Universal>
 
     </div>
@@ -42,6 +45,9 @@ export default {
         Schedule,
     },
     computed: {
+        isLogin() {
+            return this.$parent.isLogin;
+        },
     },
     methods: {
         async openModal(mode = 'add', defaultData = {}) {
@@ -49,7 +55,8 @@ export default {
             this.dataChanged = false;
             await this.$refs['form-modal'][mode](defaultData);
             window.globalLoading.unloading();
-            ts('dialog.form').modal({
+            let formName = DataUtil.isEmpty(this.formName) ? this.page : this.formName;
+            ts(`dialog.form#form-${formName}`).modal({
                 onDeny() {
                     return confirm(CONSTANTS.messages["cancel-confirmation"]);
                 },
@@ -59,7 +66,8 @@ export default {
             }).modal("show");
         },
         closeModal() {
-            ts('dialog.form').modal("hide");
+            let formName = DataUtil.isEmpty(this.formName) ? this.page : this.formName;
+            ts(`dialog.form#form-${formName}`).modal("hide");
         },
         toShowAdd() {
             this.showAddMutation = true;
@@ -92,10 +100,14 @@ export default {
 
             if(pass){
                 this.$refs["form-modal"].config.saving = true;
-                await API.sendRequest(URL, event.method, event.input, {onlyData: true}).then(async response => {
+                let options = {};
+                if(typeof event.options === "object") options = event.options;
+                options.onlyData = true;
+                await API.sendRequest(URL, event.method, event.input, options).then(async response => {
                     this.$parent.showSnackbar("success", response.messages);
                     await window.$page.$refs['content'].getListDatas();
                     this.closeModal();
+                    this.$emit("saved");
                 }).catch(e => {
                     try {
                         this.$parent.showSnackbar("error", e.response.data.messages);
@@ -112,6 +124,12 @@ export default {
     props: {
         'page': {
             type: String,
+        },
+        'form-name': {
+            type: String,
+            default() {
+                return null;
+            }
         },
         'form-mode': {
             type: String,

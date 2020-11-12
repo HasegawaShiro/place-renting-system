@@ -1,13 +1,100 @@
 <template>
+    <div
+        v-if="hasHeader"
+        class="list-content"
+    >
+        <div class="list-title">{{pageData.Title}}</div>
+        <table
+            class="ts celled fixed compact table mode"
+            :class="tableClass"
+        >
+            <thead>
+                <tr class="list-header">
+                    <th></th>
+                    <th
+                        v-for="field in fields"
+                        :key="'column-'+field.Name"
+                    >
+                        {{field.Text}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    v-for="(data) in listData"
+                    :key="'data-'+data[dataKey]"
+                >
+                    <td>
+                        <div class="ts tiny stackable icon buttons">
+                            <button
+                                v-if="showButtons.includes('view')"
+                                class="ts button"
+                                @click="viewData(data)"
+                            ><i class="eye icon"></i></button>
+                            <button
+                                v-if="showButtons.includes('edit')"
+                                class="ts info button"
+                                :class="{disabled:data.editable === false}"
+                                @click="editData(data)"
+                            ><i class="write icon"></i></button>
+                            <button
+                                v-if="showButtons.includes('delete')"
+                                class="ts negative button"
+                                :class="{disabled: data.deletable === false}"
+                                @click="deleteData(data[dataKey], data)"
+                            ><i class="trash icon"></i></button>
+                        </div>
+                    </td>
+                    <td
+                        v-for="field in fields"
+                        :key="'column-'+field.Name"
+                    >
+                        <template
+                            v-if="field.Type == 'boolean'"
+                        >
+                            <template
+                                v-if="data[field.Name] && !isEmpty(field.Options.trueText)"
+                            >
+                                {{field.Options.trueText}}
+                            </template>
+                            <template
+                                v-else-if="!data[field.Name] && !isEmpty(field.Options.falseText)"
+                            >
+                                {{field.Options.falseText}}
+                            </template>
+                        </template>
+                        <template
+                            v-else-if="field.Type == 'select'"
+                        >
+                            <template
+                                v-if="typeof field.Options.selectOptions == 'string'"
+                            >
+                                {{selects[field.Options.selectOptions][data[field.Name]]}}
+                            </template>
+                            <template
+                                v-else-if="typeof field.Options.selectOptions == 'object'"
+                            >
+                                {{field.Options.selectOptions[data[field.Name]]}}
+                            </template>
+                        </template>
+                        <template
+                            v-else
+                        >{{data[field.Name]}}</template>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <table
         class="ts celled fixed compact table mode"
         :class="tableClass"
+        v-else
     >
         <thead>
             <tr class="list-header">
                 <th></th>
                 <th
-                    v-for="field in pageData.fields()"
+                    v-for="field in fields"
                     :key="'column-'+field.Name"
                 >
                     {{field.Text}}
@@ -33,12 +120,12 @@
                         <button
                             class="ts negative button"
                             :class="{disabled: data.deletable === false}"
-                            @click="deleteData(data[dataKey])"
+                            @click="deleteData(data[dataKey], data)"
                         ><i class="trash icon"></i></button>
                     </div>
                 </td>
                 <td
-                    v-for="field in pageData.fields()"
+                    v-for="field in fields"
                     :key="'column-'+field.Name"
                 >
                     <template
@@ -88,6 +175,7 @@ export default {
         return {
             listData: {},
             pageData: {
+                Title: '',
                 fields() {
                     return [];
                 },
@@ -102,13 +190,29 @@ export default {
         },
         form() {
             return window.mainLayout.$refs.form;
+        },
+        fields() {
+            let result = [];
+            for(let field of this.pageData.fields().sort((a,b) => {return a.listOrder - b.listOrder})) {
+                if(field.Options.showOnList) {
+                    result.push(field);
+                }
+            }
+
+            return result;
         }
     },
-    mounted() {
-        this.pageData = PageUtil.getPageData(this.page);
-        this.selects = window.globalSelects;
-        this.getListDatas();
-        // console.log(this.pageData.fields());
+    async mounted() {
+        this.pageData = await PageUtil.getPageData(this.page);
+        for(let field of this.pageData.fields().filter(x => x.Type == 'select')) {
+            if(typeof field.Options.selectOptions == 'string'){
+                this.selects[field.Options.selectOptions] = await API.getReferenceSelect(field.Options.selectOptions);
+            }
+        }
+        await this.getListDatas();
+        if(this.hasHeader) {
+            window.mainLayout.contentLoaded();
+        }
     },
     props: {
         "table-class": {
@@ -126,6 +230,18 @@ export default {
                 return {};
             }
         },
+        "has-header": {
+            type: Boolean,
+            default() {
+                return true;
+            }
+        },
+        "show-buttons": {
+            type: Array,
+            default() {
+                return ['view', 'edit', 'delete'];
+            }
+        },
     },
     methods: {
         async getListDatas() {
@@ -136,7 +252,9 @@ export default {
                 this.listData = response.data.datas;
             }).catch(e => {});
 
-            window.globalLoading.unloading();
+            if(!this.hasHeader && window.contentLoaded === true) {
+                window.globalLoading.unloading();
+            }
         },
         async viewData(data) {
             this.form.openModal('view',data);
@@ -144,21 +262,39 @@ export default {
         async editData(data) {
             this.form.openModal('edit',data);
         },
-        async deleteData(id) {
-            window.globalLoading.loading();
-            await API.sendRequest(`/api/data/${this.page}/${id}`,'delete').then(async (response) => {
-                /* function deleteSchedule(source, id) {
-                    const toDelete = source.findIndex(x => x.schedule_id == id);
-                    if(toDelete != -1) delete source[toDelete];
-                    return source.filter(() => true);
-                }; */
-                window.mainLayout.showSnackbar("success", response.data.messages);
-                await this.getListDatas();
-            }).catch(e => {
-                if(!DataUtil.isEmpty(e.response.data.messages)) {
-                    window.mainLayout.showSnackbar("error", e.response.data.messages);
-                }
-            });
+        async deleteData(id, data) {
+            let requestData = {};
+            let pass = true;
+            let before = {
+                pass: true,
+                data: {},
+                message: null,
+            };
+
+            if(typeof window.$page.$refs.content.beforeDelete == 'function') {
+                before = await window.$page.$refs.content.beforeDelete(data);
+                if(before.pass === false) {
+                    pass = false;
+                    window.mainLayout.showSnackbar("success", before.message);
+                } else {
+                    requestData = before.data;
+                };
+            }
+
+            if(before.pass){
+                window.globalLoading.loading();
+                await API.sendRequest(`/api/data/${this.page}/${id}`,'delete', requestData).then(async (response) => {
+                    window.mainLayout.showSnackbar("success", response.data.messages);
+                    await this.getListDatas();
+                }).catch(e => {
+                    if(!DataUtil.isEmpty(e.response.data.messages)) {
+                        window.mainLayout.showSnackbar("error", e.response.data.messages);
+                    }
+                });
+            } else {
+                if(!DataUtil.isEmpty(before.message)) window.mainLayout.showSnackbar("success", before.message);
+            }
+
             window.globalLoading.unloading();
         },
         isEmpty(x) {
@@ -169,9 +305,14 @@ export default {
 </script>
 
 <style>
-.list-header {
+.list-content {
+    margin: 1.5em;
 }
-.list-header th {
+.list-title {
+    text-align: center;
+    font-size: 1.5em;
+}
+thead .list-header th {
     background-color: rgb(8, 138, 120) !important;
     color: #fff !important;
     font-size: 1.2em;
