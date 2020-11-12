@@ -1,5 +1,5 @@
 export default {
-    main:{
+    main: {
         TEXT: {
             menu: '選單',
             index: '首頁',
@@ -13,8 +13,55 @@ export default {
             username: '帳號',
             password: '密碼',
         },
+        MENU: {
+            utils: {
+                text: '所屬單位資料',
+                permission: 'admin',
+            },
+            users: {
+                text: '用戶資料',
+                permission: 'admin',
+            },
+            places: {
+                text: '場地基本資料',
+                permission: 'admin',
+            },
+            '': {
+                text: '場地預約登記',
+                permission: 'all',
+            },
+            announcements: {
+                text: '公告',
+                permission: 'all',
+            },
+            opinions: {
+                text: '意見反應',
+                permission: 'admin',
+            },
+            guides: {
+                text: '使用手冊',
+                permission: 'all',
+            }
+        },
+        FOOTER: {
+            top: '國立中興大學創產學院',
+            left1: '402 台中市南區興大路145號 綜合教學大樓 9樓934室',
+            left2: 'Rm. 934, 9F., No. 145, Xingda Rd., South Dist., Taichung City 402, Taiwan (R.O.C.)',
+            right1: '電話：04-22840455轉2203',
+            right2: 'E-mail：xiang@nchu.edu.tw',
+            bottom: 'Copyright © 2020 肆零玖數位工程有限公司. All rights reserved.'
+        }
     },
-    schedule:{
+    user: {
+        FORM_TEXT: {
+            title: {
+                add: "新增用戶",
+                edit: "編輯用戶",
+                view: "查看用戶"
+            }
+        }
+    },
+    schedule: {
         TEXT: {
             selected_date: '當前所選日期',
             today_event: '本日活動',
@@ -23,7 +70,7 @@ export default {
             day: '日',
         },
         FORM_TEXT: {
-            title:{
+            title: {
                 add: '新增行程',
                 edit: '編輯行程',
                 view: '查看行程'
@@ -67,6 +114,33 @@ export default {
             'repeat-all': '包含本項以後的全部活動',
             'repeat-one': '僅限這項活動'
         },
+    },
+    place: {
+        FORM_TEXT: {
+            title: {
+                add: "新增場地",
+                edit: "編輯場地",
+                view: "查看場地"
+            }
+        }
+    },
+    announcement: {
+        FORM_TEXT: {
+            title: {
+                add: "新增公告",
+                edit: "編輯公告",
+                view: "查看公告"
+            }
+        }
+    },
+    util: {
+        FORM_TEXT: {
+            title: {
+                add: "新增單位",
+                edit: "編輯單位",
+                view: "查看單位"
+            }
+        }
     },
     calendar:{
         MODE_BUTTON: {
