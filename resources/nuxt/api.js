@@ -8,7 +8,7 @@ export default class API {
         const toSendData = method == "get" ? {params: data} : data;
         if(options.hasFile === true) {
             let tmp = new FormData();
-            for(d in data) {
+            for(let d in data) {
                 tmp.append(data[d]);
             }
             window.$nuxt.$axios.setHeader({'Content-Type': 'multipart/form-data'});

@@ -204,6 +204,9 @@ export default {
                     if(field.Options.confirmation) {
                         this.$set(this.input, `${field.Name}_confirmation`, null);
                     }
+                    if(field.Type === 'file') {
+                        this.requestOptions.hasFile = true;
+                    }
                 }
             }
         },
@@ -244,7 +247,6 @@ export default {
                     if(field.Type === 'file') {
                         this.requestOptions.hasFile = true;
                     }
-
                 }
             }
         },
