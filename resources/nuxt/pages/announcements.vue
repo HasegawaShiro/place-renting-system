@@ -1,18 +1,19 @@
 <template>
-  <MainLayout
-    page="announcement"
-    form-mode="universal"
-    :has-form="true"
-    :show-buttons="showButtons"
-    ref="layout"
-    @mounted="mainLayoutMounted"
-  >
-    <List
-        ref="content"
-        slot="content"
+    <MainLayout
         page="announcement"
-    ></List>
-  </MainLayout>
+        form-mode="universal"
+        :has-form="true"
+        :show-buttons="showButtons"
+        :show-add="showAdd"
+        ref="layout"
+        @mounted="mainLayoutMounted"
+    >
+        <List
+            ref="content"
+            slot="content"
+            page="announcement"
+        ></List>
+    </MainLayout>
 </template>
 
 <script>
@@ -37,10 +38,17 @@ export default {
 
             return result;
         },
+        showAdd() {
+            let result = false;
+            if(this.user.id === 1) result = true;
+
+            return result;
+        }
     },
     methods: {
         mainLayoutMounted() {
             this.user = this.$store.state.userStore.user;
+            this.$refs.content.showButtonsMutation = this.showButtons;
         },
     },
     components: {

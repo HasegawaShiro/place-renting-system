@@ -28,6 +28,7 @@
                 :page="page"
                 :form-mode="formMode"
                 :form-data="formData"
+                :show-add="showAddMutation"
                 ref="form"
             ></Form>
             <div class="ts dimmer" id="global-loading">
@@ -94,6 +95,8 @@
                         </template>
                     </div>
                 </div>
+
+                <!-- login form -->
                 <div class="ts modals dimmer">
                     <dialog
                         class="ts tiny closable modal login"
@@ -102,9 +105,6 @@
                             <p>{{MESSAGES['auth-expired']}}</p>
                         </div>
                         <div class="ts icon content">
-                            <!-- <div class="icon three wide column large device only">
-                                <i class="big user circle icon"></i>
-                            </div> -->
                             <div class="">
                                 <form class="ts form" @keydown.enter="login()">
                                     <div class="fluid field">
@@ -116,7 +116,12 @@
                                         <input type="password" v-model="input.password">
                                         <small id="forget-password">忘記密碼?</small>
                                     </div>
-                                    <button type="button" class="ts login fluid button" @click="login()">
+                                    <button
+                                        type="button"
+                                        class="ts login fluid button"
+                                        :class="{loading: loginLoading}"
+                                        @click="login()"
+                                    >
                                         {{CONSTANTS.TEXT.login}}
                                     </button>
                                 </form>
@@ -146,7 +151,6 @@
                     {{CONSTANTS.FOOTER.bottom}}
                 </div>
             </footer>
-            <!-- <slot name="loading"></slot> -->
         </div>
         <div class="ts bottom left snackbar">
             <div class="content">
@@ -198,7 +202,8 @@ export default {
                 error: null,
             },
             authExpired: false,
-            saving: false,
+            loginLoading: false,
+            showAddMutation: true,
         };
     },
     async mounted() {
@@ -236,6 +241,7 @@ export default {
         window.globalSelects = selects;
 
         this.$emit("mounted");
+        this.showAddMutation = this.showAdd;
         // window.globalLoading.unloading();
     },
     computed: {
@@ -291,17 +297,20 @@ export default {
             ts('.login.modal').modal('hide');
         },
         async login() {
+            this.loginLoading = true;
             let loginFormData = new FormData();
             loginFormData.set('username',this.input.username);
             loginFormData.set('password',this.input.password);
             await API.sendRequest("/api/login", "post", loginFormData, {onlyData: true}).then(data => {
                 this.user = data.user;
-                this.closeLoginModal();
                 ts('.success.snackbar').snackbar({
                     content: DataUtil.parseResponseMessages(data.message)
                 });
                 this.$store.commit("userStore/set", this.user);
+                location.reload();
+                // this.closeLoginModal();
             }).catch(e => {
+                this.loginLoading = false;
                 let errorData = e.response.data;
                 if(errorData.message == "The given data was invalid."){
                     ts('.error.snackbar').snackbar({
@@ -393,6 +402,12 @@ export default {
         },
         'form-data': {
             type: Object,
+        },
+        'show-add': {
+            type: Boolean,
+            default() {
+                return true;
+            },
         }
     },
     watch: {

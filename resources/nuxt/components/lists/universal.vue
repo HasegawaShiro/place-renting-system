@@ -27,18 +27,18 @@
                     <td>
                         <div class="ts tiny stackable icon buttons">
                             <button
-                                v-if="showButtons.includes('view')"
+                                v-if="showButtonsMutation.includes('view')"
                                 class="ts button"
                                 @click="viewData(data)"
                             ><i class="eye icon"></i></button>
                             <button
-                                v-if="showButtons.includes('edit')"
+                                v-if="showButtonsMutation.includes('edit')"
                                 class="ts info button"
                                 :class="{disabled:data.editable === false}"
                                 @click="editData(data)"
                             ><i class="write icon"></i></button>
                             <button
-                                v-if="showButtons.includes('delete')"
+                                v-if="showButtonsMutation.includes('delete')"
                                 class="ts negative button"
                                 :class="{disabled: data.deletable === false}"
                                 @click="deleteData(data[dataKey], data)"
@@ -182,6 +182,7 @@ export default {
             },
             selects: {},
             filters: {},
+            showButtonsMutation: ['view', 'edit', 'delete'],
         };
     },
     computed: {
@@ -213,6 +214,9 @@ export default {
         if(this.hasHeader) {
             window.mainLayout.contentLoaded();
         }
+
+        this.$emit("mounted");
+        this.showButtonsMutation = this.showButtons;
     },
     props: {
         "table-class": {
@@ -287,9 +291,14 @@ export default {
                     window.mainLayout.showSnackbar("success", response.data.messages);
                     await this.getListDatas();
                 }).catch(e => {
-                    if(!DataUtil.isEmpty(e.response.data.messages)) {
-                        window.mainLayout.showSnackbar("error", e.response.data.messages);
+                    try {
+                        if(!DataUtil.isEmpty(e.response.data.messages)) {
+                            window.mainLayout.showSnackbar("error", e.response.data.messages);
+                        }
+                    } catch (error) {
+                        window.mainLayout.showSnackbar("error",['unknown-error', 'contact-maintenance']);
                     }
+
                 });
             } else {
                 if(!DataUtil.isEmpty(before.message)) window.mainLayout.showSnackbar("success", before.message);
