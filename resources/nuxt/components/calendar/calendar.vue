@@ -517,11 +517,11 @@ export default {
                 }
             }
         },
-        async beforeDelete(data) {
+        /* async beforeDelete(data) {
             if(data.schedule_repeat) {
 
             }
-        },
+        }, */
     },
     components:{
         MonthSelector,
