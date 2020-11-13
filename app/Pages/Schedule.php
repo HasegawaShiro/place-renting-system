@@ -281,7 +281,7 @@ class Schedule {
     public static function afterSave(Array &$data, Array &$result, String $status, Array $old = []) {
         $success = true;
 
-        if(!empty($old)) {
+        if(!empty($old) && (isset($data['repeat_edit']) && $data['repeat_edit'] == 'all')) {
             $oldRepeatId = $old["repeat_id"];
             if($old["schedule_repeat"] && !is_null($oldRepeatId)){
                 $today = Carbon::today()->toDateString();
@@ -297,9 +297,12 @@ class Schedule {
             $saveRepeat = function ($data, $repeatId) use (&$result, &$success) {
                 $tempToSave = $data;
                 $dates = _UTIL::computeRepeatDate($data);
+                $user = SessionUtil::getLoginUser();
                 foreach($dates as $d) {
                     $tempToSave["schedule_date"] = $d;
                     $tempToSave["repeat_id"] = $repeatId;
+                    $tempToSave["created_by"] = $user['id'];
+                    $tempToSave["updated_by"] = $user['id'];
 
                     $created = _MODEL::create($tempToSave);
                     if($created->isFailed()) {
