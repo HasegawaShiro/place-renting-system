@@ -218,9 +218,13 @@ class Controller extends BaseController
                         }else {
                             $model::destroy($id);
                         }
+                    } else {
+                        $model::destroy($id);
                     }
+                } else {
+                    $model::destroy($id);
                 }
-            }else {
+            } else {
                 $status = 403;
                 array_push($result['messages'], 'delete-permission-denied');
             }
