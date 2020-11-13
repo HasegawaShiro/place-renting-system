@@ -189,7 +189,7 @@ class Schedule {
                     $schedule["showOnList"] = false;
                 }
             }
-            if($auth["id"] === 1 && $auth["id"] === $schedule["created_by"] && strtotime($schedule["schedule_date"]) >= $today) {
+            if(($auth["id"] === 1 || $auth["id"] === $schedule["created_by"]) && strtotime($schedule["schedule_date"]) >= $today) {
                 $schedule["editable"] = true;
                 $schedule["deletable"] = true;
             } else {
@@ -334,7 +334,7 @@ class Schedule {
         return $success;
     }
 
-    public static function beforeDelete(Array &$data, Array &$result) {
+    public static function beforeDelete(Array $data, Array &$result) {
         $pass = true;
 
         $today = strtotime("today");
