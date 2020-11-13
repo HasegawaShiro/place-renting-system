@@ -415,7 +415,7 @@ export default {
         box-shadow: -3px -4px 14px black !important;
     }
     content {
-        height: 100vh;
+        min-height: 100vh;
         display: block;
     }
     footer {
