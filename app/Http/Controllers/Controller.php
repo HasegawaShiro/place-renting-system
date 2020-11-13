@@ -213,7 +213,7 @@ class Controller extends BaseController
                 if(class_exists($class)){
                     $page = new $class();
                     if(method_exists($page, 'beforeDelete')){
-                        if(!$page::beforeDelete($data, $result)) {
+                        if(!$page::beforeDelete($data->toArray(), $result)) {
                             $status = 400;
                         }else {
                             $model::destroy($id);
