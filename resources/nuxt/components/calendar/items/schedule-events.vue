@@ -45,8 +45,12 @@
                             :key="'schedule-detail-'+sd.schedule_id"
                             :id="'schedule-detail-'+sd.schedule_id"
                         >
-                            <div v-if="isLogin" class="two wide column form-items">
+                            <div
+                                v-if="isLogin && (sd.editable || sd.deletable)"
+                                class="two wide column form-items"
+                            >
                                 <div
+                                    v-if="sd.editable"
                                     class="item"
                                     @click="editClick(sd)"
                                 >
@@ -54,6 +58,7 @@
                                     <span class="item-text tablet or large device only text">編輯</span>
                                 </div>
                                 <div
+                                    v-if="sd.deletable"
                                     class="item"
                                     @click="deleteClick(sd.schedule_id)"
                                 >
@@ -246,10 +251,11 @@ export default {
             }
         },
         parseScheduleRepeat(schedule) {
-            if(schedule.schedule_repeat) {}else {
+            if(schedule.schedule_repeat) {
+                return "";
+            } else {
                 return "否";
             }
-            return "";
         },
         isEmpty(obj) {
             return DataUtil.isEmpty(obj);
@@ -423,17 +429,6 @@ export default {
     transform: translatey(-60%);
     left: -5em;
 }
-/* .schedule-events .upcoming-events .container h3::after {
-    content: "";
-    display: block;
-    width: 91%;
-    height: 2px;
-    background-color: #e8e8e8;
-    position: absolute;
-    top: 50%;
-    transform: translatey(-60%);
-    right: 0;
-} */
 .schedule-events .upcoming-events .container .events-wrapper {
     margin-bottom: 30px;
 }
@@ -458,7 +453,6 @@ export default {
     height: 100%;
     background-color: #e8e8e8;
     position: absolute;
-    /* transform: translatey(-60%); */
     top: 0px;
     left: 0px;
 }
@@ -527,7 +521,7 @@ export default {
     max-width: 0px;
 }
 .schedule-events .upcoming-events .container .events-wrapper .schedule-detail {
-    box-shadow: 0px 0px 8px 3px #b3b3b3 inset;
+    box-shadow: 0px 2px 8px 3px #b3b3b3 inset;
     border-radius: 0px;
     margin: 0px;
     padding: 0px;
