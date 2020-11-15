@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -108,10 +109,11 @@ class Controller extends BaseController
         if($permissionPass){
             $data = $request->all();
             $validationPass = ValidateUtil::validateForSave($table, $data, 'add', $result);
+            $user_id = Auth::check() ? $request->user()->user_id : -1;
 
             if($validationPass) {
-                $data["created_by"] = $request->user()->user_id;
-                $data["updated_by"] = $request->user()->user_id;
+                $data["created_by"] = $user_id;
+                $data["updated_by"] = $user_id;
                 $created = $model::create($data);
                 $data[$created->getKeyName()] = $created->getKey();
 
