@@ -441,6 +441,7 @@ class Place {
                     listOrder: 3,
                     formOrder: 3,
                     default: false,
+                    required: false,
                 }
             )),
         ];
