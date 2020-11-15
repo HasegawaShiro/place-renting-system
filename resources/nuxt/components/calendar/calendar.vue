@@ -101,9 +101,9 @@
                                     v-else-if="config.mode === 'list'"
                                     class="from to button"
                                 >
-                                    2020-01-01
+                                    {{filters.schedule_date_from}}
                                     ~
-                                    2020-12-31
+                                    {{filters.schedule_date_to}}
                                 </i>
                                 <MonthSelector v-if="config.mode === 'month'" :modal-open="monthSelectorOpen"></MonthSelector>
                                 <template v-if="config.mode !== 'list'">
@@ -137,6 +137,7 @@
                                             class="ts basic tiny dropdown"
                                             :key="'select-'+name"
                                             v-model="filters[name]"
+                                            @change="getListDatas"
                                         >
                                             <option :value="null"></option>
                                             <option
@@ -348,6 +349,9 @@ export default {
             }
         });
 
+        this.filters.schedule_date_from = DataUtil.formatDateInput(this.calendar.getStartOfCalendar());
+        this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
+
         window.mainLayout.contentLoaded();
     },
     props:{},
@@ -397,41 +401,12 @@ export default {
         },
         schedulesByDay() {
             let result = {};
-            let that = this;
-            for(let week of that.calendar.Dates) {
+
+            for(let week of this.calendar.Dates) {
                 for(let day of week) {
                     let dateText = DataUtil.formatDateInput(day.date);
-                    result[dateText] = that.schedules.filter(x => {
-                        let toShow = true;
-                        if(x.schedule_date != dateText) toShow = false;
-                        for(let f in that.filters) {
-                            if(f != 'type' && !DataUtil.isEmpty(that.filters[f]) && x[`${f}_id`] != that.filters[f]) {
-                                toShow = false;
-                            }else if(f == 'type' && !DataUtil.isEmpty(that.filters[f]) && x.schedule_type != that.filters[f]){
-                                toShow = false;
-                            }
-                        }
-                        return toShow;
-                    }).sort((a,b) => {
-                        let dateA = a.date;
-                        let dateB = b.date;
-                        let timeA = a.schedule_from.split(":");
-                        let timeB = b.schedule_from.split(":");
-                        dateA.setHours(timeA[0], timeA[1]);
-                        dateB.setHours(timeB[0], timeB[1]);
-                        if(dateA.getTime() < dateB.getTime()) {
-                            return -1;
-                        }else if(dateA.getTime() == dateB.getTime()){
-                            if(a.title < b.title) {
-                                return -1;
-                            }else if(a.title == b.title) {
-                                return 0;
-                            }else {
-                                return 1;
-                            }
-                        }else{
-                            return 1;
-                        }
+                    result[dateText] = this.schedules.filter(x => {
+                        return x.schedule_date == dateText;
                     });
                 }
             }
@@ -474,9 +449,23 @@ export default {
             this.monthSelectorOpen = !this.monthSelectorOpen;
         },
         async getListDatas() {
-            await API.sendRequest('/api/data/schedule').then(async response => {
+            if(window.globalLoading != undefined) window.globalLoading.loading();
+            let filters = {};
+            for(let f in this.filters) {
+                if(!['type', 'schedule_date_from', 'schedule_date_to'].includes(f)) {
+                    if(!DataUtil.isEmpty(this.filters[f])) filters[`${f}_id`] = this.filters[f];
+                } else if(f == 'type' && !DataUtil.isEmpty(this.filters[f])) {
+                    filters.schedule_type = this.filters[f];
+                } else {
+                    filters[f] = this.filters[f];
+                }
+            }
+
+            if(!DataUtil.isEmpty(this.$refs["list"])) this.$refs.list.filters = filters;
+
+            await API.sendRequest('/api/data/schedule', 'get', {filters}).then(async response => {
                 let temp = DataUtil.deepClone(response.data.datas);
-                for(let sd in temp){
+                for(let sd in temp) {
                     let dateSplit = temp[sd].schedule_date.split("-");
                     let date = new Date(dateSplit[0], parseInt(dateSplit[1])-1, dateSplit[2]);
                     temp[sd].date = date;
@@ -486,6 +475,7 @@ export default {
                 if(!DataUtil.isEmpty(this.$refs["list"])) await this.$refs["list"].getListDatas();
                 return temp;
             }).catch(e => {});
+            if(window.globalLoading != undefined) window.globalLoading.unloading();
         },
         countDayCellSchedule(schedules) {
             if(schedules.length >= 2) {
