@@ -48,6 +48,7 @@ export default {
     methods: {
         mainLayoutMounted() {
             this.user = this.$store.state.userStore.user;
+            this.$refs.layout.$refs.form.showAddMutation = this.showAdd;
             this.$refs.content.showButtonsMutation = this.showButtons;
         },
     },
