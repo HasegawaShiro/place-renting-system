@@ -9,7 +9,7 @@ export default class API {
         if(options.hasFile === true) {
             let tmp = new FormData();
             for(let d in data) {
-                tmp.append(data[d]);
+                tmp.append(d,data[d]);
             }
             window.$nuxt.$axios.setHeader({'Content-Type': 'multipart/form-data'});
         } else {
