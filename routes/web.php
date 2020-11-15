@@ -26,9 +26,10 @@ Route::group(['prefix' => 'api'], function () {
     });
     Route::get('select/{table}', [Controller::class, 'getReferenceSelect']);
     Route::get('data/{table}/{id?}', [Controller::class, 'getData']);
+    Route::post('data/{table}', [Controller::class, 'postData']);
     Route::group(['middleware' => 'auth'], function() {
         Route::get('auth', [UserController::class, 'getUserSession']);
-        Route::post('data/{table}', [Controller::class, 'postData']);
+        // Route::post('data/{table}', [Controller::class, 'postData']);
         Route::put('data/{table}/{id}', [Controller::class, 'putData']);
         Route::delete('data/{table}/{id}', [Controller::class, 'deleteData']);
     });
