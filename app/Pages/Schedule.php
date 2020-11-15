@@ -11,7 +11,7 @@ use App\Models\Schedule as _MODEL;
 use App\Utils\DataUtil;
 use App\Utils\SessionUtil;
 use App\Utils\ScheduleUtil as _UTIL;
-use App\Utils\ValidationUtil;
+use App\Utils\ValidateUtil;
 
 class Schedule {
     public static function fields() {
@@ -119,7 +119,8 @@ class Schedule {
             "from-to-unavailable" => '此時段已被 :user 預約',
             "place-is-disabled" => '此場地不存在或已被停用',
             "schedule-data-expired" => '不可修改已過期資料',
-            "date-unavailable" => ':date 同一時段已被 :user 預約'
+            "date-unavailable" => ':date 同一時段已被 :user 預約',
+            "repeat-days-zero" => '重複週期請至少選曲一天'
         ];
     }
 
@@ -140,10 +141,14 @@ class Schedule {
         $auth = SessionUtil::getLoginUser();
         $models = [];
         $collect = collect([]);
-        $filters = isset($request->filters) ? $request->filters : [];
-        $orders = isset($request->orders) ? $request->orders : ['schedule_date', 'schedule_from'];
+        $filters = isset($request->filters) ? (array) json_decode($request->filters) : [];
+        $orders = isset($request->orders) && empty($request->orders) ? (array) json_decode($request->orders) : [
+            'schedule_date' => 'DESC',
+            'schedule_from' => 'ASC'
+        ];
 
         if(is_null($id)) {
+            $query = $query->query();
             if(isset($filters["schedule_date_from"])) {
                 $query->whereDate("schedule_date", '>=', $filters["schedule_date_from"]);
             }
@@ -158,6 +163,10 @@ class Schedule {
             }
             if(isset($filters["schedule_type"])) {
                 $query->where("schedule_type", $filters["schedule_type"]);
+            }
+
+            foreach($orders as $key => $order) {
+                $query->orderBy($key, $order);
             }
 
             $models = $query->get();
@@ -200,7 +209,7 @@ class Schedule {
         }
 
         if(is_null($id) && isset($filters["util_id"])) {
-            dd($collect->where('util_id', $filters["util_id"])->all());
+            $collect = $collect->where('util_id', $filters["util_id"]);
         }
 
         return $collect->toArray();
@@ -214,6 +223,8 @@ class Schedule {
 
         if($data['schedule_repeat']){
             array_push($rules["schedule_end"], "required");
+            ValidateUtil::unsetRules($rules["schedule_repeat_days"],"between");
+            $messages["schedule_repeat_days.between"] = self::messages()['repeat-days-zero'];
             if(array_search($data['schedule_end'], ['at','times']) !== false) {
                 $type = $data['schedule_end'];
                 $atLimit = Carbon::today()->addMonthsNoOverflow(6)->toDateString();
