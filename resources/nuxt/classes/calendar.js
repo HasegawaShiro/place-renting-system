@@ -139,6 +139,28 @@ export default class Calendar {
         return `${date.getFullYear()}${delimiter}${date.getMonth()+1}${delimiter}${date.getDate()}`
     }
 
+    getStartOfCalendar() {
+        return this.#Dates[0][0].date;
+    }
+    getEndOfCalendar() {
+        const lastWeek = this.#Dates.length-1;
+        return this.#Dates[lastWeek][6].date;
+    }
+    getStartOfMonth() {
+        return new Date(this.#Year, this.#Month);
+    }
+    getEndOfMonth() {
+        let date = new Date(this.#Year, this.#Month);
+        let dp = new Date(this.#Year, this.#Month);
+
+        while(date.getMonth() == dp.getMonth()) {
+            date.setDate(dp.getDate());
+            dp.setDate(dp.getDate()+1);
+        }
+
+        return date;
+    }
+
     prevYear() {
         let prevy = this.Year - 1;
         if(prevy > 1900){
