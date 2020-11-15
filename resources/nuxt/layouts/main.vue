@@ -22,7 +22,7 @@
 
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
-        <div class="squeezable pusher" id="sidebar-pusher" @scroll="windowScroll($event)">
+        <div class="squeezable pusher" id="sidebar-pusher">
             <Form
                 v-if="hasForm"
                 :page="page"
@@ -68,8 +68,16 @@
                                 <span
                                     class="text button"
                                     id="register-button"
+                                    @click="register()"
                                 >{{CONSTANTS.TEXT.register}}</span>
                             </div>
+                            <Form
+                                page="user"
+                                ref="register"
+                                form-name="register"
+                                :show-add="false"
+                                @saved="registerSaved()"
+                            ></Form>
                         </template>
                         <template v-else-if="isLogin">
                             <Form
@@ -96,39 +104,42 @@
                     </div>
                 </div>
 
-                <!-- login form -->
-                <div class="ts modals dimmer">
-                    <dialog
-                        class="ts tiny closable modal login"
-                    >
-                        <div class="ts inverted negative segment" v-if="authExpired">
-                            <p>{{MESSAGES['auth-expired']}}</p>
-                        </div>
-                        <div class="ts icon content">
-                            <div class="">
-                                <form class="ts form" @keydown.enter="login()">
-                                    <div class="fluid field">
-                                        <label>{{CONSTANTS.TEXT.username}}</label>
-                                        <input type="text" v-model="input.username" >
-                                    </div>
-                                    <div class="fluid field">
-                                        <label>{{CONSTANTS.TEXT.password}}</label>
-                                        <input type="password" v-model="input.password">
-                                        <small id="forget-password">忘記密碼?</small>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="ts login fluid button"
-                                        :class="{loading: loginLoading}"
-                                        @click="login()"
-                                    >
-                                        {{CONSTANTS.TEXT.login}}
-                                    </button>
-                                </form>
+                <!-- login & register form -->
+                <template v-if="!isLogin">
+                    <div class="ts modals dimmer">
+                        <dialog
+                            class="ts tiny closable modal login"
+                        >
+                            <div class="ts inverted negative segment" v-if="authExpired">
+                                <p>{{MESSAGES['auth-expired']}}</p>
                             </div>
-                        </div>
-                    </dialog>
-                </div>
+                            <div class="ts icon content">
+                                <div class="">
+                                    <form class="ts form" @keydown.enter="login()">
+                                        <div class="fluid field">
+                                            <label>{{CONSTANTS.TEXT.username}}</label>
+                                            <input type="text" v-model="input.username" >
+                                        </div>
+                                        <div class="fluid field">
+                                            <label>{{CONSTANTS.TEXT.password}}</label>
+                                            <input type="password" v-model="input.password">
+                                            <small id="forget-password">忘記密碼?</small>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            class="ts login fluid button"
+                                            :class="{loading: loginLoading, disabled: loginLoading}"
+                                            @click="login()"
+                                        >
+                                            {{CONSTANTS.TEXT.login}}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </dialog>
+                    </div>
+                </template>
+
             </header>
             <content>
                 <slot @hook:mounted="mounted" name="content" ref="content"></slot>
@@ -326,6 +337,10 @@ export default {
             this.input.password = null;
             this.authExpired = false;
         },
+        async register() {
+            this.$refs["register"].openModal('add');
+        },
+        async registerSaved() {},
         async editProfile() {
             const auth = await API.sendRequest(`/api/data/user/${this.user.id}`);
             if(!DataUtil.isEmpty(auth.data)){
@@ -333,7 +348,6 @@ export default {
             } else {
                 showSnackbar('error', ['unknown-error','contact-maintenance'])
             }
-
         },
         async profileSaved() {
             window.globalLoading.loading();
@@ -370,18 +384,6 @@ export default {
         contentLoaded() {
             window.globalLoading.unloading();
             window.contentLoaded = true;
-        },
-        windowScroll(event) {
-            const el = event.target;
-            const that = this;
-            const header = document.querySelector("header .menu");
-            const headerFixed = document.querySelector("header .menu.fix-top");
-
-            if(el.scrollTop > header.clientHeight && headerFixed == undefined){
-                if(!header.classList.contains('fix-top')) header.classList.add('fix-top');
-            }else if(el.scrollTop < header.clientHeight && headerFixed != undefined){
-                if(header.classList.contains('fix-top')) header.classList.remove('fix-top');
-            }
         }
     },
     props: {
@@ -422,12 +424,19 @@ export default {
     #global-loading {
         position: fixed;
     }
-    header .menu.fix-top {
-        position: fixed;
-        width: 100%;
-        background: white !important;
+    header {
+        position: sticky;
+        top: 0px;
         z-index: 5;
-        box-shadow: -3px -4px 14px black !important;
+        background-color: rgba(8, 80, 70, 0.712);
+        border: none;
+        /* box-shadow: -3px -4px 14px black !important; */
+    }
+    header .menu {
+        border: none !important;
+    }
+    header .menu a, header .menu i, header .menu div {
+        color: white !important;
     }
     content {
         min-height: 100vh;
@@ -492,7 +501,11 @@ export default {
         .nchu.main .sidebar a.item:hover {
             background-color:  rgb(8, 112, 98) !important;
         }
-        .nchu.main header .text.button:hover, .nchu.main .login.modal #forget-password:hover {
+        .nchu.main header .text.button:hover {
+            /* color: rgb(138, 138, 138); */
+            cursor: pointer;
+        }
+        .nchu.main .login.modal #forget-password:hover {
             color: rgb(8, 138, 120);
             cursor: pointer;
         }
