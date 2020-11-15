@@ -27,6 +27,7 @@ class Util extends Model
 
     protected $editable = [
         'util_name',
+        'util_disabled',
         'remarks',
         'updated_by',
     ];
