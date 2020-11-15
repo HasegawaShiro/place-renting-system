@@ -87,7 +87,7 @@ export default {
             cycle: '週期',
             schedule_end: '結束日期',
             at: '於',
-            times: '次',
+            times: '週(包含本週)',
             place_id: '使用地點',
             schedule_registrant: '登記人',
             schedule_type: '借用型態',
@@ -111,7 +111,7 @@ export default {
         messages: {
             'repeat-edit': '編輯週期性資料',
             'repeat-delete': '刪除週期性資料',
-            'repeat-all': '包含本項以後的全部活動',
+            'repeat-all': '本項以後的全部活動(不包含已過期資料)',
             'repeat-one': '僅限這項活動'
         },
     },
