@@ -120,7 +120,7 @@ class Schedule {
             "place-is-disabled" => '此場地不存在或已被停用',
             "schedule-data-expired" => '不可修改已過期資料',
             "date-unavailable" => ':date 同一時段已被 :user 預約',
-            "repeat-days-zero" => '重複週期請至少選曲一天'
+            "repeat-days-zero" => '重複週期請至少選取一天'
         ];
     }
 
@@ -223,7 +223,8 @@ class Schedule {
 
         if($data['schedule_repeat']){
             array_push($rules["schedule_end"], "required");
-            ValidateUtil::unsetRules($rules["schedule_repeat_days"],"between");
+            ValidateUtil::unsetRules($rules["schedule_repeat_days"],"between:0,127");
+            ValidateUtil::setRules($rules["schedule_repeat_days"],"between:1,127");
             $messages["schedule_repeat_days.between"] = self::messages()['repeat-days-zero'];
             if(array_search($data['schedule_end'], ['at','times']) !== false) {
                 $type = $data['schedule_end'];
