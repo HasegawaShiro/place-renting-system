@@ -36,7 +36,7 @@ class User {
                     'required',
                     'string',
                     'max:200',
-                    'regex:/^[0-9]{10}$/'
+                    'regex:/^[\-\+\#0-9]*$/'
                 ],
                 'email' => [
                     'required',
@@ -75,7 +75,7 @@ class User {
                     'required',
                     'string',
                     'max:200',
-                    'regex:/^[0-9]{10}$/'
+                    'regex:/^[\-\+\#0-9]*$/'
                 ],
                 'email' => [
                     'required',
@@ -171,6 +171,7 @@ class User {
         } else {
             $data["password"] = Hash::make($data["password"]);
         }
+        $data['email'] = strtolower($data['email']);
 
         return $pass;
     }
@@ -191,5 +192,13 @@ class User {
         }
 
         return $success;
+    }
+
+    public static function beforeDelete(Array $data, Array &$result) {
+        if($data['user_id'] == 1) {
+            $result['messages'] = "您不能刪除Admin";
+        }
+
+        return $data['user_id'] != 1;
     }
 }
