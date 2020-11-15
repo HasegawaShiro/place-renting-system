@@ -182,6 +182,7 @@ export default {
             },
             selects: {},
             filters: {},
+            orders: {},
             showButtonsMutation: ['view', 'edit', 'delete'],
         };
     },
@@ -250,7 +251,9 @@ export default {
     methods: {
         async getListDatas() {
             const URL = "/api/data/"+this.page;
-            let params = DataUtil.deepClone(this.params);
+            let params = DataUtil.deepClone(this.getParams);
+            params.filters = this.filters;
+            params.orders = this.orders;
 
             await API.sendRequest(URL, 'get', params).then(response => {
                 this.listData = response.data.datas;
