@@ -15,11 +15,15 @@ class ScheduleUtil {
         $to = $data['schedule_to'];
         $repeatId = isset($data["repeat_id"]) ? $data["repeat_id"] : 0;
         $id = isset($data['schedule_id']) ? $data['schedule_id'] : 0;
+        // dd($repeatId);
 
         $query = _MODEL::whereDate('schedule_date', $date)
             ->where('place_id', $place)
             ->where('schedule_id', '<>', $id)
-            ->where('repeat_id', '<>', $repeatId)
+            ->where(function($q) use ($repeatId) {
+                $q->whereNull('repeat_id')
+                ->orWhere('repeat_id', '<>', $repeatId);
+            })
             ->where(function ($q) use ($from, $to) {
                 $q->orWhere(function($q) use ($from, $to) {
                     $q->whereTime('schedule_to', '>', $from)
@@ -40,7 +44,6 @@ class ScheduleUtil {
                 });
             })->get();
 
-            // dd($query);
             // dd($query->getQuery()->tosql(), $query->getQuery()->getBindings());
         $available = sizeof($query) === 0;
         if(!$available){
@@ -77,7 +80,7 @@ class ScheduleUtil {
                 $count--;
             }
         } else {
-            $count = $data["schedule_end_times"]-1;
+            $count = $data["schedule_end_times"];
             while ($count > 0) {
                 $d->addDay();
                 $weekDay = $d->dayOfWeekIso-1;
