@@ -142,6 +142,15 @@ export default {
             }
         }
     },
+    opinion: {
+        FORM_TEXT: {
+            title: {
+                add: "新增意見",
+                edit: "編輯意見",
+                view: "查看意見"
+            }
+        }
+    },
     calendar:{
         MODE_BUTTON: {
             month: '月表',

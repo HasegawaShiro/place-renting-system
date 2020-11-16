@@ -322,10 +322,10 @@ class Announcement {
                     'select',
                     {
                         selectOptions: 'user',
-                        filter: {
+                        filterBy: {
                             foreignField: 'util_id',
                             target: 'util_id',
-                            from: 'util'
+                            from: 'user'
                         },
                         listOrder: 5,
                         formOrder: 5,
@@ -452,8 +452,83 @@ class Place {
 }
 
 class Opinion {
-    #Name = "user"
-    #Title = "用戶資料"
+    #Name = "opinion"
+    #Title = "意見反應"
+    fields() {
+        return [
+            (new Field(
+                'created_at',
+                '日期',
+                'text',
+                {
+                    showOnForm: false,
+                    editable: false,
+                }
+            )),
+            (new Field(
+                'opinion_title',
+                '主題',
+                'text',
+                {
+                    listOrder: 1,
+                    formOrder: 0,
+                    editable: false,
+                }
+            )),
+            (new Field(
+                'opinion_content',
+                '反應內容',
+                'textarea',
+                {
+                    showOnList: false,
+                    formOrder: 1,
+                    editable: false,
+                }
+            )),
+            (new Field(
+                'opinion_name',
+                '留言人姓名',
+                'text',
+                {
+                    listOrder: 2,
+                    formOrder: 2,
+                    editable: false,
+                }
+            )),
+            (new Field(
+                'opinion_email',
+                '聯絡信箱',
+                'text',
+                {
+                    listOrder: 3,
+                    formOrder: 3,
+                    editable: false,
+                }
+            )),
+            (new Field(
+                'opinion_phone',
+                '聯絡電話',
+                'text',
+                {
+                    listOrder: 4,
+                    formOrder: 4,
+                    editable: false,
+                }
+            )),
+            (new Field(
+                'opinion_finish',
+                '狀態',
+                'boolean',
+                {
+                    listOrder:5,
+                    showOnForm: false,
+                    trueText: '已完成',
+                    falseText: '未完成'
+                }
+            ))
+        ]
+    }
+
     get Name() {return this.#Name}
     get Title() {return this.#Title}
 }
@@ -469,7 +544,7 @@ class Field {
         showOnForm: true,   // 是否出現在表單畫面
         hideOnView: false,
         selectOptions: [],  // 下拉選項：如果是動態下拉，就直接寫table名稱'user', 若為固定下拉，則寫Array: [1,2, '字串']
-        filter: {},
+        filterBy: {},
         remarks: null,      // 顯示於欄位下方的備註文字
         trueText: null,     // boolean型態，出現在列表時，若為True，則顯示的文字
         falseText: null,    // boolean型態，出現在列表時，若為False，則顯示的文字

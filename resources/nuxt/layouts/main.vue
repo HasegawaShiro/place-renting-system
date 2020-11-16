@@ -52,10 +52,17 @@
                     >{{CONSTANTS.TEXT.title}}</n-link>
                     <div class="right menu">
                         <div v-if="isLogin" class="item">{{user.name}}, {{CONSTANTS.TEXT.greet}}</div>
+                        <Form
+                            page="opinion"
+                            ref="opinion"
+                            form-name="opinion"
+                            :show-add="false"
+                        ></Form>
                         <a
                             class="item"
                             style="z-index: 2;"
                             :data-tooltip="CONSTANTS.TEXT.opinion"
+                            @click="addOpinion()"
                         ><i class="mail outline icon"></i></a>
                         <template v-if="!isLogin">
                             <div class="item">
@@ -341,6 +348,9 @@ export default {
             this.$refs["register"].openModal('add');
         },
         async registerSaved() {},
+        async addOpinion() {
+            this.$refs['opinion'].openModal('add');
+        },
         async editProfile() {
             const auth = await API.sendRequest(`/api/data/user/${this.user.id}`);
             if(!DataUtil.isEmpty(auth.data)){
@@ -435,7 +445,7 @@ export default {
     header .menu {
         border: none !important;
     }
-    header .menu a, header .menu i, header .menu div {
+    header .menu a, header .menu i, header .menu div:not(.header) {
         color: white !important;
     }
     content {
