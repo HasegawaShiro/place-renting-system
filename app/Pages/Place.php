@@ -68,14 +68,8 @@ class Place {
     public static function permission($status, $id = null) {
         $pass = true;
 
-        if($status == 'edit') {
-            $auth = SessionUtil::getLoginUser();
-            if($auth['id'] !== 1) $pass = false;
-        } else if($status == 'edit') {
-            $origin = _MODEL::find($id);
-            $auth = SessionUtil::getLoginUser();
-            if($auth['id'] !== 1 && $auth['id'] !== $origin->created_by) $pass = false;
-        }
+        $auth = SessionUtil::getLoginUser();
+        if($auth['id'] !== 1) $pass = false;
 
         return $pass;
     }
