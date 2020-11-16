@@ -211,6 +211,13 @@ export default {
                 this.selects[field.Options.selectOptions] = await API.getReferenceSelect(field.Options.selectOptions);
             }
         }
+
+        if(window.$page.$refs.content.filters != undefined) {
+            this.filters = window.$page.$refs.content.filters;
+        }
+        if(window.$page.$refs.content.orders != undefined) {
+            this.orders = window.$page.$refs.content.orders;
+        }
         await this.getListDatas();
         if(this.hasHeader) {
             window.mainLayout.contentLoaded();
