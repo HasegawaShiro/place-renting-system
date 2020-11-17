@@ -339,6 +339,9 @@ export default {
         this.selects.user = await API.getReferenceSelect("user");
         this.selects.place = await API.getReferenceSelect("place", {showDisabled: true});
         this.selects.util = await API.getReferenceSelect("util");
+
+        this.filters.schedule_date_from = DataUtil.formatDateInput(this.calendar.getStartOfCalendar());
+        this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
         await this.getListDatas();
 
         const that = this;
@@ -349,8 +352,6 @@ export default {
             }
         });
 
-        this.filters.schedule_date_from = DataUtil.formatDateInput(this.calendar.getStartOfCalendar());
-        this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
 
         window.mainLayout.contentLoaded();
     },
@@ -423,9 +424,12 @@ export default {
             }
             return result;
         },
-        calendarChange(method = null, ...params) {
-            if(method !== null) this.calendar[method](...params);
+        async calendarChange(method = null, ...params) {
+            if(method !== null) await this.calendar[method](...params);
 
+            this.filters.schedule_date_from = this.calendar.getStartOfCalendar();
+            this.filters.schedule_date_to = this.calendar.getEndOfCalendar();
+            this.getListDatas();
             this.$forceUpdate();
             this.$emit("change", this.calendar);
         },
