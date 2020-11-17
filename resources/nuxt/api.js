@@ -41,7 +41,7 @@ export default class API {
                         throw error;
                     }
                 });
-        }else{
+        } else {
             console.error("Invalid method: " + method);
         }
 
@@ -53,7 +53,7 @@ export default class API {
         let result = [];
         await API.sendRequest(`/api/select/${table}`,'get',options).then(response => {
             result = response.data;
-        });
+        }).catch(e => {});
         return result;
     }
 }

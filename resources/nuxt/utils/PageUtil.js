@@ -106,6 +106,7 @@ class User {
                     formOrder: 6,
                     default: false,
                     required: false,
+                    hideOnAdd: true,
                 }
             )),
         ]
@@ -523,7 +524,8 @@ class Opinion {
                     listOrder:5,
                     showOnForm: false,
                     trueText: '已完成',
-                    falseText: '未完成'
+                    falseText: '未完成',
+                    hideOnAdd: true,
                 }
             ))
         ]
@@ -542,6 +544,8 @@ class Field {
         editable: true,     // 新增可以輸入，若為false則修改不能動
         showOnList: true,   // 是否出現在列表畫面
         showOnForm: true,   // 是否出現在表單畫面
+        hideOnAdd: false,
+        hideOnEdit: false,
         hideOnView: false,
         selectOptions: [],  // 下拉選項：如果是動態下拉，就直接寫table名稱'user', 若為固定下拉，則寫Array: [1,2, '字串']
         filterBy: {},

@@ -192,7 +192,11 @@ export default {
             this.input = {};
             this.fields = [];
             for(let field of this.pageData.fields().sort((a,b) => {return a.formOrder - b.formOrder})) {
-                if(field.Options.showOnForm === true) {
+                let toShow = field.Options.showOnForm === true;
+                if(field.Options.hideOnAdd === true && this.config.mode == 'add') toShow = false;
+                if(field.Options.hideOnEdit === true && this.config.mode == 'edit') toShow = false;
+
+                if(toShow) {
                     this.fields.push(field);
                     this.$set(this.input, field.Name, field.Options.default);
                     if(field.Type === 'select') {
