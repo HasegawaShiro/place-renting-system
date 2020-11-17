@@ -78,6 +78,11 @@
                             </template>
                         </template>
                         <template
+                            v-else-if="field.Type == 'file'"
+                        >
+                            <i class="large download icon" @click="download(data[dataKey])"></i>
+                        </template>
+                        <template
                             v-else
                         >{{data[field.Name]}}</template>
                     </td>
@@ -316,6 +321,7 @@ export default {
 
             window.globalLoading.unloading();
         },
+        async download(id) {},
         isEmpty(x) {
             return DataUtil.isEmpty(x);
         },
@@ -336,5 +342,15 @@ thead .list-header th {
     color: #fff !important;
     font-size: 1.2em;
     text-align: center !important;
+}
+
+@media(hover: hover) and (pointer: fine) {
+    i.download:hover {
+        color:  rgb(8, 138, 120);
+        cursor: pointer;
+    }
+}
+i.download:active {
+    color:  rgb(9, 114, 100);
 }
 </style>
