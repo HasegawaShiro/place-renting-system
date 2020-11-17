@@ -10,8 +10,8 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
+use App\Utils\FileUtil;
 use App\Utils\UserUtil;
-use App\Utils\PageUtil;
 use App\Utils\SessionUtil;
 use App\Utils\ValidateUtil;
 use App\Utils\ScheduleUtil;
@@ -37,6 +37,7 @@ class Controller extends BaseController
 
     public static function getReferenceSelect(Request $request, $table) {
         $showDisabled = isset($request->showDisabled) ? $request->showDisabled : false;
+        $filter = isset($request->filter) ? (array) json_decode($request->filter) : [];
         $allData = Controller::getDataAsModel($table);
         $id = "{$table}_id";
         $disabled = "{$table}_disabled";
@@ -45,7 +46,14 @@ class Controller extends BaseController
         foreach ($allData as $model){
             $data = $model->toArray();
             $putable = true;
-            if(!$showDisabled && array_key_exists($disabled, $data) && $data[$disabled]){ $putable = false; }
+            if(!$showDisabled && array_key_exists($disabled, $data) && $data[$disabled]){
+                $putable = false;
+            }
+            foreach ($filter as $key => $value) {
+                if(array_key_exists($key, $data) && $data[$key] != $value) {
+                    $putable = false;
+                }
+            }
             if($putable) $result[$data[$id]] = array_key_exists($name, $data) ? $data[$name] : $data[$id];
         }
 
@@ -240,5 +248,23 @@ class Controller extends BaseController
         }
 
         return response()->json($result, $status);
+    }
+
+    public static function download(Request $request, $table, $id, $filename) {
+        $class = "App\\Pages\\".ucfirst($table);
+        $page = new $class();
+
+        if(method_exists($page, 'getFile')) {
+            $filePath = $page::getFile($id, $filename);
+        } else {
+            $filePath = '';
+        }
+        // dd($filePath);
+
+        if(file_exists($filePath)) {
+            return response()->download($filePath, $filename);
+        } else {
+            return response()->json(["messages" => 'file-not-found'], 404);
+        }
     }
 }
