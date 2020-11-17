@@ -434,7 +434,7 @@ export default {
     #global-loading {
         position: fixed;
     }
-    header {
+    #sidebar-pusher>header {
         position: sticky;
         top: 0px;
         z-index: 5;
