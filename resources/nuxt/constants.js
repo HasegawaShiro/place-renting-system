@@ -27,7 +27,7 @@ export default {
                 permission: 'admin',
             },
             '': {
-                text: '場地預約登記',
+                text: '場地使用查詢',
                 permission: 'all',
             },
             announcements: {
