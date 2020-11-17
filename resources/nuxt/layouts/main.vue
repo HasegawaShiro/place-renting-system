@@ -9,16 +9,23 @@
                     <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a>
                 </div>
             </div>
-            <!-- <a class="item" target="_blank" href="https://www.nchu.edu.tw/">官網</a>
-            <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a> -->
-            <n-link
-                v-for="(text, page) in showMenu"
-                class="item"
-                :key="`menu-${page}`"
-                :to="`/${page}`"
-            >{{text}}</n-link>
-            <!-- <a class="item">公告</a>
-            <a class="item">使用手冊</a> -->
+            <template
+                v-for="(p, page) in showMenu"
+            >
+                <n-link
+                    v-if="p.url === undefined"
+                    class="item"
+                    :key="`menu-${page}`"
+                    :to="`/${page}`"
+                >{{p.text}}</n-link>
+                <a
+                    v-else
+                    class="item"
+                    :key="`menu-${page}`"
+                    :href="`/${p.url}`"
+                >{{p.text}}</a>
+            </template>
+
 
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
@@ -274,7 +281,12 @@ export default {
                 let show = true;
 
                 if(page.permission === 'admin' && this.user.id !== 1) show = false;
-                if(show) result[k] = page.text;
+                if(show) {
+                    result[k] = {text: page.text};
+                    if(!DataUtil.isEmpty(page.url)) {
+                        result[k].url = page.url;
+                    }
+                }
             }
 
             return result;
@@ -353,7 +365,7 @@ export default {
         },
         async editProfile() {
             const auth = await API.sendRequest(`/api/data/user/${this.user.id}`);
-            if(!DataUtil.isEmpty(auth.data)){
+            if(!DataUtil.isEmpty(auth.data)) {
                 this.$refs["profile"].openModal('edit', auth.data.datas[0]);
             } else {
                 showSnackbar('error', ['unknown-error','contact-maintenance'])

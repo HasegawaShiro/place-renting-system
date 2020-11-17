@@ -4,7 +4,7 @@ export default {
             menu: '選單',
             index: '首頁',
             opinion: '意見反饋',
-            title: '中興大學創產學院場地借用系統',
+            title: '興大創產學院 場地借用系統',
             login: '登入',
             register: '註冊',
             greet: '您好',
@@ -40,6 +40,7 @@ export default {
             },
             guides: {
                 text: '使用手冊',
+                url: 'api/download/guide/0/guide.pdf',
                 permission: 'all',
             }
         },
