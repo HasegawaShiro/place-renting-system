@@ -28,9 +28,19 @@
                             v-else-if="field.Type === 'select'"
                             v-bind="{disabled: isFieldDisabled(field)}"
                             v-model="input[field.Name]"
+                            @change="inputOnChange(field)"
                         >
                             <template
-                                v-if="typeof field.Options.selectOptions == 'string'"
+                                v-if="!isEmpty(field.Options.filterBy)"
+                            >
+                                <option
+                                    v-for="(opt, value) in filters[field.Name]"
+                                    :key="`opt-${value}`"
+                                    :value="value"
+                                >{{opt}}</option>
+                            </template>
+                            <template
+                                v-else-if="typeof field.Options.selectOptions == 'string'"
                             >
                                 <option
                                     v-for="(opt, value) in selects[field.Options.selectOptions]"
@@ -155,18 +165,21 @@ export default {
             input: {},
             orginData: {},
             selects: {},
+            filters: {},
             requestOptions: {},
         }
     },
     mounted() {
         this.pageData = PageUtil.getPageData(this.page);
         for(let field of this.pageData.fields().filter(x => x.Type == 'select')) {
-            console.log(field);
-            if(typeof field.Options.selectOptions == 'string') {
-                this.selects[field.Options.selectOptions] = {};
+            if(!DataUtil.isEmpty(field.Options.filter)) {
+                this.$set(this.filters, field.Options.filter, {});
+                // this.filters[field.Options.filter] = {};
+            } else if(typeof field.Options.selectOptions == 'string') {
+                this.$set(this.selects, field.Options.selectOptions, {});
+                // this.selects[field.Options.selectOptions] = {};
             }
         }
-        console.log(this.selects)
     },
     props: {
         page: String,
@@ -254,6 +267,20 @@ export default {
                 }
             }
         },
+        async getOptionsByFilter(field) {
+            const filterBy = field.Options.filterBy;
+            let result = {};
+            let options = {
+                filter: {},
+            };
+            options.filter[field.Options.filterBy.foreignField] = this.input[field.Options.filterBy.foreignField]
+            await API.getReferenceSelect(filterBy.from, options).then(response => {
+                result = response;
+            }).catch(e => {});
+
+            // this.$forceUpdate();
+            return result;
+        },
         isInputField(field) {
             return [
                 'text',
@@ -275,7 +302,14 @@ export default {
             const options = field.Options;
             const add = this.config.mode === 'add';
             const edit = this.config.mode === 'edit';
-            return this.config.mode === 'view' || options.readOnly || (!options.editable && edit)
+            let disabled = this.config.mode === 'view' || options.readOnly || (!options.editable && edit)
+
+            if(!DataUtil.isEmpty(options.filterBy)) {
+                const f = options.filterBy;
+                if(DataUtil.isEmpty(this.input[f.foreignField])) disabled = true;
+            }
+
+            return disabled
         },
         saveClick() {
             if(['add', 'edit'].includes(this.config.mode)){
@@ -292,6 +326,17 @@ export default {
         },
         cancelClick() {
             this.$emit("cancel");
+        },
+        isEmpty(...obj) {
+            return DataUtil.isEmpty(...obj);
+        },
+        async inputOnChange(field) {
+            if(!DataUtil.isEmpty(field.Options.filter)) {
+                const target = this.pageData.fields().find(x => x.Name == field.Options.filter);
+                if(!DataUtil.isEmpty(target) && !DataUtil.isEmpty(target.Options.filterBy)) {
+                    this.filters[field.Options.filter] = await this.getOptionsByFilter(target);
+                }
+            }
         },
     },
 }
