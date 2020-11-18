@@ -61,8 +61,9 @@
                         <div v-if="isLogin" class="item">{{user.name}}, {{CONSTANTS.TEXT.greet}}</div>
                         <Form
                             page="opinion"
-                            ref="opinion"
-                            form-name="opinion"
+                            ref="add-opinion"
+                            key="add-opinion"
+                            form-name="add-opinion"
                             :show-add="false"
                         ></Form>
                         <a
@@ -97,6 +98,7 @@
                             <Form
                                 page="user"
                                 ref="profile"
+                                key="profile"
                                 form-name="profile"
                                 :show-add="false"
                                 @saved="profileSaved()"
@@ -361,7 +363,7 @@ export default {
         },
         async registerSaved() {},
         async addOpinion() {
-            this.$refs['opinion'].openModal('add');
+            this.$refs['add-opinion'].openModal('add');
         },
         async editProfile() {
             const auth = await API.sendRequest(`/api/data/user/${this.user.id}`);

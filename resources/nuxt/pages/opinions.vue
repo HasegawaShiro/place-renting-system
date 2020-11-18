@@ -3,8 +3,6 @@
     page="opinion"
     form-mode="universal"
     :has-form="true"
-    :show-buttons="showButtons"
-    :show-add="false"
     ref="layout"
     @mounted="mainLayoutMounted()"
   >
