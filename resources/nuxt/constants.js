@@ -182,9 +182,12 @@ export default {
         'save-success': '儲存成功',
         'unknown-error': '發生未知錯誤',
         'contact-maintenance': '，請洽維護人員',
+        'delete-confirmation': '確定要刪除此資料嗎？',
         'delete-success': '刪除成功',
         'delete-permission-denied': '您沒有權限刪除此資料',
-        'permission-denied': '您沒有權限進行此操作'
+        'permission-denied': '您沒有權限進行此操作',
+        'data-not-found': '查無此資料',
+        'data-is-referenced': '資料已被引用，無法刪除',
     },
     common: {
         TEXT: {
