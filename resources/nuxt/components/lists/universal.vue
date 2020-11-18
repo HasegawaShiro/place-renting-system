@@ -231,6 +231,7 @@ export default {
 
         this.$emit("mounted");
         this.showButtonsMutation = this.showButtons;
+        if(!window.mainLayout.isLogin) this.showButtonsMutation = ['view'];
     },
     props: {
         "table-class": {
@@ -293,7 +294,7 @@ export default {
             if(typeof window.$page.$refs.content.beforeDelete == 'function') {
                 before = await window.$page.$refs.content.beforeDelete(data);
                 if(before.pass === false) {
-                    window.mainLayout.showSnackbar("success", before.message);
+                    window.mainLayout.showSnackbar("error", before.message);
                 } else {
                     requestData = before.data;
                 };

@@ -1,9 +1,9 @@
 <template>
     <div class="nchu calendar">
-        <!-- <div class="ts modals dimmer">
-            <dialog class="ts closable mini modal">
+        <div class="ts modals dimmer">
+            <dialog class="ts mini modal delete-confirmation">
                 <div class="header">
-                    {{CONSTANTS.messages[`repeat-${config['repeat-action']}`]}}
+                    {{CONSTANTS.messages['repeat-delete']}}
                 </div>
                 <div class="content">
                     <div class="ts checkboxes">
@@ -38,9 +38,9 @@
                     </button>
                 </div>
             </dialog>
-        </div> -->
+        </div>
         <div class="ts grid">
-            <div class="header">
+            <div class="main-header">
                 <span class="title">{{CONSTANTS.HEADER_TEXT.title}}</span>
                 <span class="mode buttons">
                     <div class="ts buttons">
@@ -511,11 +511,35 @@ export default {
                 }
             }
         },
-        /* async beforeDelete(data) {
-            if(data.schedule_repeat) {
+        async beforeDelete(data) {
+            let result = {
+                pass: true,
+                data: {},
+                message: null,
+            };
+            const deleteComfirmation = new Promise((resolve, reject) => {
+                ts('.delete-confirmation').modal({
+                    onDeny: function() {
+                        reject(false);
+                    },
+                    onApprove: function() {
+                        resolve(true);
+                    }
+                }).modal("show");
+            });
 
+            if(data.schedule_repeat) {
+                await deleteComfirmation.then(x => {
+                    result.data['repeat-mode'] = this.config['repeat-mode'];
+                }).catch(x => {
+                    result.pass = false;
+                });
+            } else {
+                result.pass = confirm(CONSTANTS.messages["delete-confirmation"]);
             }
-        }, */
+
+            return result;
+        },
     },
     components:{
         MonthSelector,
@@ -537,7 +561,7 @@ export default {
     border: 1px solid rgba(204, 204, 204, 0.24) !important;
     /* margin-bottom: .5em !important; */
 }
-.nchu.calendar div.header {
+.nchu.calendar div.main-header {
     color: #000;
     text-align: center;
     margin-top: .3em;
@@ -545,13 +569,13 @@ export default {
     font-size: 1.5em;
     padding-bottom: .25em;
 }
-.nchu.calendar div.header .mode.buttons {
+.nchu.calendar div.main-header .mode.buttons {
     position: absolute;
     top: -0.5em;
     right: .5em;
     font-size: 10px;
 }
-.nchu.calendar div.main,  .nchu.calendar div.header{
+.nchu.calendar div.main,  .nchu.calendar div.main-header{
     width: 100%;
     margin-left: 1.5em;
     margin-right: 1.5em;
