@@ -54,7 +54,7 @@ class Schedule {
                     'exists:App\Models\User,user_id',
                 ],
                 'schedule_contact' => [
-                    'required',
+                    'nullable',
                     'string',
                     'max:200'
                 ],
@@ -84,7 +84,7 @@ class Schedule {
                     'max:40'
                 ],
                 'schedule_registrant' => [
-                    'required',
+                    'nullable',
                     'string',
                     'max:200'
                 ],

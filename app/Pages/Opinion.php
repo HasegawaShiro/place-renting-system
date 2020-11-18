@@ -26,7 +26,7 @@ class Opinion {
                     'max:200'
                 ],
                 'opinion_email' => [
-                    'required',
+                    'nullable',
                     'string',
                     'email:rfc'
                 ],

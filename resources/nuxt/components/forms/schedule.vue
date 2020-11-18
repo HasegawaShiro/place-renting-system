@@ -194,7 +194,6 @@
                 </div>
                 <div class="field">
                     <label>
-                        <sup class="required">*</sup>
                         {{CONSTANTS.FORM_TEXT.schedule_registrant}}
                     </label>
                     <input
@@ -257,7 +256,6 @@
                 </div>
                 <div class="field">
                     <label>
-                        <sup class="required">*</sup>
                         {{CONSTANTS.FORM_TEXT.schedule_contact}}
                     </label>
                     <input

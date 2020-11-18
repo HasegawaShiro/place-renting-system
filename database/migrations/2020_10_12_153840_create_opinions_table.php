@@ -18,7 +18,7 @@ class CreateOpinionsTable extends Migration
             $table->text('opinion_title');
             $table->longText('opinion_content');
             $table->text('opinion_name');
-            $table->text('opinion_email');
+            $table->text('opinion_email')->nullable();
             $table->text('opinion_phone');
             $table->boolean('opinion_finish');
             $table->bigInteger('created_by')->default(-1);

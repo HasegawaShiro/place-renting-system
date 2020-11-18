@@ -313,6 +313,7 @@ class Announcement {
                     'select',
                     {
                         selectOptions: 'util',
+                        filter: 'user_id',
                         listOrder: 4,
                         formOrder: 4,
                     }
@@ -322,7 +323,6 @@ class Announcement {
                     '承辦人',
                     'select',
                     {
-                        selectOptions: 'user',
                         filterBy: {
                             foreignField: 'util_id',
                             target: 'util_id',
@@ -501,6 +501,7 @@ class Opinion {
                 '聯絡信箱',
                 'text',
                 {
+                    required: false,
                     listOrder: 3,
                     formOrder: 3,
                     editable: false,
@@ -548,6 +549,7 @@ class Field {
         hideOnEdit: false,
         hideOnView: false,
         selectOptions: [],  // 下拉選項：如果是動態下拉，就直接寫table名稱'user', 若為固定下拉，則寫Array: [1,2, '字串']
+        filter: null,
         filterBy: {},
         remarks: null,      // 顯示於欄位下方的備註文字
         trueText: null,     // boolean型態，出現在列表時，若為True，則顯示的文字

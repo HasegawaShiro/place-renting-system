@@ -31,7 +31,7 @@ class CreateSchedulesTable extends Migration
             $table->date('schedule_end_at')->nullable();
             $table->integer('schedule_end_times')->nullable();
             // $table->longText('schedule_options');
-            $table->text('schedule_registrant');
+            $table->text('schedule_registrant')->nullable();
             $table->unsignedBigInteger('repeat_id')->nullable();
             $table->bigInteger('created_by')->default(-1);
             $table->bigInteger('updated_by')->default(-1);
