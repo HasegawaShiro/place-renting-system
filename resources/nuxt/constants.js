@@ -3,7 +3,7 @@ export default {
         TEXT: {
             menu: '選單',
             index: '首頁',
-            opinion: '意見反饋',
+            opinion: '意見反應',
             title: '興大創產學院 場地借用系統',
             login: '登入',
             register: '註冊',
@@ -171,6 +171,12 @@ export default {
                 util: '承辦單位',
                 user: '承辦人'
             },
+        },
+        messages: {
+            'repeat-edit': '編輯週期性資料',
+            'repeat-delete': '刪除週期性資料',
+            'repeat-all': '全部活動(不包含已過期資料)',
+            'repeat-one': '僅限這項活動'
         },
     },
     messages: {
