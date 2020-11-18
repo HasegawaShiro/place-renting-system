@@ -174,6 +174,7 @@
 import API from '../../api.js';
 import DataUtil from '../../utils/DataUtil.js';
 import PageUtil from '../../utils/PageUtil.js';
+import CONSTANTS from '../../constants.js';
 
 export default {
     data() {
@@ -283,7 +284,6 @@ export default {
         },
         async deleteData(id, data) {
             let requestData = {};
-            let pass = true;
             let before = {
                 pass: true,
                 data: {},
@@ -293,11 +293,12 @@ export default {
             if(typeof window.$page.$refs.content.beforeDelete == 'function') {
                 before = await window.$page.$refs.content.beforeDelete(data);
                 if(before.pass === false) {
-                    pass = false;
                     window.mainLayout.showSnackbar("success", before.message);
                 } else {
                     requestData = before.data;
                 };
+            } else {
+                before.pass = confirm(CONSTANTS.messages["delete-confirmation"]);
             }
 
             if(before.pass){
@@ -316,7 +317,7 @@ export default {
 
                 });
             } else {
-                if(!DataUtil.isEmpty(before.message)) window.mainLayout.showSnackbar("success", before.message);
+                if(!DataUtil.isEmpty(before.message)) window.mainLayout.showSnackbar("error", before.message);
             }
 
             window.globalLoading.unloading();

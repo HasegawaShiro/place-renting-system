@@ -31,4 +31,30 @@ class Util extends Model
         'remarks',
         'updated_by',
     ];
+
+    public function users() {
+        return $this->hasMany('App\Models\User', 'util_id', 'util_id');
+    }
+
+    public function announcements() {
+        return $this->hasManyThrough(
+            'App\Models\Announcement',
+            'App\Models\User',
+            'util_id',
+            'user_id',
+            'util_id',
+            'user_id'
+        );
+    }
+
+    public function schedules() {
+        return $this->hasManyThrough(
+            'App\Models\Schedule',
+            'App\Models\User',
+            'util_id',
+            'user_id',
+            'util_id',
+            'user_id'
+        );
+    }
 }

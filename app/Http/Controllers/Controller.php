@@ -20,19 +20,8 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     public static function test() {
-        /* $result = [[],[],[],[],[],[],[]];
-        for ($i=0; $i < 128; $i++) {
-            $bin = sprintf("%'07b",$i);
-            for ($j=0; $j < 7; $j++) {
-                if(substr($bin,$j,1) == "1"){
-                    array_push($result[$j], $i);
-                }
-            }
-        }
-        dd($result); */
-        // dd(\App\Models\User::find(1));
-        dump(ScheduleUtil::weekdayChart());
-        dd(ScheduleUtil::getDayRepeat(1));
+        $model = \App\Models\User::find(1)->announcements;
+        dd($model);
     }
 
     public static function getReferenceSelect(Request $request, $table) {
@@ -216,6 +205,7 @@ class Controller extends BaseController
 
         if(is_null($data)) {
             $status = 404;
+            array_push($result['messages'], 'data-not-found');
         }else {
             $userValidate = UserUtil::permissionValidate($data);
             if($userValidate) {

@@ -31,4 +31,8 @@ class Place extends Model
         'remarks',
         'updated_by',
     ];
+
+    public function schedules() {
+        return $this->hasMany('App\Models\Schedule', 'place_id', 'place_id');
+    }
 }

@@ -63,16 +63,33 @@ class Util {
     public static function permission($status, $id = null) {
         $pass = true;
 
-        if($status == 'edit') {
-            $auth = SessionUtil::getLoginUser();
-            if($auth['id'] !== 1) $pass = false;
-        } else if($status == 'edit') {
-            $origin = _MODEL::find($id);
-            $auth = SessionUtil::getLoginUser();
-            if($auth['id'] !== 1 && $auth['id'] !== $origin->created_by) $pass = false;
-        }
+        $auth = SessionUtil::getLoginUser();
+        if($auth['id'] !== 1) $pass = false;
 
         return $pass;
     }
 
+    public static function beforeDelete(Array $data, Array &$result) {
+        $pass = true;
+        if($data['util_id'] == 1) {
+            $pass = false;
+            array_push($result['messages'], "您不能刪除 ".$data['util_name']);
+        } else {
+            $origin = _MODEL::find($data['util_id']);
+            $toCheck = [
+                $origin->users,
+                $origin->schedules,
+                $origin->announcements,
+            ];
+
+            foreach ($toCheck as $i) {
+                if(!$i->isEmpty()) {
+                    $pass = false;
+                    array_push($result["messages"], 'data-is-referenced');
+                }
+            }
+        }
+
+        return $pass;
+    }
 }

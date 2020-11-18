@@ -115,14 +115,10 @@ class User {
 
     public static function permission($status, $id = null) {
         $pass = true;
-        if($status == 'get') {
-            $auth = SessionUtil::getLoginUser();
-            // if($auth['id'] !== 1 && $auth['id'] !== $origin->user_id)
-        } else if($status == 'edit') {
+        if($status == 'edit') {
             $origin = _MODEL::find($id);
             $auth = SessionUtil::getLoginUser();
             if($auth['id'] !== 1 && $auth['id'] !== $origin->user_id) $pass = false;
-            // dd($origin, $auth);
         }
 
         return $pass;
@@ -156,7 +152,9 @@ class User {
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
         $messages["username.regex"] = self::messages()["invalid-username"];
         $messages["phone.regex"] = self::messages()["invalid-phone"];
-        if($status == 'edit') {
+        if($status == 'add') {
+            $data["user_disabled"] = false;
+        } else if($status == 'edit') {
             $origin = _MODEL::find($data["user_id"]);
             if($origin->email === $data['email']){
                 ValidateUtil::unsetRules($rules["email"], "unique:users");
@@ -195,10 +193,25 @@ class User {
     }
 
     public static function beforeDelete(Array $data, Array &$result) {
-        if($data['user_id'] == 1) {
-            $result['messages'] = "您不能刪除Admin";
+        $pass = true;
+        if($data['util_id'] == 1) {
+            $pass = false;
+            array_push($result['messages'], "您不能刪除Admin");
+        } else {
+            $origin = _MODEL::find($data['util_id']);
+            $toCheck = [
+                $origin->schedules,
+                $origin->announcements,
+            ];
+
+            foreach ($toCheck as $i) {
+                if(!$i->isEmpty()) {
+                    $pass = false;
+                    array_push($result["messages"], 'data-is-referenced');
+                }
+            }
         }
 
-        return $data['user_id'] != 1;
+        return $pass;
     }
 }

@@ -73,4 +73,21 @@ class Place {
 
         return $pass;
     }
+
+    public static function beforeDelete(Array $data, Array &$result) {
+        $pass = true;
+        $origin = _MODEL::find($data['place_id']);
+        $toCheck = [
+            $origin->schedules,
+        ];
+
+        foreach ($toCheck as $i) {
+            if(!$i->isEmpty()) {
+                $pass = false;
+                array_push($result["messages"], 'data-is-referenced');
+            }
+        }
+
+        return $pass;
+    }
 }
