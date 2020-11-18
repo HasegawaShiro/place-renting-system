@@ -109,7 +109,7 @@ class User {
     public static function messages() {
         return [
             'invalid-username' => ':attribute 只能包含英數字',
-            'invalid-phone' => ':attribute 須為10個數字格式'
+            'invalid-phone' => ':attribute 只能輸入數字(0-9), 加號(+), 連字號(-)與井字號(#)'
         ];
     }
 
