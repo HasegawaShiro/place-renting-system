@@ -3,7 +3,6 @@
     page="util"
     form-mode="universal"
     :has-form="true"
-    :show-buttons="showButtons"
     ref="layout"
   >
     <List
