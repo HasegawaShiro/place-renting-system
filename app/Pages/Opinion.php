@@ -55,7 +55,7 @@ class Opinion {
         $pass = true;
 
         $auth = SessionUtil::getLoginUser();
-        if($auth['id'] !== 1) $pass = false;
+        if($auth['id'] !== 1 && $status !== 'add') $pass = false;
 
         return $pass;
     }
