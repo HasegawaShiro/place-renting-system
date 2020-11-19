@@ -13,9 +13,22 @@
                     <th></th>
                     <th
                         v-for="field in fields"
-                        :key="'column-'+field.Name"
+                        :key="'column-head-'+field.Name"
+                        class="clickable"
+                        @click="theadClick(field.Name)"
                     >
                         {{field.Text}}
+                        <template v-if="orders.findIndex(x => x.name == field.Name) >= 0">
+                            <i
+                                class="icon caret up"
+                                v-if="orders.find(x => x.name == field.Name).method == 'ASC'"
+                            ></i>
+                            <i
+                                class="icon caret down"
+                                v-else-if="orders.find(x => x.name == field.Name).method == 'DESC'"
+                            ></i>
+                            {{orders.findIndex(x => x.name == field.Name)+1}}
+                        </template>
                     </th>
                 </tr>
             </thead>
@@ -188,7 +201,7 @@ export default {
             },
             selects: {},
             filters: {},
-            orders: {},
+            orders: [],
             showButtonsMutation: ['view', 'edit', 'delete'],
         };
     },
@@ -214,7 +227,7 @@ export default {
         this.pageData = await PageUtil.getPageData(this.page);
         for(let field of this.pageData.fields().filter(x => x.Type == 'select')) {
             if(typeof field.Options.selectOptions == 'string'){
-                this.selects[field.Options.selectOptions] = await API.getReferenceSelect(field.Options.selectOptions);
+                this.selects[field.Options.selectOptions] = await API.getReferenceSelect(field.Options.selectOptions, {showDisabled: true});
             }
         }
 
@@ -323,6 +336,24 @@ export default {
 
             window.globalLoading.unloading();
         },
+        theadClick(field) {
+            console.log(field)
+            const index = this.orders.findIndex(x => x.name == field);
+            if(index >= 0) {
+                let order = this.orders[index];
+                console.log(order)
+                if(order.method == 'ASC') this.orders[index].method = 'DESC';
+                else if(order.method == 'DESC') delete this.orders[index];
+
+                this.orders = this.orders.filter(() => true);
+            } else {
+                const order = {
+                    name: field,
+                    method: 'ASC'
+                };
+                this.orders.push(order);
+            }
+        },
         async download(id) {},
         isEmpty(x) {
             return DataUtil.isEmpty(x);
@@ -351,8 +382,15 @@ thead .list-header th {
         color:  rgb(8, 138, 120);
         cursor: pointer;
     }
+    thead .list-header th.clickable:hover {
+        cursor: pointer;
+        background-color: rgb(31, 153, 137) !important;
+    }
 }
 i.download:active {
     color:  rgb(9, 114, 100);
+}
+thead .list-header th.clickable:active {
+    background-color: rgb(12, 112, 99) !important;
 }
 </style>
