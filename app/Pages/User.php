@@ -109,7 +109,9 @@ class User {
     public static function messages() {
         return [
             'invalid-username' => ':attribute 只能包含英數字',
-            'invalid-phone' => ':attribute 只能輸入數字(0-9), 加號(+), 連字號(-)與井字號(#)'
+            'invalid-phone' => ':attribute 只能輸入數字(0-9), 加號(+), 連字號(-)與井字號(#)',
+            'admin-cannot-disabled' => '您不能停用 Admin',
+            'admin-cannot-deleted' => '您不能刪除 Admin'
         ];
     }
 
@@ -171,6 +173,11 @@ class User {
         }
         $data['email'] = strtolower($data['email']);
 
+        if($status == 'edit' && $data["user_id"] == 1 && $data["user_disabled"] == true) {
+            $pass = false;
+            array_push($result["messages"], self::messages()['admin-cannot-disabled']);
+        }
+
         return $pass;
     }
 
@@ -196,7 +203,7 @@ class User {
         $pass = true;
         if($data['util_id'] == 1) {
             $pass = false;
-            array_push($result['messages'], "您不能刪除Admin");
+            array_push($result['messages'], self::messages()["admin-cannot-deleted"]);
         } else {
             $origin = _MODEL::find($data['util_id']);
             $toCheck = [
