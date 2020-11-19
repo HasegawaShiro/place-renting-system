@@ -5,12 +5,17 @@ export default class API {
     static sendRequest(url, method = 'get', data = null, options = {}) {
         const allowedMethods = ['get', 'post', 'put', 'delete'];
         method = method.toLowerCase();
-        const toSendData = method == "get" ? {params: data} : data;
+        let toSendData = data;
+        if(method == 'get' || method == 'delete') {
+            toSendData = {params: data};
+        }
+
         if(options.hasFile === true) {
             let tmp = new FormData();
             for(let d in data) {
                 tmp.append(d,data[d]);
             }
+            toSendData = tmp;
             window.$nuxt.$axios.setHeader({'Content-Type': 'multipart/form-data'});
         } else {
             window.$nuxt.$axios.setHeader({'Content-Type': 'application/json'});
