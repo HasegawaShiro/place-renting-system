@@ -278,13 +278,13 @@
                     </tbody>
                     <tbody v-else-if="config.mode === 'week'">
                         <tr
-                            v-for="(text, id) in placeOfWeek"
+                            v-for="(place, id) in placeOfWeek"
                             :key="'week-place-'+id"
                         >
-                            <td class="colorful place cell">{{text}}</td>
+                            <td class="colorful place cell">{{place.text}}</td>
                             <td
                                 class="day cell"
-                                v-for="(schedules, day) in schedulesByWeekWithPlace(id)"
+                                v-for="(schedules, day) in place.schedules"
                                 :key="'week-day-'+day"
                                 :class="{clickable: schedules.length <= 0 && isLogin}"
                             >
@@ -402,13 +402,33 @@ export default {
     props:{},
     computed:{
         placeOfWeek() {
+            let result = {};
             if(DataUtil.isEmpty(this.filters.place)){
-                return this.selects.place;
-            }else{
-                let result = {};
-                result[this.filters.place] = this.selects.place[this.filters.place];
-                return result;
+                if(!DataUtil.isEmpty(this.selects.place)){
+                    result = DataUtil.deepClone(this.selects.place);
+                }
+            } else {
+                result[this.filters.place] = DataUtil.deepClone(this.selects.place[this.filters.place]);
             }
+
+            for(let id in result) {
+                const schedules = this.schedulesByWeekWithPlace(id);
+                /* let isEmpty = DataUtil.isEmpty(...schedules);
+                if(!isEmpty) {
+                    result[id] = {
+                        text: result[id],
+                        schedules
+                    }
+                } else {
+                    delete result[id];
+                } */
+                result[id] = {
+                    text: result[id],
+                    schedules
+                }
+            }
+
+            return result;
         },
         isLogin() {
             return this.$parent.isLogin;
@@ -429,13 +449,7 @@ export default {
                 result[day.date.getDay()] = this.schedules.filter(x => {
                     let toShow = true;
                     if(x.schedule_date != dateText) toShow = false;
-                    for(let f in this.filters){
-                        if(f != 'type' && !DataUtil.isEmpty(this.filters[f]) && x[`${f}_id`] != this.filters[f]){
-                            toShow = false;
-                        }else if(f == 'type' && !DataUtil.isEmpty(this.filters[f]) && x.schedule_type != this.filters[f]){
-                            toShow = false;
-                        }
-                    }
+
                     return toShow;
                 });
             }
