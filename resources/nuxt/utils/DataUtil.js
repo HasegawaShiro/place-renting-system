@@ -192,6 +192,14 @@ export default class DataUtil{
         return `${year}-${fillZero(month)}-${fillZero(day)}`
     }
 
+    static dateTextToDateObject(datetext) {
+        const textSplit = datetext.split('-');
+        if(textSplit.length == 3) {
+            textSplit[1]--;
+            return new Date(...textSplit);
+        }
+    }
+
     static decimalToBinary(int, fill = 0) {
         let bin = int.toString(2);
         let len = fill - bin.length < 0 ? 0 : fill - bin.length;
