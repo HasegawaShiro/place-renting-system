@@ -60,25 +60,13 @@
                                 <div
                                     v-if="sd.deletable"
                                     class="item"
-                                    @click="deleteClick(sd.schedule_id)"
+                                    @click="deleteClick(sd.schedule_id, sd)"
                                 >
                                     <i class="trash icon"></i>
                                     <span class="item-text tablet or large device only text">刪除</span>
                                 </div>
                             </div>
                             <div class="fourteen wide column schedule-main">
-                                <!-- <div class="ts list">
-                                    <div class="item">
-                                        {{CONSTANTS.FORM_TEXT.schedule_from}}：
-                                        {{sd.schedule_from}}
-                                    </div>
-                                </div>
-                                <div class="ts list">
-                                    <div class="item">
-                                        {{CONSTANTS.FORM_TEXT.schedule_to}}：
-                                        {{sd.schedule_to}}
-                                    </div>
-                                </div> -->
                                 <div class="ts list">
                                     <div class="item">
                                         {{CONSTANTS.FORM_TEXT.repeat}}：
@@ -274,22 +262,55 @@ export default {
             this.$parent.$refs["form"].openModal('edit', data);
             this.closeModal();
         },
-        async deleteClick(id) {
-            await API.sendRequest(`/api/data/schedule/${id}`,'delete').then(response => {
-                function deleteSchedule(source, id) {
-                    const toDelete = source.findIndex(x => x.schedule_id == id);
-                    if(toDelete != -1) delete source[toDelete];
-                    return source.filter(() => true);
+        async deleteClick(id, data) {
+            let requestData = {};
+            let before = {
+                pass: true,
+                data: {},
+                message: null,
+            };
+            let dateText = "";
+            let toParseDate = new Date();
+
+            if(!DataUtil.isEmpty(this.showDate) && this.showDate.constructor == Date) {
+                toParseDate = this.showDate;
+            }
+            dateText = DataUtil.formatDateInput(toParseDate);
+
+            if(typeof window.$page.$refs.content.beforeDelete == 'function') {
+                this.closeModal();
+                before = await window.$page.$refs.content.beforeDelete(data);
+                if(before.pass === false) {
+                    window.mainLayout.showSnackbar("error", before.message);
+                } else {
+                    requestData = before.data;
                 };
-                this.schedules = deleteSchedule(this.schedules, id);
-                window.$page.$refs["content"].schedules = deleteSchedule(window.$page.$refs["content"].schedules, id);
-                window.mainLayout.showSnackbar("success", response.data.messages);
-            }).catch(e => {
-                if(!DataUtil.isEmpty(e.response.data.messages)) {
-                    window.mainLayout.showSnackbar("error", e.response.data.messages);
-                }
-            });
+            } else {
+                before.pass = confirm(CONSTANTS.messages["delete-confirmation"]);
+            }
+
+            if(before.pass){
+                window.globalLoading.loading();
+                await API.sendRequest(`/api/data/schedule/${id}`, 'delete', requestData).then(async response => {
+                    /* function deleteSchedule(source, id) {
+                        const toDelete = source.findIndex(x => x.schedule_id == id);
+                        if(toDelete != -1) delete source[toDelete];
+                        return source.filter(() => true);
+                    };
+                    this.schedules = deleteSchedule(this.schedules, id);
+                    window.$page.$refs["content"].schedules = deleteSchedule(window.$page.$refs["content"].schedules, id); */
+                    await window.$page.$refs.content.getListDatas();
+                    window.mainLayout.showSnackbar("success", response.data.messages);
+                }).catch(e => {
+                    if(!DataUtil.isEmpty(e.response.data.messages)) {
+                        window.mainLayout.showSnackbar("error", e.response.data.messages);
+                    }
+                });
+            }
+            window.globalLoading.unloading();
+            window.$page.$refs.content.scheduleClick(dateText);
         },
+        parseRepeat(schedule) {},
     },
 };
 </script>

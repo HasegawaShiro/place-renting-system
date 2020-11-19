@@ -81,14 +81,33 @@
                                         @click="calendarChange('prevMonth')"
                                     ></i>
                                 </template>
-                                <i
-                                    v-if="config.mode === 'month'"
-                                    class="month day button"
-                                    @click="toggleMonthSelector()"
-                                >
-                                    {{calendar.Year}}
-                                    {{calendar.Month}}
-                                </i>
+                                <template v-if="config.mode === 'month'">
+                                    <i
+                                        class="month day button"
+                                        @click="monthSelectorClick()"
+                                    >
+                                        {{calendar.Year}}
+                                        {{calendar.Month}}
+                                    </i>
+                                    <div class="ts modals dimmer">
+                                        <dialog class="ts mini modal month-selector">
+                                            <div class="header">
+                                                {{CONSTANTS.messages['month-selector']}}
+                                            </div>
+                                            <div class="content">
+                                                <input type="month">
+                                            </div>
+                                            <div class="actions">
+                                                <button class="ts deny button">
+                                                    取消
+                                                </button>
+                                                <button class="ts positive button">
+                                                    確定
+                                                </button>
+                                            </div>
+                                        </dialog>
+                                    </div>
+                                </template>
                                 <i
                                     v-else-if="config.mode === 'week'"
                                     class="week day button"
@@ -97,15 +116,34 @@
                                     ~
                                     {{calendar.getDateToString(calendar.getDatesOfWeek()[6])}}
                                 </i>
-                                <i
-                                    v-else-if="config.mode === 'list'"
-                                    class="from to button"
-                                >
-                                    {{filters.schedule_date_from}}
-                                    ~
-                                    {{filters.schedule_date_to}}
-                                </i>
-                                <MonthSelector v-if="config.mode === 'month'" :modal-open="monthSelectorOpen"></MonthSelector>
+                                <template v-else-if="config.mode === 'list'">
+                                    <i class="from to button" @click="fromToSelectorClick">
+                                        {{selectors.from}}
+                                        ~
+                                        {{selectors.to}}
+                                    </i>
+                                    <div class="ts modals dimmer">
+                                        <dialog class="ts mini modal from-to-selector">
+                                            <div class="header">
+                                                {{CONSTANTS.messages['from-to-selector']}}
+                                            </div>
+                                            <div class="content">
+                                                {{CONSTANTS.messages['from']}}
+                                                <input type="date" v-model="selectors.from"><br>
+                                                {{CONSTANTS.messages['to']}}
+                                                <input type="date" v-model="selectors.to">
+                                            </div>
+                                            <div class="actions">
+                                                <button class="ts deny button">
+                                                    取消
+                                                </button>
+                                                <button class="ts positive button">
+                                                    確定
+                                                </button>
+                                            </div>
+                                        </dialog>
+                                    </div>
+                                </template>
                                 <template v-if="config.mode !== 'list'">
                                     <i
                                         v-if="config.mode === 'month'"
@@ -298,7 +336,6 @@
 <script>
 import CONSTANTS from '../../constants.js';
 import Calendar from '../../classes/calendar.js';
-import MonthSelector from './items/month-selector.vue';
 import List from '../lists/universal.vue';
 import API from '../../api.js';
 import functions from '../../functions.js';
@@ -310,7 +347,6 @@ export default {
             CONSTANTS: CONSTANTS.calendar,
             config: {
                 mode: 'month',
-                'repeat-action': 'edit',
                 'repeat-mode': 'one',
             },
             headerColspan: {
@@ -330,6 +366,12 @@ export default {
                 util: null,
                 type : null
             },
+            selectors: {
+                month: '',
+                week: '',
+                from: '',
+                to: '',
+            },
             calendar: new Calendar(),
             schedules: [],
             monthSelectorOpen: false,
@@ -342,6 +384,8 @@ export default {
 
         this.filters.schedule_date_from = DataUtil.formatDateInput(this.calendar.getStartOfCalendar());
         this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
+        this.selectors.from = this.filters.schedule_date_from;
+        this.selectors.to = this.filters.schedule_date_to;
         await this.getListDatas();
 
         const that = this;
@@ -427,8 +471,10 @@ export default {
         async calendarChange(method = null, ...params) {
             if(method !== null) await this.calendar[method](...params);
 
-            this.filters.schedule_date_from = this.calendar.getStartOfCalendar();
-            this.filters.schedule_date_to = this.calendar.getEndOfCalendar();
+            this.filters.schedule_date_from = DataUtil.formatDateInput(this.calendar.getStartOfCalendar());
+            this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
+            this.selectors.from = this.filters.schedule_date_from;
+            this.selectors.to = this.filters.schedule_date_to;
             this.getListDatas();
             this.$forceUpdate();
             this.$emit("change", this.calendar);
@@ -448,9 +494,6 @@ export default {
                 this.calendar.nextWeek();
             }
             this.calendarChange();
-        },
-        toggleMonthSelector() {
-            this.monthSelectorOpen = !this.monthSelectorOpen;
         },
         async getListDatas() {
             if(window.globalLoading != undefined) window.globalLoading.loading();
@@ -495,11 +538,38 @@ export default {
         },
         scheduleClick(dateText, id = 0) {
             let schedule = this.schedulesByDay()[dateText];
+            const date = DataUtil.dateTextToDateObject(dateText);
             window.$page.$refs["schedule-events"].openModal({
                 schedules: schedule,
-                showDate: schedule[0].date,
+                showDate: date,
                 active_id: id,
             });
+        },
+        monthSelectorClick() {
+
+        },
+        fromToSelectorClick() {
+            const that = this;
+            let oldVal = DataUtil.deepClone(that.selectors);
+            const fromToSelector = new Promise((resolve, reject) => {
+                ts('.from-to-selector').modal({
+                    onApprove: function() {
+                        resolve();
+                    },
+                    onDeny: function() {
+                        reject();
+                    }
+                }).modal('show');
+            });
+
+            fromToSelector.then(() => {
+                const newVal = DataUtil.deepClone(that.selectors);
+                if(newVal.from != oldVal.from || newVal.to != oldVal.to) {
+                    that.filters.schedule_date_from = newVal.from;
+                    that.filters.schedule_date_to = newVal.to;
+                    that.getListDatas();
+                }
+            }).catch(() => {});
         },
         async changeMode(mode) {
             if(this.config.mode != mode){
@@ -517,32 +587,32 @@ export default {
                 data: {},
                 message: null,
             };
-            const deleteComfirmation = new Promise((resolve, reject) => {
-                ts('.delete-confirmation').modal({
-                    onDeny: function() {
-                        reject(false);
-                    },
-                    onApprove: function() {
-                        resolve(true);
-                    }
-                }).modal("show");
-            });
+            this.config['repeat-mode'] = 'one';
 
             if(data.schedule_repeat) {
+                const deleteComfirmation = new Promise((resolve, reject) => {
+                    ts('.delete-confirmation').modal({
+                        onDeny: function() {
+                            reject();
+                        },
+                        onApprove: function() {
+                            resolve();
+                        }
+                    }).modal("show");
+                });
                 await deleteComfirmation.then(x => {
                     result.data['repeat-mode'] = this.config['repeat-mode'];
                 }).catch(x => {
                     result.pass = false;
                 });
             } else {
-                result.pass = confirm(CONSTANTS.messages["delete-confirmation"]);
+                result.pass = await confirm(CONSTANTS.messages["delete-confirmation"]);
             }
 
             return result;
         },
     },
     components:{
-        MonthSelector,
         List,
     },
 }

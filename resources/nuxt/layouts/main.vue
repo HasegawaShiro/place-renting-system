@@ -25,8 +25,6 @@
                     :href="`/${p.url}`"
                 >{{p.text}}</a>
             </template>
-
-
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
         <div class="squeezable pusher" id="sidebar-pusher">

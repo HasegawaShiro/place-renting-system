@@ -81,7 +81,7 @@ class Schedule {
                 ],
                 'schedule_end_times' => [
                     'integer',
-                    'max:40'
+                    'max:24'
                 ],
                 'schedule_registrant' => [
                     'nullable',
@@ -346,15 +346,22 @@ class Schedule {
         return $success;
     }
 
-    public static function beforeDelete(Array $data, Array &$result) {
+    public static function beforeDelete(Array $data, Array &$result, Array $options) {
         $pass = true;
 
         $today = strtotime("today");
         $deleteDate = strtotime($data["schedule_date"]);
-        // dd($today, $deleteDate);
+
         if($deleteDate < $today) {
             array_push($result['messages'],'無法刪除已過期資料');
             $pass = false;
+        }
+
+        if(isset($options['repeat-mode']) && $options['repeat-mode'] == 'all') {
+            $models = _MODEL::where('repeat_id', $data['repeat_id'])->get();
+            foreach($models as $model) {
+                $model->delete();
+            }
         }
 
         return $pass;
