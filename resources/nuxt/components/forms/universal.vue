@@ -206,8 +206,7 @@ export default {
             this.fields = [];
             for(let field of this.pageData.fields().sort((a,b) => {return a.formOrder - b.formOrder})) {
                 let toShow = field.Options.showOnForm === true;
-                if(field.Options.hideOnAdd === true && this.config.mode == 'add') toShow = false;
-                if(field.Options.hideOnEdit === true && this.config.mode == 'edit') toShow = false;
+                if(field.Options.hideOnAdd === true) toShow = false;
 
                 if(toShow) {
                     this.fields.push(field);
@@ -244,7 +243,9 @@ export default {
             this.input = {};
             this.fields = [];
             for(let field of this.pageData.fields().sort((a,b) => {return a.formOrder - b.formOrder})) {
-                if((field.Options.showOnForm === true && this.config.mode !== 'view') || (this.config.mode === 'view' && !field.Options.hideOnView)) {
+                let toShow = field.Options.showOnForm === true;
+                if((this.config.mode == 'view' && field.Options.hideOnView === true) || (this.config.mode == 'edit' && field.Options.hideOnEdit === true)) toShow = false;
+                if(toShow) {
                     this.fields.push(field);
                     if(DataUtil.isEmpty(data[field.Name])) {
                         this.$set(this.input, field.Name, field.Options.default);

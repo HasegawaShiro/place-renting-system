@@ -523,7 +523,6 @@ class Opinion {
                 'boolean',
                 {
                     listOrder:5,
-                    showOnForm: false,
                     trueText: '已完成',
                     falseText: '未完成',
                     hideOnAdd: true,
