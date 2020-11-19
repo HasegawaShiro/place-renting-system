@@ -1,5 +1,6 @@
 <template>
     <div class="nchu calendar">
+        <!-- Delete confirmation -->
         <div class="ts modals dimmer">
             <dialog class="ts mini modal delete-confirmation">
                 <div class="header">
@@ -28,6 +29,28 @@
                             <label for="repeat-all">{{CONSTANTS.messages['repeat-all']}}</label>
                         </div>
                     </div>
+                </div>
+                <div class="actions">
+                    <button class="ts deny button">
+                        取消
+                    </button>
+                    <button class="ts positive button">
+                        確定
+                    </button>
+                </div>
+            </dialog>
+        </div>
+        <!-- From to selector -->
+        <div class="ts modals dimmer" v-if="">
+            <dialog class="ts mini modal calendar-seletor from-to-selector">
+                <div class="header">
+                    {{CONSTANTS.messages['from-to-selector']}}
+                </div>
+                <div class="content">
+                    {{CONSTANTS.messages['from']}}
+                    <input type="date" v-model="selectors.from"><br>
+                    {{CONSTANTS.messages['to']}}
+                    <input type="date" v-model="selectors.to">
                 </div>
                 <div class="actions">
                     <button class="ts deny button">
@@ -116,34 +139,15 @@
                                     ~
                                     {{calendar.getDateToString(calendar.getDatesOfWeek()[6])}}
                                 </i>
-                                <template v-else-if="config.mode === 'list'">
-                                    <i class="from to button" @click="fromToSelectorClick">
-                                        {{selectors.from}}
-                                        ~
-                                        {{selectors.to}}
-                                    </i>
-                                    <div class="ts modals dimmer">
-                                        <dialog class="ts mini modal from-to-selector">
-                                            <div class="header">
-                                                {{CONSTANTS.messages['from-to-selector']}}
-                                            </div>
-                                            <div class="content">
-                                                {{CONSTANTS.messages['from']}}
-                                                <input type="date" v-model="selectors.from"><br>
-                                                {{CONSTANTS.messages['to']}}
-                                                <input type="date" v-model="selectors.to">
-                                            </div>
-                                            <div class="actions">
-                                                <button class="ts deny button">
-                                                    取消
-                                                </button>
-                                                <button class="ts positive button">
-                                                    確定
-                                                </button>
-                                            </div>
-                                        </dialog>
-                                    </div>
-                                </template>
+                                <i
+                                    v-else-if="config.mode === 'list'"
+                                    class="from to button"
+                                    @click="fromToSelectorClick"
+                                >
+                                    {{selectors.from}}
+                                    ~
+                                    {{selectors.to}}
+                                </i>
                                 <template v-if="config.mode !== 'list'">
                                     <i
                                         v-if="config.mode === 'month'"
@@ -378,9 +382,9 @@ export default {
         };
     },
     async mounted() {
-        this.selects.user = await API.getReferenceSelect("user");
+        this.selects.user = await API.getReferenceSelect("user", {showDisabled: true});
         this.selects.place = await API.getReferenceSelect("place", {showDisabled: true});
-        this.selects.util = await API.getReferenceSelect("util");
+        this.selects.util = await API.getReferenceSelect("util", {showDisabled: true});
 
         this.filters.schedule_date_from = DataUtil.formatDateInput(this.calendar.getStartOfCalendar());
         this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
@@ -583,7 +587,9 @@ export default {
                     that.filters.schedule_date_to = newVal.to;
                     that.getListDatas();
                 }
-            }).catch(() => {});
+            }).catch(() => {
+                that.selectors = oldVal;
+            });
         },
         async changeMode(mode) {
             if(this.config.mode != mode){
@@ -664,11 +670,14 @@ export default {
     margin-left: 1.5em;
     margin-right: 1.5em;
 }
-.nchu.calendar div.main .colorful {
+.nchu.calendar div.main td.colorful, .nchu.calendar div.main th.colorful {
     background-color: rgb(8, 138, 120);
     color: #fff;
     text-align: center;
     font-size: 22px;
+}
+.nchu.calendar .calendar-seletor .content {
+    text-align: center;
 }
 .nchu.calendar div.main td.search {
     font-size: .8em;
