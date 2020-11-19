@@ -331,7 +331,10 @@ export default {
             let loginFormData = new FormData();
             loginFormData.set('username',this.input.username);
             loginFormData.set('password',this.input.password);
-            await API.sendRequest("/api/login", "post", loginFormData, {onlyData: true}).then(data => {
+            await API.sendRequest("/api/login", "post", loginFormData, {
+                onlyData: true,
+                doNotRelogin: true,
+            }).then(data => {
                 this.user = data.user;
                 ts('.success.snackbar').snackbar({
                     content: DataUtil.parseResponseMessages(data.message)
@@ -341,16 +344,23 @@ export default {
                 // this.closeLoginModal();
             }).catch(e => {
                 this.loginLoading = false;
-                let errorData = e.response.data;
-                if(errorData.message == "The given data was invalid."){
-                    ts('.error.snackbar').snackbar({
-                        content: DataUtil.getMessage('login-error')
-                    });
-                } else {
-                    ts('.error.snackbar').snackbar({
-                        content: DataUtil.parseResponseMessages(errorData.message)
-                    });
+                try {
+                    let errorData = e.response.data;
+
+                    if(errorData.message == "The given data was invalid."){
+                        ts('.error.snackbar').snackbar({
+                            content: DataUtil.getMessage('login-error')
+                        });
+                    } else {
+                        ts('.error.snackbar').snackbar({
+                            content: DataUtil.parseResponseMessages(errorData.message)
+                        });
+                    }
+                } catch (error) {
+                    console.log(JSON.stringify(e));
+                    this.showSnackbar('error', ['unknown-error','contact-maintenance'])
                 }
+
             });
             this.input.username = null;
             this.input.password = null;
@@ -368,7 +378,7 @@ export default {
             if(!DataUtil.isEmpty(auth.data)) {
                 this.$refs["profile"].openModal('edit', auth.data.datas[0]);
             } else {
-                showSnackbar('error', ['unknown-error','contact-maintenance'])
+                this.showSnackbar('error', ['unknown-error','contact-maintenance'])
             }
         },
         async profileSaved() {
