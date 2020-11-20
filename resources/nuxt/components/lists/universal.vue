@@ -114,8 +114,21 @@
                 <th
                     v-for="field in fields"
                     :key="'column-'+field.Name"
+                    class="clickable"
+                    @click="theadClick(field.Name)"
                 >
                     {{field.Text}}
+                    <template v-if="orders.findIndex(x => x.name == field.Name) >= 0">
+                        <i
+                            class="icon caret up"
+                            v-if="orders.find(x => x.name == field.Name).method == 'ASC'"
+                        ></i>
+                        <i
+                            class="icon caret down"
+                            v-else-if="orders.find(x => x.name == field.Name).method == 'DESC'"
+                        ></i>
+                        {{orders.findIndex(x => x.name == field.Name)+1}}
+                    </template>
                 </th>
             </tr>
         </thead>
@@ -276,17 +289,18 @@ export default {
         },
     },
     methods: {
-        async getListDatas() {
+        async getListDatas(options = {}) {
             const URL = "/api/data/"+this.page;
             let params = DataUtil.deepClone(this.getParams);
             params.filters = this.filters;
             params.orders = this.orders;
+            params.pagination = true;
 
             await API.sendRequest(URL, 'get', params).then(response => {
                 this.listData = response.data.datas;
             }).catch(e => {});
 
-            if(!this.hasHeader && window.contentLoaded === true) {
+            if((!this.hasHeader && window.contentLoaded === true) || options.unload === true) {
                 window.globalLoading.unloading();
             }
         },
@@ -337,11 +351,10 @@ export default {
             window.globalLoading.unloading();
         },
         theadClick(field) {
-            console.log(field)
+            window.globalLoading.loading();
             const index = this.orders.findIndex(x => x.name == field);
             if(index >= 0) {
                 let order = this.orders[index];
-                console.log(order)
                 if(order.method == 'ASC') this.orders[index].method = 'DESC';
                 else if(order.method == 'DESC') delete this.orders[index];
 
@@ -353,6 +366,8 @@ export default {
                 };
                 this.orders.push(order);
             }
+
+            this.getListDatas({unload: true});
         },
         async download(id) {},
         isEmpty(x) {

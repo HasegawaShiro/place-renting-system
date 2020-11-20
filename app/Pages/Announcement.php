@@ -62,11 +62,17 @@ class Announcement {
     }
 
     public static function getData($request, $id = null) {
-        $query = new _MODEL();
+        $query = (new _MODEL())->query();
         $auth = SessionUtil::getLoginUser();
         $models = [];
         $collect = collect([]);
+        $orders = isset($request->orders) ? array_map(function($arr) {
+            return (array) json_decode($arr);
+        }, $request->orders) : [];
 
+        foreach($orders as $order) {
+            $query->orderBy($order["name"], $order["method"]);
+        }
         $models = $query->get();
         foreach ($models as $model) {
             $announcement = $model->toArray();

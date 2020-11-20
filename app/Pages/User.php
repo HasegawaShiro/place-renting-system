@@ -130,10 +130,20 @@ class User {
         $query = new _MODEL();
         $models = [];
         $collect = collect([]);
-        $filters = isset($request->filters) ? $request->filters : [];
-        $orders = isset($request->orders) ? $request->orders : ['user_id'];
+        $orders = isset($request->orders) && !empty($request->orders) ? array_map(function($arr) {
+            return (array) json_decode($arr);
+        }, $request->orders) : [
+            [
+                'name' => 'user_id',
+                'method' => 'ASC'
+            ]
+        ];
 
         if(is_null($id)) {
+            $query = (new _MODEL())->query();
+            foreach($orders as $order) {
+                $query->orderBy($order["name"], $order["method"]);
+            }
             $models = $query->get();
         } else {
             array_push($models, $query::find($id));

@@ -142,10 +142,19 @@ class Schedule {
         $models = [];
         $collect = collect([]);
         $filters = isset($request->filters) ? (array) json_decode($request->filters) : [];
-        $orders = isset($request->orders) && empty($request->orders) ? (array) json_decode($request->orders) : [
-            'schedule_date' => 'DESC',
-            'schedule_from' => 'ASC'
+        $orders = isset($request->orders) && !empty($request->orders) ? array_map(function($arr) {
+            return (array) json_decode($arr);
+        }, $request->orders) : [
+            [
+                'name' => 'schedule_date',
+                'method' => 'DESC'
+            ],
+            [
+                'name' => 'schedule_from',
+                'method' => 'ASC'
+            ],
         ];
+        $paginate = isset($request->filters) ? json_decode($request->pagination) : false;
 
         if(is_null($id)) {
             $query = $query->query();
@@ -165,8 +174,8 @@ class Schedule {
                 $query->where("schedule_type", $filters["schedule_type"]);
             }
 
-            foreach($orders as $key => $order) {
-                $query->orderBy($key, $order);
+            foreach($orders as $order) {
+                $query->orderBy($order['name'], $order['method']);
             }
 
             $models = $query->get();
