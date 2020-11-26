@@ -8,4 +8,14 @@ class DataUtil {
         }
         return $message;
     }
+
+    /* public static function sortByKeys($datas, $keys = []) {
+        if(self::isCollection($datas)) {
+            $datas->sortBy(function($))
+        }
+    } */
+
+    public static function isCollection($object){
+        return is_a($object,'Illuminate\Database\Eloquent\Collection') || is_a($object,'Illuminate\Support\Collection');
+    }
 }

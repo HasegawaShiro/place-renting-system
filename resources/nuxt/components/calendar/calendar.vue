@@ -41,16 +41,28 @@
             </dialog>
         </div>
         <!-- From to selector -->
-        <div class="ts modals dimmer" v-if="">
+        <div class="ts modals dimmer" v-if="config.mode === 'list'">
             <dialog class="ts mini modal calendar-seletor from-to-selector">
                 <div class="header">
                     {{CONSTANTS.messages['from-to-selector']}}
                 </div>
                 <div class="content">
                     {{CONSTANTS.messages['from']}}
-                    <input type="date" v-model="selectors.from"><br>
+                    <input
+                        type="date"
+                        v-model="selectors.from"
+                        :min="config['from-to-min']"
+                        :max="config['from-to-max']"
+                        @change="computeFromToLimit"
+                    ><br>
                     {{CONSTANTS.messages['to']}}
-                    <input type="date" v-model="selectors.to">
+                    <input
+                        type="date"
+                        v-model="selectors.to"
+                        :min="config['from-to-min']"
+                        :max="config['from-to-max']"
+                        @change="computeFromToLimit"
+                    >
                 </div>
                 <div class="actions">
                     <button class="ts deny button">
@@ -352,6 +364,8 @@ export default {
             config: {
                 mode: 'month',
                 'repeat-mode': 'one',
+                'from-to-max': null,
+                'from-to-min': null,
             },
             headerColspan: {
                 month: 7,
@@ -390,6 +404,7 @@ export default {
         this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
         this.selectors.from = this.filters.schedule_date_from;
         this.selectors.to = this.filters.schedule_date_to;
+        this.computeFromToLimit();
         await this.getListDatas();
 
         const that = this;
@@ -590,6 +605,7 @@ export default {
             }).catch(() => {
                 that.selectors = oldVal;
             });
+            this.computeFromToLimit();
         },
         async changeMode(mode) {
             if(this.config.mode != mode){
@@ -630,6 +646,18 @@ export default {
             }
 
             return result;
+        },
+        computeFromToLimit() {
+            const from = this.selectors.from.split('-');
+            const to = this.selectors.to.split('-');
+            from[1]--;
+            to[1]--;
+            let max = new Date(...from);
+            let min = new Date(...to);
+            max.setDate(max.getDate() + 45);
+            min.setDate(min.getDate() - 45);
+            this.$set(this.config,'from-to-max',DataUtil.formatDateInput(max));
+            this.$set(this.config,'from-to-min',DataUtil.formatDateInput(min));
         },
     },
     components:{
