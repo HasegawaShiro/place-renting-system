@@ -71,11 +71,22 @@ class Schedule extends Model
         'updated_by',
     ];
 
-    public function user(){
+    public function user() {
         return $this->belongsTo('App\Models\User', 'user_id', 'user_id');
     }
 
-    public function place(){
+    public function util() {
+        return $this->hasOneThrough(
+            'App\Models\Util',
+            'App\Models\User',
+            'user_id',
+            'util_id',
+            'user_id',
+            'user_id'
+        );
+    }
+
+    public function place() {
         return $this->belongsTo('App\Models\Place', 'place_id', 'place_id');
     }
 

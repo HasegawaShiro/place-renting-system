@@ -3,6 +3,7 @@ namespace App\Pages;
 
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\User;
 use App\Models\Place;
@@ -137,7 +138,9 @@ class Schedule {
     }
 
     public static function getData($request, $id = null) {
-        $query = new _MODEL();
+        $query = _MODEL::with(['util','user','place']);
+        /* $query = DB::table('schedules')
+        ->leftjoin('utils', 'util_id'); */
         $auth = SessionUtil::getLoginUser();
         $models = [];
         $collect = collect([]);
@@ -157,7 +160,7 @@ class Schedule {
         $paginate = isset($request->filters) ? json_decode($request->pagination) : false;
 
         if(is_null($id)) {
-            $query = $query->query();
+            // $query = $query->query();
             if(isset($filters["schedule_date_from"])) {
                 $query->whereDate("schedule_date", '>=', $filters["schedule_date_from"]);
             }
@@ -173,52 +176,57 @@ class Schedule {
             if(isset($filters["schedule_type"])) {
                 $query->where("schedule_type", $filters["schedule_type"]);
             }
-
-            foreach($orders as $order) {
-                $query->orderBy($order['name'], $order['method']);
+            if(isset($filters["util_id"])) {
+                $query->with(['util' => function($q) use ($filters) {
+                    $q->where('utils.util_id', $filters["util_id"]);
+                }]);
             }
 
+            foreach($orders as $order) {
+                if(isset($order["from"]) && !is_null($order["from"])) {
+                    $query->with([$order['from'] => function($q) use ($order) {
+                        $q->orderBy("{$order['from']}s.{$order['name']}", $order['method']);
+                    }]);
+                } else {
+                    $query->orderBy($order["name"], $order['method']);
+                }
+            }
             $models = $query->get();
         } else {
-            array_push($models, $query::find($id));
+            array_push($models, $query->where('schedule_id', $id));
         }
+        $models = $query->get();
 
         $today = Carbon::today()->timestamp;
         $repeated = [];
         foreach ($models as $model) {
-            $schedule = $model->toArray();
-            $user_MODEL = $model->user()->first();
-            $user = $user_MODEL->toArray();
-            $util = $user_MODEL->util()->first()->toArray();
-            $place = $model->place()->first()->toArray();
+            try {
+                $schedule = $model->toArray();
 
-            $schedule["user_name"] = $user["name"];
-            $schedule["phone"] = $user["phone"];
-            $schedule["email"] = $user["email"];
-            $schedule["util_name"] = $util["util_name"];
-            $schedule["util_id"] = $util["util_id"];
-            $schedule["place_name"] = $place["place_name"];
-            $schedule["place_disabled"] = $place["place_disabled"];
+                $schedule["user_name"] = $model->user->name;
+                $schedule["phone"] = $model->user->phone;
+                $schedule["email"] = $model->user->email;
+                $schedule["util_name"] = $model->util->util_name;
+                $schedule["util_id"] = $model->util->util_id;
+                $schedule["place_name"] = $model->place->place_name;
+                $schedule["place_disabled"] = $model->place->place_disabled;
 
-            if(!is_null($schedule["repeat_id"])) {
-                if(array_search($schedule["repeat_id"], $repeated) === false) {
-                    array_push($repeated, $schedule["repeat_id"]);
-                } else {
-                    $schedule["showOnList"] = false;
+                if(!is_null($schedule["repeat_id"])) {
+                    if(array_search($schedule["repeat_id"], $repeated) === false) {
+                        array_push($repeated, $schedule["repeat_id"]);
+                    } else {
+                        $schedule["showOnList"] = false;
+                    }
                 }
-            }
-            if(($auth["id"] === 1 || $auth["id"] === $schedule["created_by"]) && strtotime($schedule["schedule_date"]) >= $today) {
-                $schedule["editable"] = true;
-                $schedule["deletable"] = true;
-            } else {
-                $schedule["editable"] = false;
-                $schedule["deletable"] = false;
-            }
-            $collect->add($schedule);
-        }
-
-        if(is_null($id) && isset($filters["util_id"])) {
-            $collect = $collect->where('util_id', $filters["util_id"]);
+                if(($auth["id"] === 1 || $auth["id"] === $schedule["created_by"]) && strtotime($schedule["schedule_date"]) >= $today) {
+                    $schedule["editable"] = true;
+                    $schedule["deletable"] = true;
+                } else {
+                    $schedule["editable"] = false;
+                    $schedule["deletable"] = false;
+                }
+                $collect->add($schedule);
+            } catch (\Throwable $th) {}
         }
 
         return $collect->toArray();

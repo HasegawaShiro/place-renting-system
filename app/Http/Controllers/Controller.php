@@ -64,7 +64,9 @@ class Controller extends BaseController
         ];
         $status = 200;
         $filters = isset($request->filters) ? $request->filters : [];
-        $orders = isset($request->orders) ? $request->orders : [];
+        $orders = isset($request->orders) ? array_map(function($arr) {
+            return (array) json_decode($arr);
+        }, $request->orders) : [];
 
         $class = "App\\Pages\\".ucfirst($table);
         $page = new $class();
@@ -74,7 +76,11 @@ class Controller extends BaseController
             $class = "App\\Models\\".ucfirst($table);
             $model = new $class();
             if(is_null($id)){
-                foreach($model::all() as $data){
+                $model = $model->query();
+                foreach($orders as $order) {
+                    $model->orderBy($order["name"], $order["method"]);
+                }
+                foreach($model->get() as $data){
                     array_push($result['datas'], $data->toArray());
                 }
             }else{
