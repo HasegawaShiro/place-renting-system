@@ -101,6 +101,65 @@
                     </td>
                 </tr>
             </tbody>
+            <tfoot id="pagination-layout">
+            <tr>
+                <td class="pagination" :colspan="fields.length+1">
+                    <div
+                        class="page-button"
+                        :class="{disabled: pagination.now == 0}"
+                        @click="changePaginationByMethod('prev')"
+                    >
+                        <label>&#x2190;</label>
+                    </div>
+                    <div class="page-button" v-for="page in pagination.showLeft" :key="'page-'+page">
+                        <input
+                            type="radio"
+                            :id="'page-'+page"
+                            v-model="pagination.now"
+                            :value="page"
+                            @click="changePaginationByPage(page)"
+                        >
+                        <label :for="'page-'+page">{{page+1}}</label>
+                    </div>
+                    <template v-if="pagination.showMiddle.length>0">
+                        <div class="ignored-pages">...</div>
+                        <div class="page-button" v-for="page in pagination.showMiddle" :key="'page-'+page">
+                            <input
+                                type="radio"
+                                :id="'page-'+page"
+                                name="pagination"
+                                v-model="pagination.now"
+                                :value="page"
+                                @click="changePaginationByPage(page)"
+                            >
+                            <label :for="'page-'+page">{{page+1}}</label>
+                        </div>
+                        <div class="ignored-pages">...</div>
+                    </template>
+                    <template v-else-if="pagination.total > 5">
+                        <div class="ignored-pages">...</div>
+                    </template>
+                    <div class="page-button" v-for="page in pagination.showRight" :key="'page-'+page">
+                        <input
+                            type="radio"
+                            :id="'page-'+page"
+                            name="pagination"
+                            v-model="pagination.now"
+                            :value="page"
+                            @click="changePaginationByPage(page)"
+                        >
+                        <label :for="'page-'+page">{{page+1}}</label>
+                    </div>
+                    <div
+                        class="page-button"
+                        :class="{disabled: pagination.now == pagination.total-1 || pagination.total==0}"
+                        @click="changePaginationByMethod('next')"
+                    >
+                        <label>&#x2192;</label>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
         </table>
     </div>
     <table
@@ -244,7 +303,7 @@
                     </div>
                     <div
                         class="page-button"
-                        :class="{disabled: pagination.now == pagination.total-1}"
+                        :class="{disabled: pagination.now == pagination.total-1 || pagination.total==0}"
                         @click="changePaginationByMethod('next')"
                     >
                         <label>&#x2192;</label>
@@ -275,7 +334,7 @@ export default {
             filters: {},
             orders: [],
             pagination: {
-                per: 8,
+                per: 10,
                 now: 0,
                 total: 0,
                 datas: [],
