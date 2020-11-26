@@ -15,7 +15,7 @@
                         v-for="field in fields"
                         :key="'column-head-'+field.Name"
                         class="clickable"
-                        @click="theadClick(field.Name)"
+                        @click="theadClick(field)"
                     >
                         {{field.Text}}
                         <template v-if="orders.findIndex(x => x.name == field.Name) >= 0">
@@ -115,7 +115,7 @@
                     v-for="field in fields"
                     :key="'column-'+field.Name"
                     class="clickable"
-                    @click="theadClick(field.Name)"
+                    @click="theadClick(field)"
                 >
                     {{field.Text}}
                     <template v-if="orders.findIndex(x => x.name == field.Name) >= 0">
@@ -134,7 +134,7 @@
         </thead>
         <tbody>
             <tr
-                v-for="(data) in listData"
+                v-for="(data) in pagination.datas[pagination.now]"
                 :key="'data-'+data[dataKey]"
             >
                 <td>
@@ -193,6 +193,65 @@
                 </td>
             </tr>
         </tbody>
+        <tfoot id="pagination-layout">
+            <tr>
+                <td class="pagination" :colspan="fields.length+1">
+                    <div
+                        class="page-button"
+                        :class="{disabled: pagination.now == 0}"
+                        @click="changePaginationByMethod('prev')"
+                    >
+                        <label>&#x2190;</label>
+                    </div>
+                    <div class="page-button" v-for="page in pagination.showLeft" :key="'page-'+page">
+                        <input
+                            type="radio"
+                            :id="'page-'+page"
+                            v-model="pagination.now"
+                            :value="page"
+                            @click="changePaginationByPage(page)"
+                        >
+                        <label :for="'page-'+page">{{page+1}}</label>
+                    </div>
+                    <template v-if="pagination.showMiddle.length>0">
+                        <div class="ignored-pages">...</div>
+                        <div class="page-button" v-for="page in pagination.showMiddle" :key="'page-'+page">
+                            <input
+                                type="radio"
+                                :id="'page-'+page"
+                                name="pagination"
+                                v-model="pagination.now"
+                                :value="page"
+                                @click="changePaginationByPage(page)"
+                            >
+                            <label :for="'page-'+page">{{page+1}}</label>
+                        </div>
+                        <div class="ignored-pages">...</div>
+                    </template>
+                    <template v-else-if="pagination.total > 5">
+                        <div class="ignored-pages">...</div>
+                    </template>
+                    <div class="page-button" v-for="page in pagination.showRight" :key="'page-'+page">
+                        <input
+                            type="radio"
+                            :id="'page-'+page"
+                            name="pagination"
+                            v-model="pagination.now"
+                            :value="page"
+                            @click="changePaginationByPage(page)"
+                        >
+                        <label :for="'page-'+page">{{page+1}}</label>
+                    </div>
+                    <div
+                        class="page-button"
+                        :class="{disabled: pagination.now == pagination.total-1}"
+                        @click="changePaginationByMethod('next')"
+                    >
+                        <label>&#x2192;</label>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
     </table>
 </template>
 
@@ -205,7 +264,7 @@ import CONSTANTS from '../../constants.js';
 export default {
     data() {
         return {
-            listData: {},
+            listData: [],
             pageData: {
                 Title: '',
                 fields() {
@@ -215,6 +274,15 @@ export default {
             selects: {},
             filters: {},
             orders: [],
+            pagination: {
+                per: 8,
+                now: 0,
+                total: 0,
+                datas: [],
+                showLeft: [],
+                showMiddle: [],
+                showRight: [],
+            },
             showButtonsMutation: ['view', 'edit', 'delete'],
         };
     },
@@ -234,7 +302,7 @@ export default {
             }
 
             return result;
-        }
+        },
     },
     async mounted() {
         this.pageData = await PageUtil.getPageData(this.page);
@@ -299,6 +367,7 @@ export default {
             await API.sendRequest(URL, 'get', params).then(response => {
                 this.listData = response.data.datas;
             }).catch(e => {});
+            await this.computePagination();
 
             if((!this.hasHeader && window.contentLoaded === true) || options.unload === true) {
                 window.globalLoading.unloading();
@@ -352,7 +421,8 @@ export default {
         },
         theadClick(field) {
             window.globalLoading.loading();
-            const index = this.orders.findIndex(x => x.name == field);
+            const name = field.Name;
+            const index = this.orders.findIndex(x => x.name == name);
             if(index >= 0) {
                 let order = this.orders[index];
                 if(order.method == 'ASC') this.orders[index].method = 'DESC';
@@ -361,9 +431,14 @@ export default {
                 this.orders = this.orders.filter(() => true);
             } else {
                 const order = {
-                    name: field,
+                    name,
                     method: 'ASC'
                 };
+                if(field.Options.order !== undefined) {
+                    const o = field.Options.order;
+                    if(o.name !== undefined) order.name = o.name;
+                    if(o.from !== undefined) order.from = o.from
+                }
                 this.orders.push(order);
             }
 
@@ -373,6 +448,85 @@ export default {
         isEmpty(x) {
             return DataUtil.isEmpty(x);
         },
+        computePagination() {
+            const per = this.pagination.per;
+            const datas = this.listData;
+            let result = [];
+            let point = 0;
+            for(let i of this.listData) {
+                if(result[point] === undefined) result[point] = [];
+                result[point].push(i);
+                if(result[point].length === per) point++;
+            }
+
+            this.pagination.datas = result;
+            this.pagination.total = result.length;
+            this.changePaginationByPage(0, true);
+        },
+        changePaginationByPage(page, forceExecute = false) {
+            let pagination = this.pagination;
+            if((page != pagination.now && !forceExecute) || forceExecute) {
+                let toPut = {
+                    showLeft: {
+                        start: 0,
+                        end: 0
+                    },
+                    showMiddle: {
+                        start: 0,
+                        end: -1
+                    },
+                    showRight: {
+                        start: 0,
+                        end: -1
+                    }
+                };
+
+                pagination.now = page;
+                if(pagination.total <= 5) {
+                    toPut.showLeft.start = 0;
+                    toPut.showLeft.end = pagination.total-1;
+                } else if(page < 4) {
+                    toPut.showLeft.start = 0;
+                    toPut.showLeft.end = 4;
+                }
+
+                if(page > pagination.total - 5 && pagination.total > 5) {
+                    toPut.showRight.start = pagination.total - 5;
+                    toPut.showRight.end = pagination.total-1;
+                } else if (pagination.total > 5) {
+                    toPut.showRight.start = pagination.total-1;
+                    toPut.showRight.end = pagination.total-1;
+                }
+
+                if(page >= 4 && pagination.total > 5 && page <= pagination.total - 5) {
+                    toPut.showMiddle.start = page - 2;
+                    toPut.showMiddle.end = page + 2;
+                } else if (pagination.total > 5) {
+                    let middle = Math.ceil(pagination.total/2);
+                    toPut.showMiddle.start = middle - 1;
+                    toPut.showMiddle.end = middle + 1;
+                }
+
+                for(let i in toPut) {
+                    const p = toPut[i];
+                    let temp = [];
+                    for(let j = p.start; j <= p.end; j++) {
+                        temp.push(j);
+                    }
+                    pagination[i] = temp;
+                }
+
+            }
+        },
+        changePaginationByMethod(method) {
+            let to = this.pagination.now;
+            if(method === "prev" && to > 0) {
+                to--;
+            } else if (method === "next" && to < this.pagination.total-1) {
+                to++;
+            }
+            this.changePaginationByPage(to);
+        }
     },
 }
 </script>
@@ -407,5 +561,60 @@ i.download:active {
 }
 thead .list-header th.clickable:active {
     background-color: rgb(12, 112, 99) !important;
+}
+tfoot#pagination-layout {
+    text-align: center;
+}
+tfoot .pagination div {
+    display: inline-block;
+}
+.page-button.disabled::after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 2;
+    background-color: rgba(255, 255, 255, 0.589);
+}
+.page-button {
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 17px;
+    margin-right: .15em;
+}
+.page-button input[type='radio'] {
+    display: none;
+}
+.page-button label {
+    font-size: 1em;
+    width: 1.75em;
+    height: 1.75em;
+    padding: 0.28em;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #f1f1f1;
+}
+.page-button input:checked ~ label {
+    background-color: #70eec4 !important;
+}
+@media(hover: hover) and (pointer: fine) {
+    .page-button label:hover {
+        cursor: pointer;
+        background-color: #d9d9d9;
+    }
+    .page-button input:checked ~ label:hover {
+        background-color: #4bdbab !important;
+    }
+}
+/* checkbox and radio :not(checked) active */
+.page-button label:active {
+    background-color: #92fcd9 !important;
+}
+/* checkbox, toggle and radio checked active */
+.page-button input:checked ~ label:active {
+    background-color: #40b890 !important;
 }
 </style>
