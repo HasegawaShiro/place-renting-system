@@ -329,7 +329,7 @@
                                     </template>
                                 </div>
                                 <div class="schedule overflow" v-if="schedules.length > 2">
-                                    <i class="ellipsis vertical icon" @click="schedules[index-1].schedule_date"></i>
+                                    <i class="ellipsis vertical icon" @click="scheduleClick(schedules[0].schedule_date)"></i>
                                 </div>
                             </td>
                         </tr>
