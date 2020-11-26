@@ -70,6 +70,9 @@ class User {
                 {
                     listOrder: 3,
                     showOnForm: false,
+                    order: {
+                        from: 'util',
+                    }
                 }
             )),
             (new Field(
@@ -190,6 +193,9 @@ class Schedule {
                     },
                     listOrder: 0,
                     formOrder: 0,
+                    order: {
+                        from: 'place',
+                    }
                 }
             )),
             (new Field(
@@ -199,6 +205,9 @@ class Schedule {
                 {
                     listOrder: 0,
                     formOrder: 0,
+                    order: {
+                        from: 'util',
+                    }
                 }
             )),
             (new Field(
@@ -208,6 +217,9 @@ class Schedule {
                 {
                     listOrder: 0,
                     formOrder: 0,
+                    order: {
+                        from: 'user',
+                    }
                 }
             )),
             /* (new Field(
@@ -316,6 +328,10 @@ class Announcement {
                         filter: 'user_id',
                         listOrder: 4,
                         formOrder: 4,
+                        order: {
+                            from: 'util',
+                            name: 'util_name'
+                        }
                     }
               )),
               (new Field(
@@ -330,6 +346,10 @@ class Announcement {
                         },
                         listOrder: 5,
                         formOrder: 5,
+                        order: {
+                            from: 'user',
+                            name: 'name'
+                        }
                     }
               )),
               (new Field(
@@ -562,6 +582,7 @@ class Field {
         editRequired: false,
         default: null,
         confirmation: false,
+        order: {},
     };
     static allowType = ['text', 'password', 'textarea', 'number', 'boolean', 'date', 'time', 'datetime', 'select', 'file', 'custom'];
 
