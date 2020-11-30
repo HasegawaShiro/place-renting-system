@@ -28,14 +28,14 @@
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
         <div class="squeezable pusher" id="sidebar-pusher">
-            <Form
+            <CustomForm
                 v-if="hasForm"
                 :page="page"
                 :form-mode="formMode"
                 :form-data="formData"
                 :show-add="showAddMutation"
                 ref="form"
-            ></Form>
+            ></CustomForm>
             <div class="ts dimmer" id="global-loading">
                 <div class="ts loader"></div>
             </div>
@@ -57,13 +57,13 @@
                     >{{CONSTANTS.TEXT.title}}</n-link>
                     <div class="right menu">
                         <div v-if="isLogin" class="item">{{user.name}}, {{CONSTANTS.TEXT.greet}}</div>
-                        <Form
+                        <CustomForm
                             page="opinion"
                             ref="add-opinion"
                             key="add-opinion"
                             form-name="add-opinion"
                             :show-add="false"
-                        ></Form>
+                        ></CustomForm>
                         <a
                             class="item"
                             style="z-index: 2;"
@@ -84,23 +84,23 @@
                                     @click="register()"
                                 >{{CONSTANTS.TEXT.register}}</span>
                             </div>
-                            <Form
+                            <CustomForm
                                 page="user"
                                 ref="register"
                                 form-name="register"
                                 :show-add="false"
                                 @saved="registerSaved()"
-                            ></Form>
+                            ></CustomForm>
                         </template>
                         <template v-else-if="isLogin">
-                            <Form
+                            <CustomForm
                                 page="user"
                                 ref="profile"
                                 key="profile"
                                 form-name="profile"
                                 :show-add="false"
                                 @saved="profileSaved()"
-                            ></Form>
+                            ></CustomForm>
                             <a
                                 href=""
                                 class="item"
@@ -197,13 +197,13 @@
 
 <script>
 import CONSTANTS from '../constants.js'
-import Form from '../layouts/form.vue'
+import CustomForm from '../layouts/form.vue'
 import DataUtil from '../utils/DataUtil.js';
 import API from '../api.js';
 
 export default {
     components: {
-        Form,
+        CustomForm,
     },
     data() {
         return {

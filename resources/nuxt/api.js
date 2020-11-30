@@ -11,11 +11,8 @@ export default class API {
         }
 
         if(options.hasFile === true) {
-            let tmp = new FormData();
-            for(let d in data) {
-                tmp.append(d,data[d]);
-            }
-            toSendData = tmp;
+            toSendData.append('hasFile', true);
+
             window.$nuxt.$axios.setHeader({'Content-Type': 'multipart/form-data'});
         } else {
             window.$nuxt.$axios.setHeader({'Content-Type': 'application/json'});

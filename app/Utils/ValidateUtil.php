@@ -66,4 +66,10 @@ class ValidateUtil {
             }
         };
     }
+
+    public static function isJSONString($str)
+    {
+        json_decode($str);
+        return (json_last_error() == JSON_ERROR_NONE);
+    }
 }

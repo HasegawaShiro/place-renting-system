@@ -592,11 +592,6 @@ class Field {
         this.#Type = Field.allowType.includes(type) ? type : 'text';
         for(let key in options){
             if(key == 'selectOptions'){
-                let o = options[key];
-                // console.log(o);
-                /* if(typeof o == 'string'){
-                    this.#Options.selectOptions.push(o);
-                } */
                 this.#Options[key] = options[key];
             }else if(this.#Options[key] !== undefined){
                 this.#Options[key] = options[key];

@@ -109,21 +109,28 @@ class Controller extends BaseController
             'datas' => [],
             'messages' => []
         ];
+        $fileTemp = [];
         if($permissionPass){
             $data = $request->all();
             $validationPass = ValidateUtil::validateForSave($table, $data, 'add', $result);
             $user_id = Auth::check() ? $request->user()->user_id : -1;
 
             if($validationPass) {
+                foreach($data as $key => &$value) {
+                    if(is_a($value, "Illuminate\Http\UploadedFile")) {
+                        $fileTemp[$key] = $value;
+                        $value = $value->getClientOriginalName();
+                    }
+                }
                 $data["created_by"] = $user_id;
                 $data["updated_by"] = $user_id;
                 $created = $model::create($data);
                 $data[$created->getKeyName()] = $created->getKey();
 
-                if(method_exists($page,'afterSave')){
+                if(method_exists($page,'afterSave')) {
                     if(!$page::afterSave($data, $result, 'add')) $status = 422;
                 }
-            }else{
+            } else {
                 $status = 422;
             }
         } else {
@@ -135,6 +142,12 @@ class Controller extends BaseController
 
         if($status === 200) {
             array_push($result['messages'], 'save-success');
+
+            if(isset($data["hasFile"])) {
+                foreach($fileTemp as $key => $file) {
+                    FileUtil::saveFile($table, $key, $created->getKey(), $file);
+                }
+            }
             DB::commit();
         }else{
             DB::rollBack();
@@ -246,16 +259,15 @@ class Controller extends BaseController
         return response()->json($result, $status);
     }
 
-    public static function download(Request $request, $table, $id, $filename) {
+    public static function download(Request $request, $table, $id, $filename, $field = null) {
         $class = "App\\Pages\\".ucfirst($table);
         $page = new $class();
 
         if(method_exists($page, 'getFile')) {
             $filePath = $page::getFile($id, $filename);
         } else {
-            $filePath = '';
+            $filePath = storage_path("app/uploads/$table/$field/$id-$filename");
         }
-        // dd($filePath);
 
         if(file_exists($filePath)) {
             return response()->download($filePath, $filename);

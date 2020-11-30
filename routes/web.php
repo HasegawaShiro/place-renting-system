@@ -26,7 +26,7 @@ Route::group(['prefix' => 'api'], function () {
     });
     Route::get('select/{table}', [Controller::class, 'getReferenceSelect']);
     Route::get('data/{table}/{id?}', [Controller::class, 'getData']);
-    Route::get('download/{table}/{id}/{filename}', [Controller::class, 'download']);
+    Route::get('download/{table}/{id}/{filename}/{field?}', [Controller::class, 'download']);
     Route::post('data/{table}', [Controller::class, 'postData']);
     Route::group(['middleware' => 'auth'], function() {
         Route::get('auth', [UserController::class, 'getUserSession']);

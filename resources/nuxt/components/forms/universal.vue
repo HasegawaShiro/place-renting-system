@@ -19,7 +19,13 @@
                             {{field.Text}}
                         </label>
                         <input
-                            v-if="isInputField(field)"
+                            v-if="field.Type === 'file'"
+                            v-bind="{disabled: isFieldDisabled(field)}"
+                            :type="field.Type"
+                            @change="fileOnChange($event, field)"
+                        />
+                        <input
+                            v-else-if="isInputField(field)"
                             v-model="input[field.Name]"
                             v-bind="{disabled: isFieldDisabled(field)}"
                             :type="field.Type"
@@ -167,6 +173,7 @@ export default {
             selects: {},
             filters: {},
             requestOptions: {},
+            inputFormData: new FormData(),
         }
     },
     mounted() {
@@ -210,7 +217,11 @@ export default {
 
                 if(toShow) {
                     this.fields.push(field);
-                    this.$set(this.input, field.Name, field.Options.default);
+                    if(field.Type === 'file') {
+                        this.requestOptions.hasFile = true;
+                    } else {
+                        this.$set(this.input, field.Name, field.Options.default);
+                    }
                     if(field.Type === 'select') {
                         if(typeof field.Options.selectOptions === 'string') {
                             const table = field.Options.selectOptions;
@@ -219,9 +230,6 @@ export default {
                     }
                     if(field.Options.confirmation) {
                         this.$set(this.input, `${field.Name}_confirmation`, null);
-                    }
-                    if(field.Type === 'file') {
-                        this.requestOptions.hasFile = true;
                     }
                 }
             }
@@ -247,10 +255,14 @@ export default {
                 if((this.config.mode == 'view' && field.Options.hideOnView === true) || (this.config.mode == 'edit' && field.Options.hideOnEdit === true)) toShow = false;
                 if(toShow) {
                     this.fields.push(field);
-                    if(DataUtil.isEmpty(data[field.Name])) {
-                        this.$set(this.input, field.Name, field.Options.default);
+                    if(field.Type === 'file') {
+                        this.requestOptions.hasFile = true;
                     } else {
-                        this.$set(this.input, field.Name, data[field.Name]);
+                        if(DataUtil.isEmpty(data[field.Name])) {
+                            this.$set(this.input, field.Name, field.Options.default);
+                        } else {
+                            this.$set(this.input, field.Name, data[field.Name]);
+                        }
                     }
 
                     if(field.Type === 'select') {
@@ -261,9 +273,6 @@ export default {
                     }
                     if(field.Options.confirmation) {
                         this.$set(this.input, `${field.Name}_confirmation`, null);
-                    }
-                    if(field.Type === 'file') {
-                        this.requestOptions.hasFile = true;
                     }
                 }
             }
@@ -315,6 +324,12 @@ export default {
         saveClick() {
             if(['add', 'edit'].includes(this.config.mode)){
                 let toSave = DataUtil.deepClone(this.input);
+                if(this.requestOptions.hasFile === true) {
+                    for(let d in toSave) {
+                        this.inputFormData.append(d, toSave[d]);
+                    }
+                    toSave = this.inputFormData;
+                }
 
                 this.$emit("save", {
                     name: this.page,
@@ -338,6 +353,9 @@ export default {
                     this.filters[field.Options.filter] = await this.getOptionsByFilter(target);
                 }
             }
+        },
+        fileOnChange($event, field) {
+            this.inputFormData.append(field.Name, $event.target.files[0]);
         },
     },
 }

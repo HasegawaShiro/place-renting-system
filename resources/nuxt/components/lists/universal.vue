@@ -93,7 +93,7 @@
                         <template
                             v-else-if="field.Type == 'file'"
                         >
-                            <i class="large download icon" @click="download(data[dataKey])"></i>
+                            <i class="large download icon" @click="download(data, field)"></i>
                         </template>
                         <template
                             v-else
@@ -503,7 +503,13 @@ export default {
 
             this.getListDatas({unload: true});
         },
-        async download(id) {},
+        async download(data, field) {
+            const id = data[this.dataKey];
+            const fileName = data[field.Name];
+
+            let win = window.open(`api/download/${this.page}/${id}/${fileName}/${field.Name}`, '_blank');
+            win.focus();
+        },
         isEmpty(x) {
             return DataUtil.isEmpty(x);
         },
