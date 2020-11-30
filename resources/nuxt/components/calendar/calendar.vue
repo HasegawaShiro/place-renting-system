@@ -11,22 +11,22 @@
                         <div class="ts radio checkbox">
                             <input
                                 type="radio"
-                                name="repeat-mode"
-                                id="repeat-one"
+                                name="repeat-delete"
+                                id="repeat-delete-one"
                                 value="one"
                                 v-model="config['repeat-mode']"
                             >
-                            <label for="repeat-one">{{CONSTANTS.messages['repeat-one']}}</label>
+                            <label for="repeat-delete-one">{{CONSTANTS.messages['repeat-one']}}</label>
                         </div>
                         <div class="ts radio checkbox">
                             <input
                                 type="radio"
-                                name="repeat-mode"
-                                id="repeat-all"
+                                name="repeat-delete"
+                                id="repeat-delete-all"
                                 value="all"
                                 v-model="config['repeat-mode']"
                             >
-                            <label for="repeat-all">{{CONSTANTS.messages['repeat-all']}}</label>
+                            <label for="repeat-delete-all">{{CONSTANTS.messages['repeat-all']}}</label>
                         </div>
                     </div>
                 </div>

@@ -156,21 +156,21 @@
                                 <input
                                     type="radio"
                                     name="repeat-edit"
-                                    id="repeat-one"
+                                    id="repeat-edit-one"
                                     value="one"
                                     v-model="input.repeat_edit"
                                 >
-                                <label for="repeat-one">{{CONSTANTS.messages['repeat-one']}}</label>
+                                <label for="repeat-edit-one">{{CONSTANTS.messages['repeat-one']}}</label>
                             </div>
                             <div class="ts radio checkbox">
                                 <input
                                     type="radio"
                                     name="repeat-edit"
-                                    id="repeat-all"
+                                    id="repeat-edit-all"
                                     value="all"
                                     v-model="input.repeat_edit"
                                 >
-                                <label for="repeat-all">{{CONSTANTS.messages['repeat-all']}}</label>
+                                <label for="repeat-edit-all">{{CONSTANTS.messages['repeat-all']}}</label>
                             </div>
                         </div>
                     </div>
