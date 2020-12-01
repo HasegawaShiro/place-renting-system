@@ -19,10 +19,6 @@ use App\Utils\ScheduleUtil;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-    public static function test() {
-        $model = \App\Models\User::find(1)->announcements;
-        dd($model);
-    }
 
     public static function getReferenceSelect(Request $request, $table) {
         $showDisabled = isset($request->showDisabled) ? $request->showDisabled : false;

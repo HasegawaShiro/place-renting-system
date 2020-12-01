@@ -16,7 +16,6 @@ use App\Http\Controllers\System\UserController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('test', [Controller::class, 'test']);
 
 Route::group(['prefix' => 'api'], function () {
     Route::post('login', [LoginController::class, 'login'])->name("system.auth.login.post");
