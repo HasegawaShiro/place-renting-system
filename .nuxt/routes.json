@@ -1,5 +1,41 @@
 [
   {
+    "name": "announcements",
+    "path": "/announcements",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\announcements.vue",
+    "chunkName": "pages/announcements"
+  },
+  {
+    "name": "opinions",
+    "path": "/opinions",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\opinions.vue",
+    "chunkName": "pages/opinions"
+  },
+  {
+    "name": "places",
+    "path": "/places",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\places.vue",
+    "chunkName": "pages/places"
+  },
+  {
+    "name": "users",
+    "path": "/users",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\users.vue",
+    "chunkName": "pages/users"
+  },
+  {
+    "name": "utils",
+    "path": "/utils",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\utils.vue",
+    "chunkName": "pages/utils"
+  },
+  {
+    "name": "errors-403",
+    "path": "/errors/403",
+    "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\errors\\\\403.vue",
+    "chunkName": "pages/errors/403"
+  },
+  {
     "name": "index",
     "path": "/",
     "component": "D:\\\\xampp\\\\htdocs\\\\NCHU\\\\resources\\\\nuxt\\\\pages\\\\index.vue",
