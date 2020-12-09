@@ -3,9 +3,6 @@ const laravelNuxt = require("laravel-nuxt");
 const baseUrl = "/NCHU/"
 
 module.exports = laravelNuxt({
-    /* router: {
-        base: baseUrl
-    }, */
     head: {
         script: [
             {
@@ -30,7 +27,7 @@ module.exports = laravelNuxt({
         'assets/css/main.css',
     ],
     axios: {
-        baseURL: '/api/'
+        baseURL: ''
     },
     modules: [],
     build: {},
