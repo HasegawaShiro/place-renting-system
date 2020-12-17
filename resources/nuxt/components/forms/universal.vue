@@ -253,6 +253,8 @@ export default {
             for(let field of this.pageData.fields().sort((a,b) => {return a.formOrder - b.formOrder})) {
                 let toShow = field.Options.showOnForm === true;
                 if((this.config.mode == 'view' && field.Options.hideOnView === true) || (this.config.mode == 'edit' && field.Options.hideOnEdit === true)) toShow = false;
+                if(field.Options.onlyShowForAdmin === true && this.$store.state.userStore.user.user_id === 1) toShow = false;
+
                 if(toShow) {
                     this.fields.push(field);
                     if(field.Type === 'file') {
