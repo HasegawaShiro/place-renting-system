@@ -583,6 +583,7 @@ class Field {
         default: null,
         confirmation: false,
         order: {},
+        onlyShowForAdmin: false,
     };
     static allowType = ['text', 'password', 'textarea', 'number', 'boolean', 'date', 'time', 'datetime', 'select', 'file', 'custom'];
 
