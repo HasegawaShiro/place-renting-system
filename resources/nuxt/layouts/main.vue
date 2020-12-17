@@ -267,6 +267,7 @@ export default {
 
         this.$emit("mounted");
         this.showAddMutation = this.showAdd;
+        if(typeof this.$refs['content'].mainLayoutLoaded === 'function') this.$refs['content'].mainLayoutLoaded();
         // window.globalLoading.unloading();
     },
     computed: {

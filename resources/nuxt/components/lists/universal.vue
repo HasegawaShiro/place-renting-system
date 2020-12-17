@@ -383,8 +383,6 @@ export default {
         }
 
         this.$emit("mounted");
-        this.showButtonsMutation = this.showButtons;
-        if(!window.mainLayout.isLogin) this.showButtonsMutation = ['view'];
     },
     props: {
         "table-class": {
@@ -416,6 +414,10 @@ export default {
         },
     },
     methods: {
+        mainLayoutLoaded() {
+            this.showButtonsMutation = this.showButtons;
+            if(!window.mainLayout.isLogin) this.showButtonsMutation = ['view'];
+        },
         async getListDatas(options = {}) {
             const URL = "/api/data/"+this.page;
             let params = DataUtil.deepClone(this.getParams);
