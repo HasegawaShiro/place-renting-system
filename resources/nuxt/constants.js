@@ -50,7 +50,7 @@ export default {
             left2: 'Rm. 934, 9F., No. 145, Xingda Rd., South Dist., Taichung City 402, Taiwan (R.O.C.)',
             right1: '電話：04-22840455轉2203',
             right2: 'E-mail：xiang@nchu.edu.tw',
-            bottom: 'Copyright © 2020 肆零玖數位工程有限公司. All rights reserved.'
+            bottom: 'Copyright © '+(new Date()).getFullYear()+' 肆零玖數位工程有限公司. All rights reserved.'
         }
     },
     user: {
