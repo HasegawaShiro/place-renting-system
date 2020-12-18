@@ -12,8 +12,33 @@
             <template
                 v-for="(p, page) in showMenu"
             >
+                <div
+                    v-if="typeof p.sub === 'object'"
+                    class="item"
+                    :key="`menu-${page}`"
+                >
+                    {{p.text}}
+                    <div class="menu">
+                        <template
+                            v-for="(s, sub) in p.sub"
+                        >
+                            <n-link
+                                v-if="s.url === undefined"
+                                class="item"
+                                :key="`menu-${sub}`"
+                                :to="`/${sub}`"
+                            >{{s.text}}</n-link>
+                            <a
+                                v-else
+                                class="item"
+                                :key="`menu-${sub}`"
+                                :href="`/${s.url}`"
+                            >{{s.text}}</a>
+                        </template>
+                    </div>
+                </div>
                 <n-link
-                    v-if="p.url === undefined"
+                    v-else-if="p.url === undefined"
                     class="item"
                     :key="`menu-${page}`"
                     :to="`/${page}`"
@@ -277,8 +302,7 @@ export default {
         showMenu() {
             let result = {};
 
-            for(let k in CONSTANTS.main.MENU) {
-                let page = CONSTANTS.main.MENU[k];
+            for(const [k, page] of Object.entries(CONSTANTS.main.MENU)) {
                 let show = true;
 
                 if(page.permission === 'admin' && this.user.id !== 1) show = false;
@@ -286,6 +310,16 @@ export default {
                     result[k] = {text: page.text};
                     if(!DataUtil.isEmpty(page.url)) {
                         result[k].url = page.url;
+                    }
+                    if(!DataUtil.isEmpty(page.sub)) {
+                        let sub = {};
+                        for(const [key, value] of Object.entries(page.sub)) {
+                            if(!DataUtil.isEmpty(page.prefix)) {
+                                value.url = `${page.prefix}/${DataUtil.isEmpty(value.url) ? key : sub.url}`;
+                            }
+                            sub[key] = {...value};
+                        }
+                        result[k].sub = {...sub};
                     }
                 }
             }
