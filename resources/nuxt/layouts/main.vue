@@ -267,7 +267,7 @@ export default {
 
         this.$emit("mounted");
         this.showAddMutation = this.showAdd;
-        if(typeof this.$slots['content'][0].componentInstance.mainLayoutLoaded === 'function') this.$slots['content'][0].componentInstance.mainLayoutLoaded();
+        if(this.$slots['content'][0].componentInstance != undefined && typeof this.$slots['content'][0].componentInstance.mainLayoutLoaded === 'function') this.$slots['content'][0].componentInstance.mainLayoutLoaded();
         // window.globalLoading.unloading();
     },
     computed: {
