@@ -200,6 +200,7 @@ export default {
         'permission-denied': '您沒有權限進行此操作',
         'data-not-found': '查無此資料',
         'data-is-referenced': '資料已被引用，無法刪除',
+        'file-not-found': '找不到此檔案'
     },
     common: {
         TEXT: {
