@@ -269,7 +269,11 @@ export default {
                     }
 
                     if(field.Type === 'select') {
-                        if(typeof field.Options.selectOptions === 'string') {
+                        const filterBy = field.Options.filterBy;
+                        if(!DataUtil.isEmpty(filterBy)) {
+                            const foreign = this.fields.find(x => x.Name == filterBy.foreignField);
+                            this.inputOnChange(foreign);
+                        } else if(typeof field.Options.selectOptions === 'string') {
                             const table = field.Options.selectOptions;
                             this.selects[table] = await API.getReferenceSelect(table);
                         }
