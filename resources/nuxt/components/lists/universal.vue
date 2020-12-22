@@ -508,9 +508,13 @@ export default {
         async download(data, field) {
             const id = data[this.dataKey];
             const fileName = data[field.Name];
+            API.sendRequest(`api/download/${this.page}/${id}/${fileName}/${field.Name}`).then(response => {
+                let win = window.open(`api/download/${this.page}/${id}/${fileName}/${field.Name}`, '_blank');
+                win.focus();
+            }).catch(error => {
+                window.mainLayout.showSnackbar('error', error.response.data.messages);
+            });
 
-            let win = window.open(`api/download/${this.page}/${id}/${fileName}/${field.Name}`, '_blank');
-            win.focus();
         },
         isEmpty(x) {
             return DataUtil.isEmpty(x);
