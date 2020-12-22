@@ -211,11 +211,11 @@ class User {
 
     public static function beforeDelete(Array $data, Array &$result) {
         $pass = true;
-        if($data['util_id'] == 1) {
+        if($data['user_id'] == 1) {
             $pass = false;
             array_push($result['messages'], self::messages()["admin-cannot-deleted"]);
         } else {
-            $origin = _MODEL::find($data['util_id']);
+            $origin = _MODEL::find($data['user_id']);
             $toCheck = [
                 $origin->schedules,
                 $origin->announcements,
