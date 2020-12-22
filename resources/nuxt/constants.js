@@ -40,6 +40,7 @@ export default {
             },
             guides: {
                 text: '使用手冊',
+                target: '_blank',
                 url: 'api/download/guide/0/guide.pdf',
                 permission: 'all',
             }
