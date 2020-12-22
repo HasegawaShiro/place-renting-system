@@ -38,17 +38,12 @@
                     </div>
                 </div>
                 <n-link
-                    v-else-if="p.url === undefined"
-                    class="item"
-                    :key="`menu-${page}`"
-                    :to="`/${page}`"
-                >{{p.text}}</n-link>
-                <a
                     v-else
                     class="item"
+                    :target="p.target === undefined ? '' : p.target"
                     :key="`menu-${page}`"
-                    :href="`/${p.url}`"
-                >{{p.text}}</a>
+                    :to="`/${p.url === undefined ? page : p.url}`"
+                >{{p.text}}</n-link>
             </template>
             <a class="bottom item" @click="closeSidebar">關閉選單</a>
         </div>
@@ -307,10 +302,7 @@ export default {
 
                 if(page.permission === 'admin' && this.user.id !== 1) show = false;
                 if(show) {
-                    result[k] = {text: page.text};
-                    if(!DataUtil.isEmpty(page.url)) {
-                        result[k].url = page.url;
-                    }
+                    result[k] = {...page};
                     if(!DataUtil.isEmpty(page.sub)) {
                         let sub = {};
                         for(const [key, value] of Object.entries(page.sub)) {
