@@ -224,7 +224,7 @@
                     <textarea
                         rows="5"
                         v-model="input.schedule_content"
-                        v-bind="{disabled: config.mode == 'view'}"
+                        v-bind="{readOnly: config.mode == 'view'}"
                     ></textarea>
                 </div>
                 <div class="field">
