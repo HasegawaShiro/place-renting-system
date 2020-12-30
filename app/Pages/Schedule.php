@@ -156,6 +156,10 @@ class Schedule {
                 'name' => 'schedule_from',
                 'method' => 'ASC'
             ],
+            [
+                'name' => 'schedule_to',
+                'method' => 'ASC'
+            ],
         ];
         $paginate = isset($request->filters) ? json_decode($request->pagination) : false;
 

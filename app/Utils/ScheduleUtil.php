@@ -81,12 +81,16 @@ class ScheduleUtil {
             }
         } else {
             $count = $data["schedule_end_times"];
+            $weekDay = $d->dayOfWeekIso-1;
+            if($weekDay == 6) {
+                $count--;
+            }
             while ($count > 0) {
                 $d->addDay();
-                $weekDay = $d->dayOfWeekIso-1;
                 if($bin[$weekDay] === "1") {
                     array_push($result,$d->toDateString());
                 }
+                $weekDay = $d->dayOfWeekIso-1;
                 if($weekDay == 6) {
                     $count--;
                 }
