@@ -239,8 +239,10 @@ class Schedule {
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
         $fields = self::fields();
         $today = Carbon::yesterday()->endOfDay()->toDateTimeString();
+        $atLimit = Carbon::today()->addMonthsNoOverflow(6)->toDateString();
         array_push($rules["schedule_to"], "after:{$data['schedule_from']}");
         array_push($rules["schedule_date"], "after:{$today}");
+        array_push($rules["schedule_date"], "before:{$atLimit}");
 
         if($data['schedule_repeat']){
             array_push($rules["schedule_end"], "required");
@@ -249,7 +251,7 @@ class Schedule {
             $messages["schedule_repeat_days.between"] = self::messages()['repeat-days-zero'];
             if(array_search($data['schedule_end'], ['at','times']) !== false) {
                 $type = $data['schedule_end'];
-                $atLimit = Carbon::today()->addMonthsNoOverflow(6)->toDateString();
+
                 array_push($rules["schedule_end_$type"], "required");
                 if($type == 'at') {
                     array_push($rules["schedule_end_at"], "after:{$data['schedule_date']}");
