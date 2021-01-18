@@ -12,9 +12,8 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 use App\Utils\FileUtil;
 use App\Utils\UserUtil;
-use App\Utils\SessionUtil;
+use App\Utils\DataUtil;
 use App\Utils\ValidateUtil;
-use App\Utils\ScheduleUtil;
 
 class Controller extends BaseController
 {
@@ -107,7 +106,7 @@ class Controller extends BaseController
         ];
         $fileTemp = [];
         if($permissionPass){
-            $data = $request->all();
+            /* $data = $request->all();
             $validationPass = ValidateUtil::validateForSave($table, $data, 'add', $result);
             $user_id = Auth::check() ? $request->user()->user_id : -1;
 
@@ -128,7 +127,8 @@ class Controller extends BaseController
                 }
             } else {
                 $status = 422;
-            }
+            } */
+            $created = DataUtil::saveData($request, $model, $page, 'add', null, $result, $status);
         } else {
             $status = 403;
             array_push($result['messages'], 'permission-denied');
@@ -159,11 +159,12 @@ class Controller extends BaseController
         $page = new $class();
         $origin = $model::find($id);
 
+        $status = 200;
         $result = [
             'datas' => [],
             'messages' => []
         ];
-        $status = 200;
+        $fileTemp = [];
 
         if(is_null($origin)){
             array_push($result['messages'],'data-not-found');
@@ -171,7 +172,7 @@ class Controller extends BaseController
         }else{
             $permissionPass = method_exists($page, 'permission') ? $page::permission('edit', $id) : true;
             if($permissionPass){
-                $data = $request->all();
+                /* $data = $request->all();
                 $data["{$table}_id"] = $id;
 
                 $validationPass = ValidateUtil::validateForSave($table, $data, 'edit', $result);
@@ -187,10 +188,10 @@ class Controller extends BaseController
                     if(method_exists($page,'afterSave')){
                         if(!$page::afterSave($data, $result, 'edit', $old)) $status = 422;
                     }
-
                 }else{
                     $status = 422;
-                }
+                } */
+                $origin = DataUtil::saveData($request, $model, $page, 'edit', $origin, $result, $status);
             } else {
                 $status = 403;
                 array_push($result['messages'], 'permission-denied');
@@ -201,6 +202,12 @@ class Controller extends BaseController
 
         if($status === 200) {
             array_push($result['messages'], 'save-success');
+
+            if(isset($data["hasFile"])) {
+                foreach($fileTemp as $key => $file) {
+                    FileUtil::saveFile($table, $key, $origin->getKey(), $file);
+                }
+            }
             DB::commit();
         }else{
             DB::rollBack();

@@ -1,7 +1,52 @@
 <?php
 namespace App\Utils;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 class DataUtil {
+    public static function saveData(Request $request, $model, $page, $mode, $origin = null, &$result, &$status) {
+        $data = $request->all();
+        if($mode === 'edit') {
+            $data[$origin->getKeyName()] = $origin->getKey();
+        }
+        $validationPass = ValidateUtil::validateForSave($page, $data, $mode, $result);
+        $user_id = Auth::check() ? $request->user()->user_id : -1;
+        $saved = null;
+
+        if($validationPass) {
+            foreach($data as $key => &$value) {
+                if(is_a($value, "Illuminate\Http\UploadedFile")) {
+                    $fileTemp[$key] = $value;
+                    $value = $value->getClientOriginalName();
+                }
+            }
+            $data["updated_by"] = $user_id;
+            $old = [];
+
+            if($mode === 'add') {
+                $data["created_by"] = $user_id;
+                $saved = $model::create($data);
+                $data[$saved->getKeyName()] = $saved->getKey();
+            } else if($mode === 'edit') {
+                foreach($data as $key => $value){
+                    if(!$model->isEditable($key)) unset($data[$key]);
+                }
+                $old = $origin->toArray();
+                $origin->update($data);
+                $saved = $origin;
+            }
+
+            if(method_exists($page,'afterSave')) {
+                if(!$page::afterSave($data, $result, $mode, $old)) $status = 422;
+            }
+        } else {
+            $status = 422;
+        }
+
+        return $saved;
+    }
+
     public static function replaceKeysInMessage(String $message, Array $keys) {
         foreach ($keys as $key => $value) {
             $message = str_replace($key, $value, $message);
