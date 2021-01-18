@@ -82,7 +82,7 @@ class Schedule extends Model
             'user_id',
             'util_id',
             'user_id',
-            'user_id'
+            'util_id'
         );
     }
 
