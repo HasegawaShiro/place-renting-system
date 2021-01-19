@@ -239,7 +239,8 @@ class Schedule {
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
         $fields = self::fields();
         $today = Carbon::yesterday()->endOfDay()->toDateTimeString();
-        $atLimit = Carbon::today()->addMonthsNoOverflow(6)->toDateString();
+        // $atLimit = Carbon::today()->addMonthsNoOverflow(6)->toDateString();
+        $atLimit = Carbon::today()->addYear()->toDateString();
         array_push($rules["schedule_to"], "after:{$data['schedule_from']}");
         array_push($rules["schedule_date"], "after:{$today}");
         array_push($rules["schedule_date"], "before:{$atLimit}");
