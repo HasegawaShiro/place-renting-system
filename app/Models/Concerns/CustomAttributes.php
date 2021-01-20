@@ -4,11 +4,9 @@ namespace App\Models\Concerns;
 trait CustomAttributes
 {
     protected $editable = [];
-
     public function getEditable() {
         return $this->editable;
     }
-
     public function isEditable(String $attribute) {
         return empty($this->editable) || array_search($attribute, $this->editable) !== false;
     }
@@ -20,4 +18,11 @@ trait CustomAttributes
     protected $error = null;
     public function setError($data) {$this->error = $data;}
     public function getError() {return $this->error;}
+
+    protected $hasBody = false;
+
+    public static function getModelName() {
+        $classSplit = explode('\\', get_called_class());
+        return $classSplit[sizeof($classSplit)-1];
+    }
 }
