@@ -19,10 +19,34 @@ trait CustomAttributes
     public function setError($data) {$this->error = $data;}
     public function getError() {return $this->error;}
 
-    protected $hasBody = false;
+    protected static $hasBody = false;
+    public static function hasBody() {
+        return self::$hasBody;
+    }
+    public static function getBodyModel() {
+        $result = null;
+        $class = "App\\Models\\".self::getModelName()."_body";
+
+        if(self::$hasBody && class_exists($class)) {
+            $result = new $class();
+        }
+
+        return $result;
+    }
 
     public static function getModelName() {
         $classSplit = explode('\\', get_called_class());
         return $classSplit[sizeof($classSplit)-1];
+    }
+
+    public static function getPage() {
+        $result = null;
+        $class = "App\\Pages\\".self::getModelName();
+
+        if(class_exists($class)) {
+            $result = new $class();
+        }
+
+        return $result;
     }
 }

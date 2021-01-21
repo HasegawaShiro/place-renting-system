@@ -5,13 +5,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DataUtil {
-    public static function saveData(Request $request, $model, $page, $mode, $origin = null, &$result, &$status) {
-        $data = $request->all();
+    public static function saveData($data, $model, $page, $mode, $origin = null, &$result, &$status) {
+        // $data = $request->all();
         if($mode === 'edit') {
             $data[$origin->getKeyName()] = $origin->getKey();
         }
         $validationPass = ValidateUtil::validateForSave($page, $data, $mode, $result);
-        $user_id = Auth::check() ? $request->user()->user_id : -1;
+        $user_id = Auth::check() ? session('user')['user_id'] : -1;
         $saved = null;
 
         if($validationPass) {
@@ -35,6 +35,15 @@ class DataUtil {
                 $old = $origin->toArray();
                 $origin->update($data);
                 $saved = $origin;
+            }
+
+            if($model::hasBody()) {
+                $bodyModel = $model::getBodyModel();
+                $bodyPage = $bodyModel::getPage();
+                foreach($data['_BODY'] as $body) {
+                    $body['parent_id'] = $saved->getKey();
+                    self::saveData($body, $bodyModel, $bodyPage, $mode, $origin, $result, $status);
+                }
             }
 
             if(method_exists($page,'afterSave')) {

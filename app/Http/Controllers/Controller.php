@@ -95,8 +95,9 @@ class Controller extends BaseController
         DB::beginTransaction();
         $class = "App\\Models\\".ucfirst($table);
         $model = new $class();
-        $class = "App\\Pages\\".ucfirst($table);
-        $page = new $class();
+        /* $class = "App\\Pages\\".ucfirst($table);
+        $page = new $class(); */
+        $page = $model::getPage();
         $permissionPass = method_exists($page, 'permission') ? $page::permission('add') : true;
 
         $status = 200;
@@ -106,8 +107,8 @@ class Controller extends BaseController
         ];
         $fileTemp = [];
         if($permissionPass){
-            /* $data = $request->all();
-            $validationPass = ValidateUtil::validateForSave($table, $data, 'add', $result);
+            $data = $request->all();
+            /* $validationPass = ValidateUtil::validateForSave($table, $data, 'add', $result);
             $user_id = Auth::check() ? $request->user()->user_id : -1;
 
             if($validationPass) {
@@ -128,7 +129,7 @@ class Controller extends BaseController
             } else {
                 $status = 422;
             } */
-            $created = DataUtil::saveData($request, $model, $page, 'add', null, $result, $status);
+            $created = DataUtil::saveData($data, $model, $page, 'add', null, $result, $status);
         } else {
             $status = 403;
             array_push($result['messages'], 'permission-denied');
@@ -155,8 +156,9 @@ class Controller extends BaseController
         DB::beginTransaction();
         $class = "App\\Models\\".ucfirst($table);
         $model = new $class();
-        $class = "App\\Pages\\".ucfirst($table);
-        $page = new $class();
+        /* $class = "App\\Pages\\".ucfirst($table);
+        $page = new $class(); */
+        $page = $model::getPage();
         $origin = $model::find($id);
 
         $status = 200;
@@ -172,8 +174,8 @@ class Controller extends BaseController
         }else{
             $permissionPass = method_exists($page, 'permission') ? $page::permission('edit', $id) : true;
             if($permissionPass){
-                /* $data = $request->all();
-                $data["{$table}_id"] = $id;
+                $data = $request->all();
+                /* $data["{$table}_id"] = $id;
 
                 $validationPass = ValidateUtil::validateForSave($table, $data, 'edit', $result);
 
@@ -191,7 +193,7 @@ class Controller extends BaseController
                 }else{
                     $status = 422;
                 } */
-                $origin = DataUtil::saveData($request, $model, $page, 'edit', $origin, $result, $status);
+                $origin = DataUtil::saveData($data, $model, $page, 'edit', $origin, $result, $status);
             } else {
                 $status = 403;
                 array_push($result['messages'], 'permission-denied');
