@@ -1,7 +1,6 @@
 <?php
 namespace App\Utils;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DataUtil {
@@ -11,7 +10,7 @@ class DataUtil {
             $data[$origin->getKeyName()] = $origin->getKey();
         }
         $validationPass = ValidateUtil::validateForSave($page, $data, $mode, $result);
-        $user_id = Auth::check() ? session('user')['user_id'] : -1;
+        $user_id = Auth::check() ? session('user')['id'] : -1;
         $saved = null;
 
         if($validationPass) {
@@ -27,7 +26,6 @@ class DataUtil {
             if($mode === 'add') {
                 $data["created_by"] = $user_id;
                 $saved = $model::create($data);
-                $data[$saved->getKeyName()] = $saved->getKey();
             } else if($mode === 'edit') {
                 foreach($data as $key => $value){
                     if(!$model->isEditable($key)) unset($data[$key]);
@@ -36,6 +34,7 @@ class DataUtil {
                 $origin->update($data);
                 $saved = $origin;
             }
+            $data[$saved->getKeyName()] = $saved->getKey();
 
             if($model::hasBody()) {
                 $bodyModel = $model::getBodyModel();
