@@ -28,7 +28,7 @@ class DataUtil {
                 $saved = $model::create($data);
             } else if($mode === 'edit') {
                 foreach($data as $key => $value){
-                    if(!$model->isEditable($key)) unset($data[$key]);
+                    if($model->isFillable($key) && !$model->isEditable($key)) unset($data[$key]);
                 }
                 $old = $origin->toArray();
                 $origin->update($data);
