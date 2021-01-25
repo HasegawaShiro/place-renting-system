@@ -262,32 +262,35 @@
                                     v-if="schedulesByDay()[dateObj.dateText].length > 0"
                                 >
                                     <div
-                                        v-for="i in countDayCellSchedule(schedulesByDay()[dateObj.dateText])"
+                                        v-for="(scheduleObj, i) in schedulesByDay()[dateObj.dateText]"
                                         :key="dateObj.dateText+'-'+i"
-                                        :class="schedulesByDay()[dateObj.dateText][i-1].schedule_type"
-                                        @click="scheduleClick(dateObj.dateText, schedulesByDay()[dateObj.dateText][i-1].schedule_id)"
+                                        :class="scheduleObj.schedule_type"
+                                        @click="scheduleClick(dateObj.dateText, scheduleObj.schedule_id)"
                                     >
-                                        <div class="tablet or large device only text">
+                                        <div class="text">
                                             <i>
-                                                {{schedulesByDay()[dateObj.dateText][i-1].schedule_from}}
+                                                {{scheduleObj.schedule_from}}
                                                 -
-                                                {{schedulesByDay()[dateObj.dateText][i-1].schedule_to}}
+                                                {{scheduleObj.schedule_to}}
                                             </i><br>
                                             <i>
-                                                {{selects.place[schedulesByDay()[dateObj.dateText][i-1].place_id]}}
+                                                {{selects.place[scheduleObj.place_id]}}
+                                            </i><br>
+                                            <i>
+                                                {{scheduleObj.schedule_title}}
                                             </i>
                                         </div>
-                                        <div class="mobile only text">
-                                            <i>{{schedulesByDay()[dateObj.dateText][i-1].schedule_from}}</i>
-                                        </div>
+                                        <!-- <div class="mobile only text">
+                                            <i>{{scheduleObj.schedule_from}}</i>
+                                        </div> -->
                                     </div>
-                                    <div
+                                    <!-- <div
                                         v-if="schedulesByDay()[dateObj.dateText].length > 2"
                                         class="schedule overflow"
                                         @click="scheduleClick(dateObj.dateText)"
                                     >
                                         <i class="ellipsis vertical icon"></i>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </td>
                         </tr>
@@ -306,31 +309,33 @@
                             >
                                 <div class="schedules" v-if="schedules.length > 0">
                                     <template
-                                        v-for="index in countDayCellSchedule(schedules)"
+                                        v-for="(schedule,index) in schedules"
                                     >
                                         <div
-                                            :class="schedules[index-1].schedule_type"
-                                            :key="schedules[index-1].schedule_date+'-'+index"
-                                            @click="scheduleClick(schedules[index-1].schedule_date, schedules[index-1].schedule_id)"
+                                            :class="schedule.schedule_type"
+                                            :key="schedule.schedule_date+'-'+index"
+                                            @click="scheduleClick(schedule.schedule_date, schedule.schedule_id)"
                                         >
-                                            <div class="tablet or large device only text">
+                                            <div class="text">
                                                 <i>
-                                                    {{schedules[index-1].schedule_from}}
+                                                    {{schedule.schedule_from}}
                                                     -
-                                                    {{schedules[index-1].schedule_to}}
+                                                    {{schedule.schedule_to}}
+                                                </i><br>
+                                                <i>{{selects.user[schedule.user_id]}}</i><br>
+                                                <i>
+                                                    {{schedule.schedule_title}}
                                                 </i>
-                                                <br>
-                                                <i>{{selects.user[schedules[index-1].user_id]}}</i>
                                             </div>
-                                            <div class="mobile only text">
-                                                <i>{{schedules[index-1].schedule_from}}</i>
-                                            </div>
+                                            <!-- <div class="mobile only text">
+                                                <i>{{schedule.schedule_from}}</i>
+                                            </div> -->
                                         </div>
                                     </template>
                                 </div>
-                                <div class="schedule overflow" v-if="schedules.length > 2">
+                                <!-- <div class="schedule overflow" v-if="schedules.length > 2">
                                     <i class="ellipsis vertical icon" @click="scheduleClick(schedules[0].schedule_date)"></i>
-                                </div>
+                                </div> -->
                             </td>
                         </tr>
                     </tbody>
@@ -757,7 +762,7 @@ export default {
     border-radius: 3px;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 3em;
+    /* height: 3em; */
     white-space: nowrap;
     margin-bottom: 0.5em;
     width: 100%;
