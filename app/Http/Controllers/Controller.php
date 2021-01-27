@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Utils\FileUtil;
 use App\Utils\UserUtil;
 use App\Utils\DataUtil;
-use App\Utils\ValidateUtil;
 
 class Controller extends BaseController
 {
@@ -45,7 +45,7 @@ class Controller extends BaseController
     }
 
     public static function getDataAsModel(String $table) {
-        $table = "App\\Models\\".ucfirst($table);
+        $table = "App\\Models\\".ucfirst(Str::camel($table));
         $model = new $table();
         $allData = $model::all();
 
@@ -63,12 +63,12 @@ class Controller extends BaseController
             return (array) json_decode($arr);
         }, $request->orders) : [];
 
-        $class = "App\\Pages\\".ucfirst($table);
+        $class = "App\\Pages\\".ucfirst(Str::camel($table));
         $page = new $class();
         if(class_exists($class) && method_exists($page, 'getData')){
             $result["datas"] = $page::getData($request, $id);
         } else {
-            $class = "App\\Models\\".ucfirst($table);
+            $class = "App\\Models\\".ucfirst(Str::camel($table));
             $model = new $class();
             if(is_null($id)){
                 $model = $model->query();
@@ -93,7 +93,7 @@ class Controller extends BaseController
     }
     public static function postData(Request $request, $table) {
         DB::beginTransaction();
-        $class = "App\\Models\\".ucfirst($table);
+        $class = "App\\Models\\".ucfirst(Str::camel($table));
         $model = new $class();
         /* $class = "App\\Pages\\".ucfirst($table);
         $page = new $class(); */
@@ -154,7 +154,7 @@ class Controller extends BaseController
     }
     public static function putData(Request $request, $table, $id) {
         DB::beginTransaction();
-        $class = "App\\Models\\".ucfirst($table);
+        $class = "App\\Models\\".ucfirst(Str::camel($table));
         $model = new $class();
         /* $class = "App\\Pages\\".ucfirst($table);
         $page = new $class(); */
@@ -223,7 +223,7 @@ class Controller extends BaseController
             'messages' => [],
         ];
         $status = 200;
-        $class = "App\\Models\\".ucfirst($table);
+        $class = "App\\Models\\".ucfirst(Str::camel($table));
         $model = new $class();
         $data = $model::find($id);
 
@@ -233,13 +233,12 @@ class Controller extends BaseController
         }else {
             $userValidate = UserUtil::permissionValidate($data);
             if($userValidate) {
-                $class = "App\\Pages\\".ucfirst($table);
-                if(class_exists($class)){
-                    $page = new $class();
-                    if(method_exists($page, 'beforeDelete')){
+                $page = $model::getPage();
+                if(!is_null($page)) {
+                    if(method_exists($page, 'beforeDelete')) {
                         if(!$page::beforeDelete($data->toArray(), $result, $request->all())) {
                             $status = 400;
-                        }else {
+                        } else {
                             $model::destroy($id);
                         }
                     } else {
@@ -254,10 +253,10 @@ class Controller extends BaseController
             }
         }
 
-        if($status === 200){
+        if($status === 200) {
             array_push($result['messages'], 'delete-success');
             DB::commit();
-        }else {
+        } else {
             DB::rollBack();
         }
 
@@ -265,7 +264,7 @@ class Controller extends BaseController
     }
 
     public static function download(Request $request, $table, $id, $filename, $field = null) {
-        $class = "App\\Pages\\".ucfirst($table);
+        $class = "App\\Pages\\".ucfirst(Str::camel($table));
         $page = new $class();
 
         if(method_exists($page, 'getFile')) {
