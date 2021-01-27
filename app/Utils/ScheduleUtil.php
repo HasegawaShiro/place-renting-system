@@ -66,15 +66,13 @@ class ScheduleUtil {
         $bin = str_split($bin);
         $mode = $data["schedule_end"];
         $d = Carbon::createFromFormat("Y-m-d",$data["schedule_date"]);
-
         if($mode == "at") {
             $endDate = Carbon::createFromFormat("Y-m-d", $data["schedule_end_at"]);
             $count = $d->diffInDays($endDate);
-
             while ($count > 0) {
                 $d->addDay();
                 $weekDay = $d->dayOfWeekIso-1;
-                if($bin[$weekDay] === "1"){
+                if($bin[$weekDay] === "1") {
                     array_push($result,$d->toDateString());
                 }
                 $count--;
@@ -87,10 +85,10 @@ class ScheduleUtil {
             }
             while ($count > 0) {
                 $d->addDay();
+                $weekDay = $d->dayOfWeekIso-1;
                 if($bin[$weekDay] === "1") {
                     array_push($result,$d->toDateString());
                 }
-                $weekDay = $d->dayOfWeekIso-1;
                 if($weekDay == 6) {
                     $count--;
                 }
