@@ -782,26 +782,6 @@ export default {
     text-align: center;
     font-size: 18px;
 }
-/* .nchu.calendar div.main .month.mode .day.cell .schedules .conference, .nchu.calendar div.main .week.mode .day.cell .schedules .conference {
-    border-color: rgb(190, 81, 7) !important;
-    background-color: rgba(240, 132, 61, 0.692);
-}
-.nchu.calendar div.main .month.mode .day.cell .schedules .activity, .nchu.calendar div.main .week.mode .day.cell .schedules .activity {
-    border-color: rgb(212, 194, 32) !important;
-    background-color: rgba(255, 233, 110, 0.863);
-}
-.nchu.calendar div.main .month.mode .day.cell .schedules .lesson, .nchu.calendar div.main .week.mode .day.cell .schedules .lesson {
-    border-color: rgb(25, 57, 117) !important;
-    background-color: rgba(54, 99, 182, 0.466);
-}
-.nchu.calendar div.main .month.mode .day.cell .schedules .exam, .nchu.calendar div.main .week.mode .day.cell .schedules .exam {
-    border-color: rgb(150, 21, 155) !important;
-    background-color: rgba(217, 41, 223, 0.534);
-}
-.nchu.calendar div.main .month.mode .day.cell .schedules .other, .nchu.calendar div.main .week.mode .day.cell .schedules .other {
-    border-color: rgb(45, 171, 202) !important;
-    background-color: rgba(61, 216, 255, 0.589);
-} */
 
 /* week mode */
 .nchu.calendar div.main .week.mode thead .colorful.year.header {

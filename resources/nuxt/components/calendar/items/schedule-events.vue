@@ -1,6 +1,7 @@
 <template>
 <div class="ts modals dimmer">
     <dialog class="ts mobile-wrapper closable modal schedule-events">
+        <i class="close icon"></i>
         <header class="header">
         </header>
 
@@ -31,9 +32,9 @@
                     >
                         <div
                             class="custom-accordion"
-                            :class="sd.schedule_type"
                             :key="'schedule-event-'+sd.schedule_id"
                             :id="'schedule-accordion-'+sd.schedule_id"
+                            :style="{'border-color': sd.place_color}"
                             @click="onAccordionClick($event, sd.schedule_id)"
                         >
                             <span>{{sd.schedule_from}} - {{sd.schedule_to}}</span><br>
@@ -138,6 +139,12 @@
                                         {{sd.schedule_url}}
                                     </div>
                                 </div>
+                                <div class="ts list">
+                                    <div class="item">
+                                        {{CONSTANTS.FORM_TEXT.schedule_document}}：
+                                        {{sd.schedule_document}}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div
@@ -233,17 +240,34 @@ export default {
 
             if(toOpen){
                 let detail = document.querySelector(`#schedule-detail-${id}`);
-                // console.log(detail.querySelector(".schedule-main").scrollHeight)
                 detail.style['max-height'] = detail.querySelector(".schedule-main").scrollHeight + 50 + 'px';
                 detail.style['padding'] = '1em .25em';
             }
         },
         parseScheduleRepeat(schedule) {
+            let result = "否";
             if(schedule.schedule_repeat) {
-                return "";
-            } else {
-                return "否";
+                let bin = DataUtil.decimalToBinary(schedule.schedule_repeat_days,7).split("");
+                console.log(bin);
+                if(bin.includes("0")) {
+                    let week = "";
+                    const WEEK_TEXT = ['一','二','三','四','五','六','日'];
+                    for(let i = 0; i < 7; i++) {
+                        if(bin[i] === "1") week = DataUtil.unionString(week,WEEK_TEXT[i],'、');
+                    }
+                    result = `每週 ${week}`;
+                } else {
+                    result = "每天";
+                }
+                result += "，持續"
+                if(schedule.schedule_end === "at") {
+                    result += `到 ${schedule.schedule_end_at}`;
+                } else {
+                    result += ` ${schedule.schedule_end_times} 週`;
+                }
             }
+
+            return result;
         },
         isEmpty(obj) {
             return DataUtil.isEmpty(obj);
@@ -310,7 +334,6 @@ export default {
             window.globalLoading.unloading();
             window.$page.$refs.content.scheduleClick(dateText);
         },
-        parseRepeat(schedule) {},
     },
 };
 </script>
@@ -461,13 +484,13 @@ export default {
     cursor: pointer;
     padding: 18px;
     width: 100%;
-    border: none;
+    border-left: .8em solid #aaa;
     text-align: left;
     outline: none;
     font-size: 15px;
     transition: 0.4s;
 }
-.schedule-events .upcoming-events .container .events-wrapper .custom-accordion::before {
+/* .schedule-events .upcoming-events .container .events-wrapper .custom-accordion::before {
     content: "";
     display: block;
     width: .8em;
@@ -476,7 +499,7 @@ export default {
     position: absolute;
     top: 0px;
     left: 0px;
-}
+} */
 .schedule-events .upcoming-events .container .events-wrapper .custom-accordion.conference::before {
     background-color: rgb(240, 133, 61);
 }
