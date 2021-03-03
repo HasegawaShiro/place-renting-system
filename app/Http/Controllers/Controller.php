@@ -136,8 +136,6 @@ class Controller extends BaseController
         DB::beginTransaction();
         $class = "App\\Models\\".ucfirst(Str::camel($table));
         $model = new $class();
-        /* $class = "App\\Pages\\".ucfirst($table);
-        $page = new $class(); */
         $page = $model::getPage();
         $origin = $model::find($id);
 
@@ -148,12 +146,12 @@ class Controller extends BaseController
         ];
         $fileTemp = [];
 
-        if(is_null($origin)){
+        if(is_null($origin)) {
             array_push($result['messages'],'data-not-found');
             $status = 404;
-        }else{
+        } else {
             $permissionPass = method_exists($page, 'permission') ? $page::permission('edit', $id) : true;
-            if($permissionPass){
+            if($permissionPass) {
                 $data = DataUtil::parseFormData($request->all());
                 $origin = DataUtil::saveData($data, $model, $page, 'edit', $origin, $result, $status);
             } else {
