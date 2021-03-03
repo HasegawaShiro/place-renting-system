@@ -1,6 +1,7 @@
 <?php
 namespace App\Pages;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 use App\Models\User as _MODEL;
@@ -186,6 +187,10 @@ class User {
         if($status == 'edit' && $data["user_id"] == 1 && $data["user_disabled"] == true) {
             $pass = false;
             array_push($result["messages"], self::messages()['admin-cannot-disabled']);
+        }
+
+        if(!Auth::check()) {
+            $data["user_disabled"] = true;
         }
 
         return $pass;

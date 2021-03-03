@@ -108,6 +108,7 @@
                                 page="user"
                                 ref="register"
                                 form-name="register"
+                                warning="註冊後請通知管理員啟用帳號"
                                 :show-add="false"
                                 @saved="registerSaved()"
                             ></CustomForm>
@@ -494,7 +495,7 @@ export default {
     header .menu {
         border: none !important;
     }
-    header .menu a, header .menu i, header .menu div:not(.header) {
+    header .menu a, header .menu i, header .menu div:not(.header):not(.slate) {
         color: white !important;
     }
     content {

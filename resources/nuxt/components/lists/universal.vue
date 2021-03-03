@@ -96,6 +96,11 @@
                             <i class="large download icon" @click="download(data, field)"></i>
                         </template>
                         <template
+                            v-else-if="field.Type == 'color'"
+                        >
+                            <input type="color" :value="data[field.Name]" disabled>
+                        </template>
+                        <template
                             v-else
                         >{{data[field.Name]}}</template>
                     </td>
@@ -669,6 +674,9 @@ tfoot .pagination div {
 }
 .page-button input:checked ~ label {
     background-color: #70eec4 !important;
+}
+input[type="color"]:disabled {
+    width: 100%;
 }
 @media(hover: hover) and (pointer: fine) {
     .page-button label:hover {

@@ -16,6 +16,7 @@
             v-else
             :page="page"
             :form-name="formName"
+            :warning="warning"
             ref="form-modal"
             @save="onModalSave($event)"
         ></Universal>
@@ -146,6 +147,12 @@ export default {
         'form-data': {
             type: Object
         },
+        "warning": {
+            type: String,
+            default() {
+                return "";
+            }
+        }
     },
     watch: {
         formData(newVal, oldVal){
