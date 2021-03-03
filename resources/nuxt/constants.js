@@ -43,6 +43,10 @@ export default {
                 target: '_blank',
                 url: 'api/download/guide/0/guide.pdf',
                 permission: 'all',
+            },
+            place_intro: {
+                text: '場地教室介紹',
+                permission: 'all'
             }
         },
         FOOTER: {
@@ -100,8 +104,8 @@ export default {
             mail: '電子信箱',
             schedule_contact: '聯絡人',
             schedule_url: '相關網址',
-            schedule_document: '開班核准公文',
-            form_hint: '[相關網址] 與 [開班核准公文] 請至少擇一填寫',
+            schedule_document: '核准開班公文',
+            form_hint: '[相關網址] 與 [核准開班公文] 請至少擇一填寫',
         },
         selects:{
             types: {

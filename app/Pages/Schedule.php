@@ -110,6 +110,7 @@ class Schedule {
                 'user_id' => '承辦人',
                 'schedule_contact' => '聯絡人',
                 'schedule_url' => '相關網址',
+                'schedule_document' => '核准開班公文',
                 'schedule_repeat' => '是否重複',
                 'schedule_repeat_days' => '重複方式',
                 'schedule_end_at' => '重複結束日期',
@@ -245,7 +246,6 @@ class Schedule {
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
         $fields = self::fields();
         $today = Carbon::yesterday()->endOfDay()->toDateTimeString();
-        // $atLimit = Carbon::today()->addMonthsNoOverflow(6)->toDateString();
         $atLimit = Carbon::today()->addYear()->toDateString();
         array_push($rules["schedule_to"], "after:{$data['schedule_from']}");
         array_push($rules["schedule_date"], "after:{$today}");
@@ -272,6 +272,11 @@ class Schedule {
         } else {
             array_push($rules["schedule_end_at"], "nullable");
             array_push($rules["schedule_end_times"], "nullable");
+        }
+
+        if(empty($data["schedule_url"]) && empty($data["schedule_document"])) {
+            ValidateUtil::setRules($rules["schedule_url"],"required");
+            $messages["schedule_url.required"] = ":attribute 與 ".$fields['attributes']['schedule_document']." 請至少擇一填寫";
         }
 
         $messages["schedule_to.after"] = ":attribute 必須要晚於 ".$fields['attributes']['schedule_from'];
