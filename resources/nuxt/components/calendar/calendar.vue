@@ -264,10 +264,10 @@
                                     <div
                                         v-for="(scheduleObj, i) in schedulesByDay()[dateObj.dateText]"
                                         :key="dateObj.dateText+'-'+i"
-                                        :class="scheduleObj.schedule_type"
+                                        :style="{'background-color': scheduleBackColor(scheduleObj.place_color)}"
                                         @click="scheduleClick(dateObj.dateText, scheduleObj.schedule_id)"
                                     >
-                                        <div class="text">
+                                        <div class="text" :style="{'border-color': scheduleBolderColor(scheduleObj.place_color)}">
                                             <i>
                                                 {{scheduleObj.schedule_from}}
                                                 -
@@ -280,17 +280,7 @@
                                                 {{scheduleObj.schedule_title}}
                                             </i>
                                         </div>
-                                        <!-- <div class="mobile only text">
-                                            <i>{{scheduleObj.schedule_from}}</i>
-                                        </div> -->
                                     </div>
-                                    <!-- <div
-                                        v-if="schedulesByDay()[dateObj.dateText].length > 2"
-                                        class="schedule overflow"
-                                        @click="scheduleClick(dateObj.dateText)"
-                                    >
-                                        <i class="ellipsis vertical icon"></i>
-                                    </div> -->
                                 </div>
                             </td>
                         </tr>
@@ -314,9 +304,10 @@
                                         <div
                                             :class="schedule.schedule_type"
                                             :key="schedule.schedule_date+'-'+index"
+                                            :style="{'background-color': scheduleBackColor(schedule.place_color)}"
                                             @click="scheduleClick(schedule.schedule_date, schedule.schedule_id)"
                                         >
-                                            <div class="text">
+                                            <div class="text" :style="{'border-color': scheduleBolderColor(schedule.place_color)}">
                                                 <i>
                                                     {{schedule.schedule_from}}
                                                     -
@@ -506,6 +497,24 @@ export default {
             }
             return result;
         },
+        scheduleBackColor(color) {
+            let result = "rgba(";
+            for(let i = 1; i < 7; i+=2) {
+                let c = color.substr(i, 2);
+                result += Number.parseInt(c, 16).toString() + ", ";
+            }
+            result += "0.67)";
+            return result;
+        },
+        scheduleBolderColor(color) {
+            let result = "rgba(";
+            for(let i = 1; i < 7; i+=2) {
+                let c = color.substr(i, 2);
+                result += (Number.parseInt(c, 16)-25).toString() + ", ";
+            }
+            result += "1)";
+            return result;
+        },
         async calendarChange(method = null, ...params) {
             if(method !== null) await this.calendar[method](...params);
 
@@ -582,9 +591,6 @@ export default {
                 showDate: date,
                 active_id: id,
             });
-        },
-        monthSelectorClick() {
-
         },
         fromToSelectorClick() {
             const that = this;
@@ -756,9 +762,8 @@ export default {
 .nchu.calendar div.main .month.mode .day.cell h2.holiday {
     color: red;
 }
-.nchu.calendar div.main .month.mode .day.cell .schedules>div:not(.overflow), .nchu.calendar div.main .week.mode .day.cell .schedules>div:not(.overflow){
+.nchu.calendar div.main .month.mode .day.cell .schedules>div:not(.overflow), .nchu.calendar div.main .week.mode .day.cell .schedules>div:not(.overflow) {
     padding-left: .05em;
-    border-left: 3px solid;
     border-radius: 3px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -767,8 +772,9 @@ export default {
     margin-bottom: 0.5em;
     width: 100%;
 }
-.nchu.calendar div.main .month.mode .day.cell .schedules div .text, .nchu.calendar div.main .week.mode .day.cell .schedules div .text {
-    border: none;
+.nchu.calendar div.main .month.mode .day.cell .schedules div.text, .nchu.calendar div.main .week.mode .day.cell .schedules div .text {
+    border-left: 4px solid;
+    padding-left: .2em;
 }
 .nchu.calendar div.main .month.mode .day.cell .schedule.overflow, .nchu.calendar div.main .week.mode .day.cell .schedule.overflow {
     padding: 2px;
@@ -776,7 +782,7 @@ export default {
     text-align: center;
     font-size: 18px;
 }
-.nchu.calendar div.main .month.mode .day.cell .schedules .conference, .nchu.calendar div.main .week.mode .day.cell .schedules .conference {
+/* .nchu.calendar div.main .month.mode .day.cell .schedules .conference, .nchu.calendar div.main .week.mode .day.cell .schedules .conference {
     border-color: rgb(190, 81, 7) !important;
     background-color: rgba(240, 132, 61, 0.692);
 }
@@ -795,7 +801,7 @@ export default {
 .nchu.calendar div.main .month.mode .day.cell .schedules .other, .nchu.calendar div.main .week.mode .day.cell .schedules .other {
     border-color: rgb(45, 171, 202) !important;
     background-color: rgba(61, 216, 255, 0.589);
-}
+} */
 
 /* week mode */
 .nchu.calendar div.main .week.mode thead .colorful.year.header {
