@@ -172,6 +172,8 @@ class Schedule {
                         activity: '活動',
                         lesson: '課程',
                         exam: '考試',
+                        lecture: '講座',
+                        camp: '營隊',
                         other: '其他'
                     },
                     listOrder: 0,
@@ -443,12 +445,23 @@ class Place {
                 }
             )),
             (new Field(
+                'place_color',
+                '場地色別',
+                'color',
+                {
+                    listOrder: 2,
+                    formOrder: 2,
+                    required: false,
+                    default: "#FFFFFF",
+                }
+            )),
+            (new Field(
                 'remarks',
                 '備註',
                 'text',
                 {
-                    listOrder: 2,
-                    formOrder: 2,
+                    listOrder: 3,
+                    formOrder: 3,
                     required: false,
                 }
             )),
@@ -459,8 +472,8 @@ class Place {
                 {
                     trueText: '是',
                     falseText: '否',
-                    listOrder: 3,
-                    formOrder: 3,
+                    listOrder: 4,
+                    formOrder: 4,
                     default: false,
                     required: false,
                 }
@@ -585,7 +598,7 @@ class Field {
         order: {},
         onlyShowForAdmin: false,
     };
-    static allowType = ['text', 'password', 'textarea', 'number', 'boolean', 'date', 'time', 'datetime', 'select', 'file', 'custom'];
+    static allowType = ['text', 'password', 'textarea', 'number', 'boolean', 'date', 'time', 'datetime', 'select', 'file', 'color', 'custom'];
 
     constructor(name, text = null, type = 'string', options = {}) {
         this.#Name = name;
