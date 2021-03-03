@@ -99,7 +99,9 @@ export default {
             phone: '電話',
             mail: '電子信箱',
             schedule_contact: '聯絡人',
-            schedule_url: '相關網址'
+            schedule_url: '相關網址',
+            schedule_document: '開班核准公文',
+            form_hint: '[相關網址] 與 [開班核准公文] 請至少擇一填寫',
         },
         selects:{
             types: {
@@ -107,6 +109,8 @@ export default {
                 activity: '活動',
                 lesson: '課程',
                 exam: '考試',
+                lecture: '講座',
+                camp: '營隊',
                 other: '其他'
             },
         },
@@ -213,6 +217,8 @@ export default {
                 activity: '活動',
                 lesson: '課程',
                 exam: '考試',
+                lecture: '講座',
+                camp: '營隊',
                 other: '其他'
             },
             user: {},
