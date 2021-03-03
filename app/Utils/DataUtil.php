@@ -68,8 +68,17 @@ class DataUtil {
         }
     } */
 
-    public static function isCollection($object){
+    public static function isCollection($object) {
         return is_a($object,'Illuminate\Database\Eloquent\Collection') || is_a($object,'Illuminate\Support\Collection');
+    }
+
+    public static function parseFormData($data) {
+        if(isset($data["_JSON"])) {
+            $json = json_decode($data["_JSON"]);
+            unset($data["_JSON"]);
+            foreach($json as $key => $value) $data[$key] = $value;
+        }
+        return $data;
     }
 
     public static function parseExcelColumn(string $column){

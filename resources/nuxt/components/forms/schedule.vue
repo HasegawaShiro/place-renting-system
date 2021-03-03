@@ -272,7 +272,18 @@
                         v-bind="{disabled: config.mode == 'view'}"
                     >
                 </div>
+                <div class="field">
+                    <label>{{CONSTANTS.FORM_TEXT.schedule_document}}</label>
+                    <input
+                        type="file"
+                        v-bind="{disabled: config.mode == 'view'}"
+                        @change="fileOnChange($event, 'schedule_document')"
+                    >
+                </div>
             </form>
+            <div class="ts center aligned vertically fitted slate">
+                <span class="description">{{CONSTANTS.FORM_TEXT.form_hint}}</span>
+            </div>
         </div>
         <div class="actions" v-if="config.mode != 'view'">
             <button
@@ -296,7 +307,6 @@
 <script>
 import CONSTANTS from "../../constants.js";
 import DataUtil from '../../utils/DataUtil.js';
-import {PageUtil, Form} from '../../utils/PageUtil.js';
 import API from '../../api.js';
 
 export default {
@@ -347,7 +357,8 @@ export default {
                     schedule_repeat_method: 'keep',
                     schedule_repeat_days: ['0', '0', '0', '0', '0', '0', '0'],
                 };
-            }
+            },
+            inputFormData: new FormData(),
         };
     },
     async mounted() {
@@ -432,21 +443,26 @@ export default {
             }
         },
         saveClick() {
-            if(['add', 'edit'].includes(this.config.mode)){
+            if(['add', 'edit'].includes(this.config.mode)) {
                 let toSave = DataUtil.deepClone(this.input);
-                if(this.config.fullday){
+                const hasFile = !DataUtil.isEmpty(this.inputFormData.get("schedule_document"));
+                if(this.config.fullday) {
                     toSave.schedule_from = "00:00";
                     toSave.schedule_to = "23:59";
                 }
 
-                if(this.config.schedule_repeat_method == "keep"){
+                if(this.config.schedule_repeat_method == "keep") {
                     toSave.schedule_repeat_days = 127;
-                }else{
+                } else {
                     let days = "";
-                    for(let i = 0; i < 7; i++){
+                    for(let i = 0; i < 7; i++) {
                         days += this.config.schedule_repeat_days[i];
                     }
                     toSave.schedule_repeat_days = parseInt(days,2);
+                }
+                if(hasFile) {
+                    this.inputFormData.set('_JSON', JSON.stringify(toSave));
+                    toSave = this.inputFormData;
                 }
 
                 this.$emit("save", {
@@ -454,11 +470,18 @@ export default {
                     input: toSave,
                     method: this.config.mode == 'add' ? 'post' : 'put',
                     id: this.config.id,
+                    options: {hasFile},
                 });
             }
         },
         cancelClick() {
             this.$emit("cancel");
+        },
+        fileOnChange($event, name) {
+            const file = $event.target.files[0];
+            if(!DataUtil.isEmpty(file)) {
+                this.inputFormData.set(name, file);
+            }
         },
     },
 };

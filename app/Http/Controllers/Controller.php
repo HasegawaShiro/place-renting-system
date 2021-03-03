@@ -18,6 +18,9 @@ use App\Utils\DataUtil;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    public function test() {
+        dd(Auth::check());
+    }
 
     public static function getReferenceSelect(Request $request, $table) {
         $showDisabled = isset($request->showDisabled) ? $request->showDisabled : false;
@@ -95,8 +98,6 @@ class Controller extends BaseController
         DB::beginTransaction();
         $class = "App\\Models\\".ucfirst(Str::camel($table));
         $model = new $class();
-        /* $class = "App\\Pages\\".ucfirst($table);
-        $page = new $class(); */
         $page = $model::getPage();
         $permissionPass = method_exists($page, 'permission') ? $page::permission('add') : true;
 
@@ -107,28 +108,7 @@ class Controller extends BaseController
         ];
         $fileTemp = [];
         if($permissionPass){
-            $data = $request->all();
-            /* $validationPass = ValidateUtil::validateForSave($table, $data, 'add', $result);
-            $user_id = Auth::check() ? $request->user()->user_id : -1;
-
-            if($validationPass) {
-                foreach($data as $key => &$value) {
-                    if(is_a($value, "Illuminate\Http\UploadedFile")) {
-                        $fileTemp[$key] = $value;
-                        $value = $value->getClientOriginalName();
-                    }
-                }
-                $data["created_by"] = $user_id;
-                $data["updated_by"] = $user_id;
-                $created = $model::create($data);
-                $data[$created->getKeyName()] = $created->getKey();
-
-                if(method_exists($page,'afterSave')) {
-                    if(!$page::afterSave($data, $result, 'add')) $status = 422;
-                }
-            } else {
-                $status = 422;
-            } */
+            $data = DataUtil::parseFormData($request->all());
             $created = DataUtil::saveData($data, $model, $page, 'add', null, $result, $status);
         } else {
             $status = 403;
@@ -174,25 +154,7 @@ class Controller extends BaseController
         }else{
             $permissionPass = method_exists($page, 'permission') ? $page::permission('edit', $id) : true;
             if($permissionPass){
-                $data = $request->all();
-                /* $data["{$table}_id"] = $id;
-
-                $validationPass = ValidateUtil::validateForSave($table, $data, 'edit', $result);
-
-                if($validationPass) {
-                    $toUpdate = $data;
-                    $toUpdate["updated_by"] = $request->user()->user_id;
-                    foreach($toUpdate as $key => $value){
-                        if(!$model->isEditable($key)) unset($toUpdate[$key]);
-                    }
-                    $old = $origin->toArray();
-                    $origin->update($toUpdate);
-                    if(method_exists($page,'afterSave')){
-                        if(!$page::afterSave($data, $result, 'edit', $old)) $status = 422;
-                    }
-                }else{
-                    $status = 422;
-                } */
+                $data = DataUtil::parseFormData($request->all());
                 $origin = DataUtil::saveData($data, $model, $page, 'edit', $origin, $result, $status);
             } else {
                 $status = 403;

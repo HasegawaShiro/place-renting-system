@@ -28,6 +28,7 @@
                             v-else-if="isInputField(field)"
                             v-model="input[field.Name]"
                             v-bind="{disabled: isFieldDisabled(field)}"
+                            :class="{isColor: field.Type == 'color'}"
                             :type="field.Type"
                         />
                         <select
@@ -130,6 +131,9 @@
                     </div>
                 </template>
             </form>
+            <div v-if="!isEmpty(warning)" class="ts center aligned vertically fitted slate">
+                <span class="description">{{warning}}</span>
+            </div>
         </div>
         <div class="actions" v-if="config.mode != 'view'">
             <button
@@ -191,6 +195,12 @@ export default {
     props: {
         page: String,
         "form-name": String,
+        "warning": {
+            type: String,
+            default() {
+                return "";
+            }
+        }
     },
     computed: {
         parseFormName() {
@@ -306,7 +316,7 @@ export default {
                 'date',
                 'time',
                 'datetime',
-                'file'
+                'color'
             ].includes(field.Type);
         },
         isFieldRequired(field) {
@@ -331,12 +341,8 @@ export default {
         saveClick() {
             if(['add', 'edit'].includes(this.config.mode)){
                 let toSave = DataUtil.deepClone(this.input);
-                if(this.requestOptions.hasFile === true) {
-                    for(let d in toSave) {
-                        this.inputFormData.append(d, toSave[d]);
-                    }
-                    toSave = this.inputFormData;
-                }
+                this.inputFormData.set('_JSON', JSON.stringify(toSave));
+                toSave = this.inputFormData;
 
                 this.$emit("save", {
                     name: this.page,
@@ -361,8 +367,14 @@ export default {
                 }
             }
         },
-        fileOnChange($event, field) {
-            this.inputFormData.append(field.Name, $event.target.files[0]);
+        fileOnChange($event, name) {
+            const file = $event.target.files[0];
+            if(this.inputFormData.has(name)) {
+                this.inputFormData.delete(name);
+            }
+            if(!DataUtil.isEmpty(file)) {
+                this.inputFormData.append(name, file);
+            }
         },
     },
 }
@@ -384,5 +396,13 @@ label .required {
     top: -0.2em;
     font-size: 1.7em;
     color: red;
+}
+input.isColor {
+    line-height: 2em !important;
+    padding: 0.12em !important;
+}
+div.slate {
+    margin-top: 1.5em;
+    background-color: rgb(255, 207, 207) !important;
 }
 </style>
