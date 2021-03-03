@@ -17,6 +17,7 @@ class CreatePlacesTable extends Migration
             $table->bigIncrements('place_id');
             $table->text('place_code')->unique();
             $table->text('place_name');
+            $table->text('place_color')->default("#FFFFFF");
             $table->boolean('place_disabled');
             $table->longText('remarks')->nullable();
             $table->bigInteger('created_by')->default(-1);

@@ -20,7 +20,7 @@ class CreateSchedulesTable extends Migration
             $table->date('schedule_date');
             $table->time('schedule_from');
             $table->time('schedule_to');
-            $table->enum('schedule_type', ['conference', 'activity', 'lesson', 'exam', 'other']);
+            $table->enum('schedule_type', ['conference', 'activity', 'lesson', 'exam', 'lecture', 'camp', 'other']);
             $table->longText('schedule_content')->nullable();
             $table->foreignId('user_id');
             $table->longText('schedule_contact')->nullable();
@@ -32,6 +32,7 @@ class CreateSchedulesTable extends Migration
             $table->integer('schedule_end_times')->nullable();
             // $table->longText('schedule_options');
             $table->text('schedule_registrant')->nullable();
+            $table->text('schedule_document')->nullable();
             $table->unsignedBigInteger('repeat_id')->nullable();
             $table->bigInteger('created_by')->default(-1);
             $table->bigInteger('updated_by')->default(-1);
