@@ -10,9 +10,12 @@ export default class API {
             toSendData = {params: data};
         }
 
-        if(options.hasFile === true) {
+        if(toSendData.constructor === FormData) {
             toSendData.append('hasFile', true);
-
+            if(method === "put"){
+                toSendData.append('_method', "PUT");
+                method = "post";
+            }
             window.$nuxt.$axios.setHeader({'Content-Type': 'multipart/form-data'});
         } else {
             window.$nuxt.$axios.setHeader({'Content-Type': 'application/json'});
