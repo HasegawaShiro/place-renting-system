@@ -28,6 +28,7 @@ class Schedule extends Model
         'schedule_end_at',
         'schedule_end_times',
         'schedule_registrant',
+        'schedule_document',
         'repeat_id',
         'created_by',
         'updated_by',
@@ -67,6 +68,7 @@ class Schedule extends Model
         'schedule_end_at',
         'schedule_end_times',
         'schedule_registrant',
+        'schedule_document',
         'repeat_id',
         'updated_by',
     ];

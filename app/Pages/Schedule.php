@@ -42,7 +42,7 @@ class Schedule {
                 ],
                 'schedule_type' => [
                     'required',
-                    Rule::in(['conference','activity','lesson','exam','other']),
+                    Rule::in(['conference','activity','lesson','exam','lecture','camp','other']),
                 ],
                 'schedule_content' => [
                     'nullable',
@@ -88,6 +88,11 @@ class Schedule {
                     'nullable',
                     'string',
                     'max:200'
+                ],
+                'schedule_document' => [
+                    'nullable',
+                    'file',
+                    'max:20000'
                 ],
                 'repeat_id' => [
                     'nullable',
@@ -213,6 +218,7 @@ class Schedule {
                 $schedule["util_name"] = $model->util->util_name;
                 $schedule["util_id"] = $model->util->util_id;
                 $schedule["place_name"] = $model->place->place_name;
+                $schedule["place_color"] = $model->place->place_color;
                 $schedule["place_disabled"] = $model->place->place_disabled;
 
                 if(!is_null($schedule["repeat_id"])) {
