@@ -26,6 +26,10 @@ class Place {
                     'string',
                     'max:200',
                 ],
+                'place_color' => [
+                    'nullable',
+                    'string',
+                ],
                 'place_disabled' => [
                     'required',
                     'boolean'
@@ -45,6 +49,10 @@ class Place {
                     'required',
                     'string',
                     'max:200',
+                ],
+                'place_color' => [
+                    'nullable',
+                    'string',
                 ],
                 'place_disabled' => [
                     'required',

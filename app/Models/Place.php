@@ -13,6 +13,7 @@ class Place extends Model
     protected $fillable = [
         'place_code',
         'place_name',
+        'place_color',
         'place_disabled',
         'remarks',
         'created_by',
@@ -27,6 +28,7 @@ class Place extends Model
 
     protected $editable = [
         'place_name',
+        'place_color',
         'place_disabled',
         'remarks',
         'updated_by',
