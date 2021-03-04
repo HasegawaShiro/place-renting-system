@@ -217,12 +217,6 @@
                             >
                                 {{year}}
                             </th>
-                            <!-- <th class="colorful year header" colspan="4">
-                                2020
-                            </th>
-                            <th class="colorful year header" colspan="3">
-                                2021
-                            </th> -->
                         </tr>
                         <tr v-if="config.mode === 'month' || config.mode === 'week'">
                             <th
@@ -268,17 +262,13 @@
                                         @click="scheduleClick(dateObj.dateText, scheduleObj.schedule_id)"
                                     >
                                         <div class="text" :style="{'border-color': scheduleBolderColor(scheduleObj.place_color)}">
-                                            <i>
+                                            <p>
                                                 {{scheduleObj.schedule_from}}
                                                 -
                                                 {{scheduleObj.schedule_to}}
-                                            </i><br>
-                                            <i>
-                                                {{selects.place[scheduleObj.place_id]}}
-                                            </i><br>
-                                            <i>
-                                                {{scheduleObj.schedule_title}}
-                                            </i>
+                                            </p>
+                                            <p>{{selects.place[scheduleObj.place_id]}}</p>
+                                            <p>{{scheduleObj.schedule_title}}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -308,25 +298,17 @@
                                             @click="scheduleClick(schedule.schedule_date, schedule.schedule_id)"
                                         >
                                             <div class="text" :style="{'border-color': scheduleBolderColor(schedule.place_color)}">
-                                                <i>
+                                                <p>
                                                     {{schedule.schedule_from}}
                                                     -
                                                     {{schedule.schedule_to}}
-                                                </i><br>
-                                                <i>{{selects.user[schedule.user_id]}}</i><br>
-                                                <i>
-                                                    {{schedule.schedule_title}}
-                                                </i>
+                                                </p>
+                                                <p>{{selects.user[schedule.user_id]}}</p>
+                                                <p>{{schedule.schedule_title}}</p>
                                             </div>
-                                            <!-- <div class="mobile only text">
-                                                <i>{{schedule.schedule_from}}</i>
-                                            </div> -->
                                         </div>
                                     </template>
                                 </div>
-                                <!-- <div class="schedule overflow" v-if="schedules.length > 2">
-                                    <i class="ellipsis vertical icon" @click="scheduleClick(schedules[0].schedule_date)"></i>
-                                </div> -->
                             </td>
                         </tr>
                     </tbody>
@@ -679,6 +661,9 @@ export default {
 
 <style>
 /* public */
+p {
+    margin: 0px !important;
+}
 .nchu.calendar {
     user-select: none;
 }
@@ -755,7 +740,7 @@ export default {
     background-color: rgba(255, 255, 255, 0.589);
 }
 .nchu.calendar div.main .month.mode .day.cell h2 {
-    margin-bottom: .02em;
+    margin-bottom: .25em;
     padding-left: .2em;
     border-radius: 3px;
 }
@@ -767,7 +752,6 @@ export default {
     border-radius: 3px;
     overflow: hidden;
     text-overflow: ellipsis;
-    /* height: 3em; */
     white-space: nowrap;
     margin-bottom: 0.5em;
     width: 100%;
