@@ -4,7 +4,7 @@ namespace App\Utils;
 use Illuminate\Support\Facades\Auth;
 
 class DataUtil {
-    public static function saveData($data, $model, $page, $mode, $origin = null, &$result, &$status) {
+    public static function saveData($data, $model, $page, $mode, $origin = null, &$result, &$status, &$fileTemp) {
         // $data = $request->all();
         if($mode === 'edit') {
             $data[$origin->getKeyName()] = $origin->getKey();
@@ -41,7 +41,7 @@ class DataUtil {
                 $bodyPage = $bodyModel::getPage();
                 foreach($data['_BODY'] as $body) {
                     $body['parent_id'] = $saved->getKey();
-                    self::saveData($body, $bodyModel, $bodyPage, $mode, $origin, $result, $status);
+                    self::saveData($body, $bodyModel, $bodyPage, $mode, $origin, $result, $status, $fileTemp);
                 }
             }
 
