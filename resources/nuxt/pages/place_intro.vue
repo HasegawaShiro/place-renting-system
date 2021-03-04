@@ -5,11 +5,11 @@
         @mounted="mainLayoutMounted()"
     >
         <div slot="content">
-            <div class="ts modals dimmer">
+            <div class="ts modals dimmer" style="padding: 0">
                 <dialog id="modal" class="ts closable basic modal">
-                    <i class="close icon"></i>
-                    <div class="content" style="width:100%">
-                        <img :src="imageURL(modalImage)">
+                    <i class="close icon" style="position: fixed; right: 5%; top: 2.5%;"></i>
+                    <div class="content" style="width:auto; height:100%;">
+                        <img :src="imageURL(modalImage)" style="width:100%;">
                     </div>
                 </dialog>
             </div>
@@ -128,25 +128,36 @@ img {
 .imageMask {
     width: 100%;
     height: 100%;
-    z-index: 5;
+    z-index: 1;
     background-color: rgba(255, 255, 255, 0);
     display: block;
     position: absolute;
     left: 0px;
     top: 0px;
-    font-size: 2.5em;
+    font-size: 2.5vw;
+    line-height: 2.5vw;
 }
 
 @media(hover: hover) and (pointer: fine) {
     .imageMask:hover::before {
         cursor: pointer;
-        content: '\5c55\958b\5716\7247';
-        text-align: center;
-        line-height: 800%;
+        content: '';
         background-color: rgba(255, 255, 255, 0.562);
         width: 100%;
         height: 100%;
         display: block;
+        position: relative;
+    }
+    .imageMask:hover::after {
+        content: '\5c55\958b\5716\7247';
+        text-align: center;
+        cursor: pointer;
+        position: relative;
+        margin: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 }
 </style>
