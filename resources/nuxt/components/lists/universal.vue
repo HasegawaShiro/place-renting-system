@@ -93,7 +93,7 @@
                         <template
                             v-else-if="field.Type == 'file'"
                         >
-                            <i class="large download icon" @click="download(data, field)"></i>
+                            <i v-if="!isEmpty(data[field.Name])" class="large download icon" @click="download(data, field)"></i>
                         </template>
                         <template
                             v-else-if="field.Type == 'color'"
@@ -622,7 +622,7 @@ thead .list-header th {
 }
 
 @media(hover: hover) and (pointer: fine) {
-    i.download:hover {
+    *:not(button)>i.download:hover {
         color:  rgb(8, 138, 120);
         cursor: pointer;
     }
@@ -631,7 +631,7 @@ thead .list-header th {
         background-color: rgb(31, 153, 137) !important;
     }
 }
-i.download:active {
+*:not(button)>i.download:active {
     color:  rgb(9, 114, 100);
 }
 thead .list-header th.clickable:active {

@@ -136,13 +136,25 @@
                                 <div class="ts list">
                                     <div class="item">
                                         {{CONSTANTS.FORM_TEXT.schedule_url}}：
-                                        {{sd.schedule_url}}
+                                        <a
+                                            v-if="!isEmpty(sd.schedule_url)"
+                                            target="_blank"
+                                            :href="parseURL(sd.schedule_url)"
+                                        >
+                                            {{sd.schedule_url}}
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="ts list">
                                     <div class="item">
                                         {{CONSTANTS.FORM_TEXT.schedule_document}}：
                                         {{sd.schedule_document}}
+                                        <i
+                                            v-if="!isEmpty(sd.schedule_document)"
+                                            class="large download icon"
+                                            @click="download(sd)"
+                                            style="margin-left: .5em;"
+                                        ></i>
                                     </div>
                                 </div>
                             </div>
@@ -248,7 +260,6 @@ export default {
             let result = "否";
             if(schedule.schedule_repeat) {
                 let bin = DataUtil.decimalToBinary(schedule.schedule_repeat_days,7).split("");
-                console.log(bin);
                 if(bin.includes("0")) {
                     let week = "";
                     const WEEK_TEXT = ['一','二','三','四','五','六','日'];
@@ -334,6 +345,21 @@ export default {
             window.globalLoading.unloading();
             window.$page.$refs.content.scheduleClick(dateText);
         },
+        async download(data) {
+            const id = data['schedule_id'];
+            const fileName = data['schedule_document'];
+            API.sendRequest(`api/download/schedule/${id}/${fileName}/schedule_document`).then(response => {
+                let win = window.open(`api/download/schedule/${id}/${fileName}/schedule_document`, '_blank');
+                win.focus();
+            }).catch(error => {
+                window.mainLayout.showSnackbar('error', error.response.data.messages);
+            });
+        },
+        parseURL(url = "") {
+            let result = url;
+            if(url.indexOf("http") !== 0) result = "http://"+result;
+            return result;
+        }
     },
 };
 </script>
