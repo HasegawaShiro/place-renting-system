@@ -18,12 +18,34 @@
                             <sup v-if="isFieldRequired(field)" class="required">*</sup>
                             {{field.Text}}
                         </label>
-                        <input
+                        <template
                             v-if="field.Type === 'file'"
-                            v-bind="{disabled: isFieldDisabled(field)}"
-                            :type="field.Type"
-                            @change="fileOnChange($event, field)"
-                        />
+                        >
+                            <div
+                                v-if="config.mode == 'view'"
+                                class="ts fluid input"
+                                :class="{action: !isEmpty(input[field.Name])}"
+                            >
+                                <input
+                                    v-model="input[field.Name]"
+                                    disabled
+                                    type="text"
+                                >
+                                <button
+                                    v-if="!isEmpty(input[field.Name])"
+                                    class="ts icon button"
+                                    @click.prevent="download(input, field)"
+                                >
+                                    <i class="download icon"></i>
+                                </button>
+                            </div>
+                            <input
+                                v-else
+                                :type="field.Type"
+                                @change="fileOnChange($event, field.Name)"
+                            />
+                        </template>
+
                         <input
                             v-else-if="isInputField(field)"
                             v-model="input[field.Name]"
@@ -213,8 +235,6 @@ export default {
     },
     methods: {
         async add(defaultData = {}) {
-            let dateToPut = new Date();
-
             this.pageData = PageUtil.getPageData(this.page);
             this.config.mode = 'add';
             this.config.id = 0;
@@ -244,12 +264,20 @@ export default {
                     }
                 }
             }
+            for(let f of document.querySelectorAll("input[type='file']")) {
+                f.value = "";
+            }
+            this.inputFormData = new FormData();
         },
         async edit(data) {
             this.config.mode = 'edit';
             this.config.id = data[`${this.page}_id`];
 
             await this.parseOriginData(data);
+            for(let f of document.querySelectorAll("input[type='file']")) {
+                f.value = "";
+            }
+            this.inputFormData = new FormData();
         },
         async view(data) {
             this.config.mode = 'view';
@@ -270,6 +298,13 @@ export default {
                     this.fields.push(field);
                     if(field.Type === 'file') {
                         this.requestOptions.hasFile = true;
+                        if(this.config.mode === 'view') {
+                            if(DataUtil.isEmpty(data[field.Name])) {
+                                this.$set(this.input, field.Name, field.Options.default);
+                            } else {
+                                this.$set(this.input, field.Name, data[field.Name]);
+                            }
+                        }
                     } else {
                         if(DataUtil.isEmpty(data[field.Name])) {
                             this.$set(this.input, field.Name, field.Options.default);
@@ -341,8 +376,19 @@ export default {
         saveClick() {
             if(['add', 'edit'].includes(this.config.mode)){
                 let toSave = DataUtil.deepClone(this.input);
-                this.inputFormData.set('_JSON', JSON.stringify(toSave));
-                toSave = this.inputFormData;
+                let hasFile = false;
+                for(let field of this.pageData.fields().filter(x => x.Type == 'file')) {
+                    if(!DataUtil.isEmpty(this.inputFormData.get(field.Name))) {
+                        hasFile = true;
+                        break;
+                    }
+                }
+
+                if(hasFile) {
+                    this.inputFormData.set('_JSON', JSON.stringify(toSave));
+                    toSave = this.inputFormData;
+                    this.requestOptions.hasFile = true;
+                }
 
                 this.$emit("save", {
                     name: this.page,
@@ -369,12 +415,20 @@ export default {
         },
         fileOnChange($event, name) {
             const file = $event.target.files[0];
-            if(this.inputFormData.has(name)) {
-                this.inputFormData.delete(name);
-            }
             if(!DataUtil.isEmpty(file)) {
-                this.inputFormData.append(name, file);
+                this.inputFormData.set(name, file);
             }
+        },
+        async download(data, field) {
+            const id = this.config.id;
+            const fileName = data[field.Name];
+            API.sendRequest(`api/download/${this.page}/${id}/${fileName}/${field.Name}`).then(response => {
+                let win = window.open(`api/download/${this.page}/${id}/${fileName}/${field.Name}`, '_blank');
+                win.focus();
+            }).catch(error => {
+                window.mainLayout.showSnackbar('error', error.response.data.messages);
+            });
+            return false;
         },
     },
 }

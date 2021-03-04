@@ -274,14 +274,32 @@
                 </div>
                 <div class="field">
                     <label>{{CONSTANTS.FORM_TEXT.schedule_document}}</label>
-                    <input
-                        type="file"
-                        v-bind="{disabled: config.mode == 'view'}"
-                        @change="fileOnChange($event, 'schedule_document')"
+                    <div
+                        v-if="config.mode == 'view'"
+                        class="ts fluid input"
+                        :class="{action: !isEmpty(input.schedule_document)}"
                     >
+                        <input
+                            v-model="input.schedule_document"
+                            disabled
+                            type="text"
+                        >
+                        <button
+                            v-if="!isEmpty(input.schedule_document)"
+                            class="ts icon button"
+                            @click.prevent="download(input)"
+                        >
+                            <i class="download icon"></i>
+                        </button>
+                    </div>
+                    <input
+                        v-else
+                        type="file"
+                        @change="fileOnChange($event, 'schedule_document')"
+                    />
                 </div>
             </form>
-            <div class="ts center aligned vertically fitted slate">
+            <div v-if="config.mode != 'view'" class="ts center aligned vertically fitted slate">
                 <span class="description">{{CONSTANTS.FORM_TEXT.form_hint}}</span>
             </div>
         </div>
@@ -348,6 +366,7 @@ export default {
                     user_id: null,
                     schedule_contact: null,
                     schedule_url: null,
+                    schedule_document: null,
                     repeat_id: null,
                 }
             },
@@ -372,8 +391,6 @@ export default {
     },
     methods: {
         async add(defaultData = {}) {
-            let dateToPut = new Date();
-
             this.user = this.$store.state.userStore.user;
             this.config.mode = 'add';
             this.config.id = 0;
@@ -393,12 +410,19 @@ export default {
             }
 
             this.input.user_id = this.user.id;
+            for(let f of document.querySelectorAll("input[type='file']")) {
+                f.value = "";
+            }
+            this.inputFormData = new FormData();
         },
         async edit(data) {
             this.config.mode = 'edit';
             this.config.id = data.schedule_id;
-            if(data.repeat_id != null && data.schedule_repeat) {}
             await this.parseOriginData(data);
+            for(let f of document.querySelectorAll("input[type='file']")) {
+                f.value = "";
+            }
+            this.inputFormData = new FormData();
         },
         async view(data) {
             this.config.mode = 'view';
@@ -461,6 +485,7 @@ export default {
                     toSave.schedule_repeat_days = parseInt(days,2);
                 }
                 if(hasFile) {
+                    delete toSave.schedule_document;
                     this.inputFormData.set('_JSON', JSON.stringify(toSave));
                     toSave = this.inputFormData;
                 }
@@ -482,6 +507,20 @@ export default {
             if(!DataUtil.isEmpty(file)) {
                 this.inputFormData.set(name, file);
             }
+        },
+        async download(data) {
+            const id = this.config.id;
+            const fileName = data['schedule_document'];
+            API.sendRequest(`api/download/schedule/${id}/${fileName}/schedule_document`).then(response => {
+                let win = window.open(`api/download/schedule/${id}/${fileName}/schedule_document`, '_blank');
+                win.focus();
+            }).catch(error => {
+                window.mainLayout.showSnackbar('error', error.response.data.messages);
+            });
+            return false;
+        },
+        isEmpty(obj) {
+            return DataUtil.isEmpty(obj);
         },
     },
 };

@@ -109,7 +109,7 @@ class Controller extends BaseController
         $fileTemp = [];
         if($permissionPass){
             $data = DataUtil::parseFormData($request->all());
-            $created = DataUtil::saveData($data, $model, $page, 'add', null, $result, $status);
+            $created = DataUtil::saveData($data, $model, $page, 'add', null, $result, $status, $fileTemp);
         } else {
             $status = 403;
             array_push($result['messages'], 'permission-denied');
@@ -119,7 +119,6 @@ class Controller extends BaseController
 
         if($status === 200) {
             array_push($result['messages'], 'save-success');
-
             if(isset($data["hasFile"])) {
                 foreach($fileTemp as $key => $file) {
                     FileUtil::saveFile($table, $key, $created->getKey(), $file);
@@ -153,7 +152,7 @@ class Controller extends BaseController
             $permissionPass = method_exists($page, 'permission') ? $page::permission('edit', $id) : true;
             if($permissionPass) {
                 $data = DataUtil::parseFormData($request->all());
-                $origin = DataUtil::saveData($data, $model, $page, 'edit', $origin, $result, $status);
+                $origin = DataUtil::saveData($data, $model, $page, 'edit', $origin, $result, $status, $fileTemp);
             } else {
                 $status = 403;
                 array_push($result['messages'], 'permission-denied');
@@ -164,7 +163,6 @@ class Controller extends BaseController
 
         if($status === 200) {
             array_push($result['messages'], 'save-success');
-
             if(isset($data["hasFile"])) {
                 foreach($fileTemp as $key => $file) {
                     FileUtil::saveFile($table, $key, $origin->getKey(), $file);
