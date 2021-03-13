@@ -74,6 +74,50 @@
                 </div>
             </dialog>
         </div>
+        <!-- Month selector -->
+        <div class="ts modals dimmer" v-else-if="config.mode === 'month'">
+            <dialog class="ts mini modal calendar-seletor month-selector">
+                <div class="header">
+                    {{CONSTANTS.messages['month-selector']}}
+                </div>
+                <div class="content">
+                    <input
+                        type="month"
+                        v-model="selectors.month"
+                    />
+                </div>
+                <div class="actions">
+                    <button class="ts deny button">
+                        取消
+                    </button>
+                    <button class="ts positive button">
+                        確定
+                    </button>
+                </div>
+            </dialog>
+        </div>
+        <!-- Week selector -->
+        <div class="ts modals dimmer" v-else-if="config.mode === 'week'">
+            <dialog class="ts mini modal calendar-seletor calendar-week-selector">
+                <div class="header">
+                    {{CONSTANTS.messages['week-selector']}}
+                </div>
+                <div class="content">
+                    <input
+                        type="date"
+                        v-model="selectors.week"
+                    />
+                </div>
+                <div class="actions">
+                    <button class="ts deny button">
+                        取消
+                    </button>
+                    <button class="ts positive button">
+                        確定
+                    </button>
+                </div>
+            </dialog>
+        </div>
         <div class="ts grid">
             <div class="main-header">
                 <span class="title">{{CONSTANTS.HEADER_TEXT.title}}</span>
@@ -146,6 +190,7 @@
                                 <i
                                     v-else-if="config.mode === 'week'"
                                     class="week day button"
+                                    @click="weekSelectorClick"
                                 >
                                     {{calendar.getDateToString(calendar.getDatesOfWeek()[0])}}
                                     ~
@@ -382,6 +427,8 @@ export default {
         this.filters.schedule_date_to = DataUtil.formatDateInput(this.calendar.getEndOfCalendar());
         this.selectors.from = this.filters.schedule_date_from;
         this.selectors.to = this.filters.schedule_date_to;
+        this.selectors.month = this.calendar.Year+'-'+this.calendar.getMonthFillZero();
+        this.selectors.week = this.calendar.getDateToString();
         this.computeFromToLimit();
         await this.getListDatas();
 
@@ -393,10 +440,8 @@ export default {
             }
         });
 
-
         window.mainLayout.contentLoaded();
     },
-    props:{},
     computed:{
         placeOfWeek() {
             let result = {};
@@ -410,15 +455,6 @@ export default {
 
             for(let id in result) {
                 const schedules = this.schedulesByWeekWithPlace(id);
-                /* let isEmpty = DataUtil.isEmpty(...schedules);
-                if(!isEmpty) {
-                    result[id] = {
-                        text: result[id],
-                        schedules
-                    }
-                } else {
-                    delete result[id];
-                } */
                 result[id] = {
                     text: result[id],
                     schedules
@@ -551,14 +587,8 @@ export default {
                 if(!DataUtil.isEmpty(this.$refs["list"])) await this.$refs["list"].getListDatas();
                 return temp;
             }).catch(e => {});
+            this.$forceUpdate();
             if(window.globalLoading != undefined) window.globalLoading.unloading();
-        },
-        countDayCellSchedule(schedules) {
-            if(schedules.length >= 2) {
-                return 2;
-            }else{
-                return 1;
-            }
         },
         dayCellClick(dateText) {
             if(this.$parent.isLogin) {
@@ -599,6 +629,63 @@ export default {
                 that.selectors = oldVal;
             });
             this.computeFromToLimit();
+        },
+        monthSelectorClick() {
+            const that = this;
+            let oldVal = DataUtil.deepClone(that.selectors);
+
+            const monthSelector = new Promise((resolve, reject) => {
+                ts('.month-selector').modal({
+                    onApprove: function() {
+                        resolve();
+                    },
+                    onDeny: function() {
+                        reject();
+                    }
+                }).modal('show');
+            });
+
+            monthSelector.then(() => {
+                const newVal = DataUtil.deepClone(that.selectors);
+                if(newVal.month != oldVal.month && !DataUtil.isEmpty(newVal.month)) {
+                    let yearMonth = newVal.month.split("-");
+                    that.calendar.Year = yearMonth[0];
+                    that.calendar.Month = yearMonth[1];
+                    that.filters.schedule_date_from = DataUtil.formatDateInput(that.calendar.getStartOfCalendar());
+                    that.filters.schedule_date_to = DataUtil.formatDateInput(that.calendar.getEndOfCalendar());
+                    that.getListDatas();
+                }
+            }).catch(() => {
+                that.selectors = oldVal;
+            });
+        },
+        weekSelectorClick() {
+            const that = this;
+            let oldVal = DataUtil.deepClone(that.selectors);
+
+            const weekSelector = new Promise((resolve, reject) => {
+                ts('.calendar-week-selector').modal({
+                    onApprove: function() {
+                        resolve();
+                    },
+                    onDeny: function() {
+                        reject();
+                    }
+                }).modal('show');
+            });
+
+            weekSelector.then(() => {
+                const newVal = DataUtil.deepClone(that.selectors);
+                if(newVal.week != oldVal.week && !DataUtil.isEmpty(newVal.week)) {
+                    // let weekDate = newVal.week.split("-");
+                    that.calendar.SelectedDate = newVal.week
+                    that.filters.schedule_date_from = DataUtil.formatDateInput(that.calendar.getStartOfCalendar());
+                    that.filters.schedule_date_to = DataUtil.formatDateInput(that.calendar.getEndOfCalendar());
+                    that.getListDatas();
+                }
+            }).catch(() => {
+                that.selectors = oldVal;
+            });
         },
         async changeMode(mode) {
             if(this.config.mode != mode){
@@ -673,7 +760,6 @@ p {
 .nchu.calendar table {
     border-collapse:collapse;
     border: 1px solid rgba(204, 204, 204, 0.24) !important;
-    /* margin-bottom: .5em !important; */
 }
 .nchu.calendar div.main-header {
     color: #000;

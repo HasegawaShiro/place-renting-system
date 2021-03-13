@@ -125,6 +125,7 @@ export default class DataUtil{
     }
 
     static sortArrayByCustomKey(array, key = [], order = "ASC") {
+        let result = array;
         if (array.constructor === Array) {
             if (typeof key === "string" || (typeof key === "number" && Number.isInteger(key))) {
                 key = [key];
@@ -133,7 +134,7 @@ export default class DataUtil{
             if (key.constructor !== Array) {
                 console.error("The second parameter must be an array, string or integer.");
             } else {
-                array.sort((a, b) => {
+                result = array.sort((a, b) => {
                     let compared = 0;
                     if ((a.constructor === Array || a.constructor === Object) && (b.constructor === Array || b.constructor === Object)) {
                         for (let k of key) {
@@ -153,6 +154,8 @@ export default class DataUtil{
         } else {
             console.error("The first parameter must be an array.");
         }
+
+        return result;
     }
 
     static unionString(string, union, delimiter = ",") {

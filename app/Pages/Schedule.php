@@ -3,7 +3,7 @@ namespace App\Pages;
 
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\User;
 use App\Models\Place;
@@ -243,6 +243,18 @@ class Schedule {
         return $collect->toArray();
     }
 
+    public static function getFile($id, $field, $filename) {
+        $data = _MODEL::find($id);
+        $table = strtolower(_MODEL::getModelName());
+        if($data->schedule_repeat) {
+            $repeat = _MODEL::where('repeat_id', $data->repeat_id)->orderBy('schedule_date','ASC')->get();
+            $id = $repeat->first()->getKey();
+            // dd($id);
+        }
+
+        return storage_path("app/uploads/$table/$field/$id-$filename");
+    }
+
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {
         $fields = self::fields();
         $today = Carbon::yesterday()->endOfDay()->toDateTimeString();
@@ -251,7 +263,7 @@ class Schedule {
         array_push($rules["schedule_date"], "after:{$today}");
         array_push($rules["schedule_date"], "before:{$atLimit}");
 
-        if($data['schedule_repeat']){
+        if($data['schedule_repeat']) {
             array_push($rules["schedule_end"], "required");
             ValidateUtil::unsetRules($rules["schedule_repeat_days"],"between:0,127");
             ValidateUtil::setRules($rules["schedule_repeat_days"],"between:1,127");
@@ -274,7 +286,16 @@ class Schedule {
             array_push($rules["schedule_end_times"], "nullable");
         }
 
-        if(empty($data["schedule_url"]) && empty($data["schedule_document"])) {
+        $fileEmpty = empty($data["schedule_document"]);
+        if($status == 'edit') {
+            $originFile = _MODEL::find($data['schedule_id'])->schedule_document;
+            if(!empty($originFile) && $originFile === $data['schedule_document']) {
+                $fileEmpty = false;
+                // unset($data['schedule_document']);
+                ValidateUtil::unsetRules($rules["schedule_document"], 'file', 'max:20000');
+            }
+        }
+        if(empty($data["schedule_url"]) && $fileEmpty) {
             ValidateUtil::setRules($rules["schedule_url"],"required");
             $messages["schedule_url.required"] = ":attribute 與 ".$fields['attributes']['schedule_document']." 請至少擇一填寫";
         }
@@ -332,6 +353,17 @@ class Schedule {
             $oldRepeatId = $old["repeat_id"];
             if($old["schedule_repeat"] && !is_null($oldRepeatId)){
                 $today = Carbon::today()->toDateString();
+
+                $oldRepeatFirst = _MODEL::where('repeat_id', $oldRepeatId)->first();
+                $id = $oldRepeatFirst->getKey();
+                $filename = $oldRepeatFirst->schedule_document;
+                $table = strtolower(_MODEL::getModelName());
+                $oldFile = "uploads/$table/schedule_document/$id-$filename";
+                $newFile = "uploads/$table/schedule_document/{$data['schedule_id']}-$filename";
+                if($id != $data['schedule_id'] && Storage::exists($oldFile)) {
+                    Storage::move($oldFile, $newFile);
+                }
+
                 _MODEL::where('repeat_id', $oldRepeatId)
                 ->where('schedule_id', '<>', $data["schedule_id"])
                 ->whereDate("schedule_date", ">=", $today)

@@ -95,12 +95,10 @@
                                 <div class="ts list">
                                     <div class="item">
                                         <div style="width: 100%; display:block">{{CONSTANTS.FORM_TEXT.schedule_content}}：</div>
-                                        <div
+                                        <pre
                                             v-if="!isEmpty(sd.schedule_content)"
                                             style="margin-left: 1.2em; margin-top: .5em"
-                                        >
-                                            {{sd.schedule_content}}
-                                        </div>
+                                        >{{sd.schedule_content}}</pre>
                                     </div>
                                 </div>
                                 <div class="ts list">

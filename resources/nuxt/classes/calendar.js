@@ -13,19 +13,19 @@ export default class Calendar {
         this.#Today = new Date();
         this.#Today.setHours(0,0,0,0);
         this.#SelectedDate = this.#Today;
-        if(year === undefined){
+        if(year === undefined) {
             this.#Year = this.#Today.getFullYear();
-        }else if(year >= 1900 && year <= 275760){
+        } else if(year >= 1900 && year <= 275760) {
             this.Year = year;
-        }else{
+        } else {
             throw new Error("Invalid year. The year must in 1900~275760.");
         }
 
-        if(month === undefined){
+        if(month === undefined) {
             this.#Month = this.#Today.getMonth();
-        }else if(month >= 1 && month <= 12){
+        } else if(month >= 1 && month <= 12) {
             this.Month = month;
-        }else{
+        } else {
             throw new Error("Invalid month. The month must in 1~12.");
         }
         this.setDates();
@@ -41,11 +41,11 @@ export default class Calendar {
         const selected = this.#SelectedDate;
         let firstDay = D.getDay() == 0 ? 7 : D.getDay();
         let dp = D.getDate();
-        for(let i = 0; i < 6; i++){
+        for(let i = 0; i < 6; i++) {
             const temp = new Date(year, month, dp);
-            if(temp.getDay() != 1 && temp.getDay() <= firstDay){
+            if(temp.getDay() != 1 && temp.getDay() <= firstDay) {
                 dp--;
-            }else{
+            } else {
                 break;
             }
         }
@@ -80,75 +80,87 @@ export default class Calendar {
     get Year() {return this.#Year}
     set Year(y) {
         y = Number(y)
-        if(isNaN(y) && y >= 1900 && y <= 275760){
+        if(isNaN(y) && y >= 1900 && y <= 275760) {
             console.error("Invalid year. The year must in 1900~275760.");
-        }else{
+        } else {
             this.#Year = y;
             this.setDates();
         }
     }
 
-    get Month() {return this.#Month+1}
+    get Month() {
+        return this.#Month+1
+    }
     set Month(m) {
         m = Number(m);
-        if(isNaN(m) && m >= 1 && m <=12){
+        if(isNaN(m) && m >= 1 && m <=12) {
             console.error("Invalid month. The month must in 1~12.");
-        }else{
+        } else {
             this.#Month = m-1;
             this.setDates();
         }
     }
 
     get Week() {return this.#Week}
-    set Week(x) {console.error("Dates cannot be setted.");}
+    set Week(x) {console.error("Dates cannot be setted.")}
 
     get Dates() {return this.#Dates}
-    set Dates(x) {console.error("Dates cannot be setted.");}
+    set Dates(x) {console.error("Dates cannot be setted.")}
 
     get SelectedDate() {return this.#SelectedDate}
     set SelectedDate(date) {
-        if(typeof date === "object" && date.constructor === Date){
+        if(typeof date === "object" && date.constructor === Date) {
             this.#SelectedDate = date;
-        }else{
+        } else if(typeof date === "string") {
+            let dateSplit = date.includes("-") ? date.split("-") : date.split("/");
+            if(dateSplit.length !== 3) {
+                console.error("Invalid date format.");
+            } else {
+                dateSplit[1] = parseInt(dateSplit[1]) - 1;
+                this.#SelectedDate = new Date(...dateSplit);
+            }
+        } else {
             console.error("SelectedDate must be a Date object.");
         }
+
+        this.#Year = this.#SelectedDate.getFullYear();
+        this.#Month = this.#SelectedDate.getMonth();
+        this.setDates();
     }
 
-    getDatesOfWeek() {
-        return this.#Dates[this.#Week];
-    }
+    getDatesOfWeek() {return this.#Dates[this.#Week]}
     getYearOfWeek() {
         let result = {};
-        for(let date of this.getDatesOfWeek()){
-            if(result[date.date.getFullYear()] === undefined){
+        for(let date of this.getDatesOfWeek()) {
+            if(result[date.date.getFullYear()] === undefined) {
                 result[date.date.getFullYear()] = 1;
-            }else{
+            } else {
                 result[date.date.getFullYear()]++;
             }
         }
         return result;
     }
 
-    getDateToString(date, delimiter = '-'){
-        if(date.date !== undefined){
+    getDateToString(date, delimiter = '-') {
+        const fillZero = function(x) {
+            x = ((x < 10) ? '0' : '') + x.toString();
+            return x;
+        }
+        if(date !== undefined && date.date !== undefined) {
             return this.getDateToString(date.date);
-        }else if(typeof date !== "object" || date.constructor !== Date){
+        } else if(typeof date !== "object" || date.constructor !== Date) {
             date = this.#SelectedDate;
         }
 
-        return `${date.getFullYear()}${delimiter}${date.getMonth()+1}${delimiter}${date.getDate()}`
+        return `${date.getFullYear()}${delimiter}${fillZero(date.getMonth()+1)}${delimiter}${fillZero(date.getDate())}`
     }
 
-    getStartOfCalendar() {
-        return this.#Dates[0][0].date;
-    }
+    getStartOfCalendar() {return this.#Dates[0][0].date}
     getEndOfCalendar() {
         const lastWeek = this.#Dates.length-1;
         return this.#Dates[lastWeek][6].date;
     }
-    getStartOfMonth() {
-        return new Date(this.#Year, this.#Month);
-    }
+    getStartOfMonth() {return new Date(this.#Year, this.#Month)}
     getEndOfMonth() {
         let date = new Date(this.#Year, this.#Month);
         let dp = new Date(this.#Year, this.#Month);
@@ -159,6 +171,10 @@ export default class Calendar {
         }
 
         return date;
+    }
+
+    getMonthFillZero() {
+        return ((this.#Month < 9 ? '0' : '') + (this.#Month+1).toString());
     }
 
     prevYear() {
@@ -191,7 +207,7 @@ export default class Calendar {
     }
     prevWeek() {
         let prevw = this.#Week - 1;
-        if(prevw < 0){
+        if(prevw < 0) {
             this.prevMonth();
             prevw = this.#Dates.length-2;
         }
@@ -201,7 +217,7 @@ export default class Calendar {
     }
     nextWeek() {
         let nextw = this.#Week + 1;
-        if(nextw > this.#Dates.length-1){
+        if(nextw > this.#Dates.length-1) {
             this.nextMonth();
             nextw = 1;
         }

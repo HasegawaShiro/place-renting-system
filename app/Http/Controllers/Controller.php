@@ -226,7 +226,7 @@ class Controller extends BaseController
         $page = new $class();
 
         if(method_exists($page, 'getFile')) {
-            $filePath = $page::getFile($id, $filename);
+            $filePath = $page::getFile($id, $field, $filename);
         } else {
             $filePath = storage_path("app/uploads/$table/$field/$id-$filename");
         }

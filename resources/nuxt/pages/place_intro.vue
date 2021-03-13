@@ -37,7 +37,16 @@
                                 {{data.name}}
                             </td>
                             <td style="overflow-wrap: anywhere;">
-                                {{data.intro}}
+                                <template
+                                    v-if="typeof data.intro == 'string'"
+                                >{{data.intro}}</template>
+                                <template
+                                    v-else-if="data.intro.constructor == Array"
+                                >
+                                    <p v-for="(p, i) of data.intro" :key="'place-'+i">
+                                        {{p}}
+                                    </p>
+                                </template>
                             </td>
                             <td class="center aligned ">
                                 <div
