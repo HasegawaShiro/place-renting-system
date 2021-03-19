@@ -516,6 +516,7 @@ export default {
             return result;
         },
         scheduleBackColor(color) {
+            if(DataUtil.isEmpty(color)) return "rgb(256,256,256)";
             let result = "rgba(";
             for(let i = 1; i < 7; i+=2) {
                 let c = color.substr(i, 2);
@@ -525,6 +526,7 @@ export default {
             return result;
         },
         scheduleBolderColor(color) {
+            if(DataUtil.isEmpty(color)) return "rgb(256,256,256)";
             let result = "rgba(";
             for(let i = 1; i < 7; i+=2) {
                 let c = color.substr(i, 2);
