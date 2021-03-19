@@ -3,9 +3,9 @@ namespace App\Pages;
 
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-use App\Models\User;
 use App\Models\Place;
 use App\Models\Schedule as _MODEL;
 
@@ -138,6 +138,8 @@ class Schedule {
             $auth = SessionUtil::getLoginUser();
             if($auth['id'] !== 1 && $auth['id'] !== $origin->created_by) $pass = false;
             // dd($origin, $auth);
+        } else {
+            $pass = Auth::check();
         }
 
         return $pass;
