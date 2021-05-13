@@ -72,6 +72,10 @@
                                     <div class="item">
                                         {{CONSTANTS.FORM_TEXT.repeat}}：
                                         {{parseScheduleRepeat(sd)}}
+                                        <a
+                                            v-if="!isEmpty(sd.repeat_first)"
+                                            @click="editClick(sd.repeat_first)"
+                                        >{{parseRepeatFirst(sd)}}</a>
                                     </div>
                                 </div>
                                 <div class="ts list">
@@ -97,7 +101,10 @@
                                         <div style="width: 100%; display:block">{{CONSTANTS.FORM_TEXT.schedule_content}}：</div>
                                         <pre
                                             v-if="!isEmpty(sd.schedule_content)"
-                                            style="margin-left: 1.2em; margin-top: .5em"
+                                            style="margin-left: 1.2em;
+                                                margin-top: .5em;
+                                                margin-bottom: 0px
+                                            "
                                         >{{sd.schedule_content}}</pre>
                                     </div>
                                 </div>
@@ -274,12 +281,23 @@ export default {
                 } else {
                     result += ` ${schedule.schedule_end_times} 週`;
                 }
+                if(!DataUtil.isEmpty(schedule.repeat_first)) result += '，';
             }
 
             return result;
         },
-        isEmpty(obj) {
-            return DataUtil.isEmpty(obj);
+        parseRepeatFirst(schedule) {
+            let result = "";
+
+            let first = schedule.repeat_first;
+            if(!DataUtil.isEmpty(first)) {
+                result = `${this.CONSTANTS.FORM_TEXT.repeat_first}: ${first.schedule_date}`;
+            }
+
+            return result;
+        },
+        isEmpty(...obj) {
+            return DataUtil.isEmpty(...obj);
         },
         addClick() {
             if(this.$parent.isLogin) {

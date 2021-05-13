@@ -88,6 +88,7 @@ export default {
             fullday: '全天',
             schedule_repeat: '是否重複',
             repeat: '重複',
+            repeat_first: '最早可修改日',
             schedule_repeat_method: '重複方式',
             keep: '持續',
             cycle: '週期',

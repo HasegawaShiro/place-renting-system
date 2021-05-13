@@ -147,8 +147,6 @@ class Schedule {
 
     public static function getData($request, $id = null) {
         $query = _MODEL::with(['util','user','place']);
-        /* $query = DB::table('schedules')
-        ->leftjoin('utils', 'util_id'); */
         $auth = SessionUtil::getLoginUser();
         $models = [];
         $collect = collect([]);
@@ -169,10 +167,8 @@ class Schedule {
                 'method' => 'ASC'
             ],
         ];
-        $paginate = isset($request->filters) ? json_decode($request->pagination) : false;
 
         if(is_null($id)) {
-            // $query = $query->query();
             if(isset($filters["schedule_date_from"])) {
                 $query->whereDate("schedule_date", '>=', $filters["schedule_date_from"]);
             }
@@ -224,13 +220,19 @@ class Schedule {
                 $schedule["place_color"] = $model->place->place_color;
                 $schedule["place_disabled"] = $model->place->place_disabled;
 
-                if(!is_null($schedule["repeat_id"])) {
+                if(!is_null($schedule["repeat_id"]) && $schedule["schedule_repeat"]) {
                     if(array_search($schedule["repeat_id"], $repeated) === false) {
                         array_push($repeated, $schedule["repeat_id"]);
                     } else {
                         $schedule["showOnList"] = false;
                     }
+
+                    $firstRepeat = self::getRepeatIdFirst($model, true, "model")->toArray();
+                    if($firstRepeat["schedule_id"] != $schedule["schedule_id"]) {
+                        $schedule["repeat_first"] = $firstRepeat;
+                    }
                 }
+
                 if(($auth["id"] === 1 || $auth["id"] === $schedule["created_by"]) && strtotime($schedule["schedule_date"]) >= $today) {
                     $schedule["editable"] = true;
                     $schedule["deletable"] = true;
@@ -246,15 +248,39 @@ class Schedule {
     }
 
     public static function getFile($id, $field, $filename) {
-        $data = _MODEL::find($id);
         $table = strtolower(_MODEL::getModelName());
-        if($data->schedule_repeat) {
-            $repeat = _MODEL::where('repeat_id', $data->repeat_id)->orderBy('schedule_date','ASC')->get();
-            $id = $repeat->first()->getKey();
-            // dd($id);
-        }
+        $id = self::getRepeatIdFirst($id);
 
         return storage_path("app/uploads/$table/$field/$id-$filename");
+    }
+
+    public static function getRepeatIdFirst($search, $editable = false, $getType = "id") {
+        $id = 0;
+        if(is_a($search, "App\\Models\\Schedule")) {
+            $data = $search;
+        } else if(is_string($search) || is_numeric($search)) {
+            $data = _MODEL::find($search);
+        }
+
+        if($data->schedule_repeat) {
+            $today = Carbon::today()->toDateString();
+            $auth = SessionUtil::getLoginUser();
+            $repeat = _MODEL::where('repeat_id', $data->repeat_id)->orderBy('schedule_date','ASC');
+            if($editable) {
+                $repeat->whereDate("schedule_date", ">=", $today);
+                if($auth["id"] !== 1) $repeat->where("created_by", $auth["id"]);
+            }
+            $data = $repeat->first();
+            $id = $data->getKey();
+        } else {
+            $id = $data->getKey();
+        }
+
+        if($getType === "id") {
+            return $id;
+        } else {
+            return $data;
+        }
     }
 
     public static function beforeValidation(Array &$data, Array &$rules, Array &$messages, String $status) {

@@ -32,6 +32,13 @@
                         <label for="fullday"></label>
                     </div>
                 </div>
+                <div
+                    v-if="hasRepeatFirst(input)"
+                    class="field"
+                >
+                    <label>{{CONSTANTS.FORM_TEXT.repeat_first}}</label>
+                    <a @click="toRepeatFirst(input)">{{input.repeat_first.schedule_date}}</a>
+                </div>
                 <template v-if="!config.fullday">
                     <div class="field">
                         <label>{{CONSTANTS.FORM_TEXT.schedule_from}}</label>
@@ -147,7 +154,7 @@
                     </div>
                 </template>
                 <template
-                    v-if="config.mode === 'edit' && orginData.schedule_repeat && orginData.repeat_id != null"
+                    v-if="config.mode === 'edit' && originData.schedule_repeat && originData.repeat_id != null"
                 >
                     <div class="field">
                         <label>{{CONSTANTS.messages['repeat-edit']}}</label>
@@ -325,6 +332,7 @@
 <script>
 import CONSTANTS from "../../constants.js";
 import DataUtil from '../../utils/DataUtil.js';
+import functions from '../../functions.js';
 import API from '../../api.js';
 
 export default {
@@ -347,7 +355,7 @@ export default {
                 util: {},
             },
             input: {},
-            orginData: {},
+            originData: {},
             defaultInput() {
                 return {
                     schedule_title: null,
@@ -379,8 +387,6 @@ export default {
             },
             inputFormData: new FormData(),
         };
-    },
-    async mounted() {
     },
     props: {
         'form-data': {
@@ -444,10 +450,10 @@ export default {
             this.input = {};
             for(let k in this.defaultInput()) {
                 if(DataUtil.isEmpty(data[k])){
-                    this.$set(this.orginData, k, this.defaultInput()[k]);
+                    this.$set(this.originData, k, this.defaultInput()[k]);
                     this.$set(this.input, k, this.defaultInput()[k]);
                 }else{
-                    this.$set(this.orginData, k, data[k]);
+                    this.$set(this.originData, k, data[k]);
                     this.$set(this.input, k, data[k]);
                 }
             }
@@ -462,8 +468,13 @@ export default {
             if(this.input.schedule_from == "00:00" && this.input.schedule_to == "23:59") {
                 this.config.fullday = true;
             }
-            if(this.config.mode === 'edit' && data.schedule_repeat && data.repeat_id != null) {
-                this.input.repeat_edit = "one";
+            if(this.config.mode === 'edit' && data.schedule_repeat) {
+                if(data.repeat_id != null) {
+                    this.input.repeat_edit = "one";
+                }
+                if(!DataUtil.isEmpty(data.repeat_first)) {
+                    this.input.repeat_first = data.repeat_first;
+                }
             }
         },
         saveClick() {
@@ -519,8 +530,32 @@ export default {
             });
             return false;
         },
-        isEmpty(obj) {
-            return DataUtil.isEmpty(obj);
+        hasRepeatFirst(schedule) {
+            let first = schedule.repeat_first;
+
+            if(!DataUtil.isEmpty(first)) {
+                let isRepeatFirst = schedule.schedule_id === first.schedule_id;
+                return this.config.mode == 'edit' && !isRepeatFirst;
+            } else {
+                return false;
+            }
+        },
+        async toRepeatFirst(schedule) {
+            let first = schedule.repeat_first;
+
+            if(!DataUtil.isEmpty(first)) {
+                window.globalLoading.loading();
+                await functions.delay(500);
+                window.globalLoading.unloading();
+                for(let i of ['schedule_id', 'schedule_date']) {
+                    for(let j of [this.input, this.originData]) {
+                        j[i] = first[i];
+                    }
+                }
+            }
+        },
+        isEmpty(...obj) {
+            return DataUtil.isEmpty(...obj);
         },
     },
 };
@@ -578,6 +613,9 @@ label .required {
     margin-right: .3em;
 }
 @media(hover: hover) and (pointer: fine) {
+    a {
+        cursor: pointer;
+    }
     .week-selector .week-button label:hover {
         cursor: pointer;
         background-color: #d9d9d9;
