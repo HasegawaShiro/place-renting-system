@@ -89,9 +89,8 @@ export default {
         };
     },
     async mounted() {
-        fetch("/place_intro.json")
+        fetch(`${window.$nuxt.$axios.defaults.baseURL}/place_intro.json`)
         .then(response => {
-            console.log(response);
             response.json().then(data => {
                 this.listData = data;
             });
@@ -104,7 +103,7 @@ export default {
         mainLayoutMounted() {
         },
         imageURL(path) {
-            return `/images/place_intro/${path}.jpg`
+            return `${window.$nuxt.$axios.defaults.baseURL}/images/place_intro/${path}.jpg`
         },
         imageClick(img) {
             this.modalImage = img;

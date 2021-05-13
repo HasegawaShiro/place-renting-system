@@ -137,7 +137,6 @@ class Schedule {
             $origin = _MODEL::find($id);
             $auth = SessionUtil::getLoginUser();
             if($auth['id'] !== 1 && $auth['id'] !== $origin->created_by) $pass = false;
-            // dd($origin, $auth);
         } else {
             $pass = Auth::check();
         }
@@ -147,7 +146,7 @@ class Schedule {
 
     public static function getData($request, $id = null) {
         $query = _MODEL::with(['util','user','place']);
-        $auth = SessionUtil::getLoginUser();
+        $auth = empty(SessionUtil::getLoginUser()) ? ["id" => 0] : SessionUtil::getLoginUser();
         $models = [];
         $collect = collect([]);
         $filters = isset($request->filters) ? (array) json_decode($request->filters) : [];
@@ -240,10 +239,10 @@ class Schedule {
                     $schedule["editable"] = false;
                     $schedule["deletable"] = false;
                 }
+
                 $collect->add($schedule);
             } catch (\Throwable $th) {}
         }
-
         return $collect->toArray();
     }
 
@@ -264,13 +263,13 @@ class Schedule {
 
         if($data->schedule_repeat) {
             $today = Carbon::today()->toDateString();
-            $auth = SessionUtil::getLoginUser();
+            $auth = empty(SessionUtil::getLoginUser()) ? ["id"=>0] : SessionUtil::getLoginUser();
             $repeat = _MODEL::where('repeat_id', $data->repeat_id)->orderBy('schedule_date','ASC');
             if($editable) {
                 $repeat->whereDate("schedule_date", ">=", $today);
                 if($auth["id"] !== 1) $repeat->where("created_by", $auth["id"]);
             }
-            $data = $repeat->first();
+            $data = empty($repeat->first()) ? $data : $repeat->first();
             $id = $data->getKey();
         } else {
             $id = $data->getKey();
