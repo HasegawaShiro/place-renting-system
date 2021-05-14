@@ -15,7 +15,6 @@ class ScheduleUtil {
         $to = $data['schedule_to'];
         $repeatId = isset($data["repeat_id"]) ? $data["repeat_id"] : 0;
         $id = isset($data['schedule_id']) ? $data['schedule_id'] : 0;
-        // dd($repeatId);
 
         $query = _MODEL::whereDate('schedule_date', $date)
             ->where('place_id', $place)
@@ -44,7 +43,6 @@ class ScheduleUtil {
                 });
             })->get();
 
-            // dd($query->getQuery()->tosql(), $query->getQuery()->getBindings());
         $available = sizeof($query) === 0;
         if(!$available){
             $schedule = $query->first()->toArray();

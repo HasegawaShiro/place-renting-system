@@ -379,8 +379,6 @@ class Schedule {
         if(!empty($old) && (isset($data['repeat_edit']) && $data['repeat_edit'] == 'all')) {
             $oldRepeatId = $old["repeat_id"];
             if($old["schedule_repeat"] && !is_null($oldRepeatId)){
-                $today = Carbon::today()->toDateString();
-
                 $oldRepeatFirst = _MODEL::where('repeat_id', $oldRepeatId)->first();
                 $id = $oldRepeatFirst->getKey();
                 $filename = $oldRepeatFirst->schedule_document;
@@ -392,8 +390,7 @@ class Schedule {
                 }
 
                 _MODEL::where('repeat_id', $oldRepeatId)
-                ->where('schedule_id', '<>', $data["schedule_id"])
-                ->whereDate("schedule_date", ">=", $today)
+                ->whereDate("schedule_date", ">", $data["schedule_date"])
                 ->delete();
             }
         }

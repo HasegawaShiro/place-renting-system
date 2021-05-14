@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Utils\ScheduleUtil;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -103,6 +104,10 @@ class Schedule extends Model
             }
 
             return $validator["available"];
+        });
+
+        self::deleting(function(&$schedule) {
+            return strtotime($schedule->schedule_date) >= Carbon::today()->timestamp;
         });
     }
 }
