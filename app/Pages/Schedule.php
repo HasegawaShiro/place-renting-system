@@ -157,22 +157,27 @@ class Schedule
         $models = [];
         $collect = collect([]);
         $filters = isset($request->filters) ? (array) json_decode($request->filters) : [];
-        $orders = isset($request->orders) && !empty($request->orders) ? array_map(function ($arr) {
-            return (array) json_decode($arr);
-        }, $request->orders) : [
-            [
-                'name' => 'schedule_date',
-                'method' => 'DESC'
-            ],
-            [
-                'name' => 'schedule_from',
-                'method' => 'ASC'
-            ],
-            [
-                'name' => 'schedule_to',
-                'method' => 'ASC'
-            ],
-        ];
+        $orders = isset($request->orders) && !empty($request->orders)
+            ? array_map(
+                function ($arr) {
+                    return (array) json_decode($arr);
+                },
+                $request->orders
+            )
+            : [
+                [
+                    'name' => 'schedule_date',
+                    'method' => 'DESC'
+                ],
+                [
+                    'name' => 'schedule_from',
+                    'method' => 'ASC'
+                ],
+                [
+                    'name' => 'schedule_to',
+                    'method' => 'ASC'
+                ],
+            ];
 
         if (is_null($id)) {
             if (isset($filters["schedule_date_from"])) {

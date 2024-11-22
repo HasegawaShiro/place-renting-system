@@ -21,18 +21,16 @@ Route::any('test', [Controller::class, 'test']);
 Route::group(['prefix' => 'api'], function () {
     Route::post('login', [LoginController::class, 'login'])->name("system.auth.login.post");
     Route::any('logout', [LoginController::class, 'logout'])->name('system.auth.logout');
-    Route::get('csrf', function (Request $request) {
-        return csrf_token();
-    });
+    Route::get('csrf', function () { return csrf_token(); });
     Route::get('select/{table}', [Controller::class, 'getReferenceSelect']);
     Route::get('data/{table}/{id?}', [Controller::class, 'getData']);
     Route::get('download/{table}/{id}/{filename}/{field?}', [Controller::class, 'download']);
     Route::post('data/{table}', [Controller::class, 'postData']);
     Route::group(['middleware' => 'auth'], function() {
         Route::get('auth', [UserController::class, 'getUserSession']);
-        // Route::post('data/{table}', [Controller::class, 'postData']);
         Route::put('data/{table}/{id}', [Controller::class, 'putData']);
         Route::delete('data/{table}/{id}', [Controller::class, 'deleteData']);
+        Route::post('schedules/export', [Controller::class, 'exportSchedules']);
     });
 });
 

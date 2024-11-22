@@ -1,219 +1,219 @@
 <template>
-    <div class="nchu main">
-        <slot name="other" ref="other"></slot>
-        <div class="ts static left sidebar inverted vertical menu" id="main-sidebar">
-            <div class="item">
-                中興大學
-                <div class="menu">
-                    <a class="item" target="_blank" href="https://www.nchu.edu.tw/">官網</a>
-                    <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a>
-                </div>
-            </div>
-            <template
-                v-for="(p, page) in showMenu"
-            >
-                <div
-                    v-if="typeof p.sub === 'object'"
-                    class="item"
-                    :key="`menu-${page}`"
-                >
-                    {{p.text}}
-                    <div class="menu">
-                        <template
-                            v-for="(s, sub) in p.sub"
-                        >
-                            <n-link
-                                v-if="s.url === undefined"
-                                class="item"
-                                :key="`menu-${sub}`"
-                                :to="`/${sub}`"
-                            >{{s.text}}</n-link>
-                            <a
-                                v-else
-                                class="item"
-                                :key="`menu-${sub}`"
-                                :href="`/${s.url}`"
-                            >{{s.text}}</a>
-                        </template>
-                    </div>
-                </div>
-                <n-link
-                    v-else
-                    class="item"
-                    :target="p.target === undefined ? '' : p.target"
-                    :key="`menu-${page}`"
-                    :to="`/${p.url === undefined ? page : p.url}`"
-                >{{p.text}}</n-link>
-            </template>
-            <a class="bottom item" @click="closeSidebar">關閉選單</a>
+  <div class="nchu main">
+    <slot name="other" ref="other"></slot>
+    <div class="ts static left sidebar inverted vertical menu" id="main-sidebar">
+      <div class="item">
+        中興大學
+        <div class="menu">
+          <a class="item" target="_blank" href="https://www.nchu.edu.tw/">官網</a>
+          <a class="item" target="_blank" href="https://www.iciil.nchu.edu.tw/">創產學院</a>
         </div>
-        <div class="squeezable pusher" id="sidebar-pusher">
-            <CustomForm
-                v-if="hasForm"
-                :page="page"
-                :form-mode="formMode"
-                :form-data="formData"
-                :show-add="showAddMutation"
-                ref="form"
-            ></CustomForm>
-            <div class="ts dimmer" id="global-loading">
-                <div class="ts loader"></div>
-            </div>
-            <header>
-                <div class="ts pointing secondary large icon menu">
+      </div>
+      <template
+        v-for="(p, page) in showMenu"
+      >
+        <div
+          v-if="typeof p.sub === 'object'"
+          class="item"
+          :key="`menu-${page}`"
+        >
+          {{p.text}}
+          <div class="menu">
+            <template
+              v-for="(s, sub) in p.sub"
+            >
+              <n-link
+                v-if="s.url === undefined"
+                class="item"
+                :key="`menu-${sub}-link`"
+                :to="`/${sub}`"
+              >{{s.text}}</n-link>
+              <a
+                v-else
+                class="item"
+                :key="`menu-${sub}`"
+                :href="`/${s.url}`"
+              >{{s.text}}</a>
+            </template>
+          </div>
+        </div>
+        <n-link
+          v-else
+          class="item"
+          :target="p.target === undefined ? '' : p.target"
+          :key="`menu-${page}-link`"
+          :to="`/${p.url === undefined ? page : p.url}`"
+        >{{p.text}}</n-link>
+      </template>
+      <a class="bottom item" @click="closeSidebar">關閉選單</a>
+    </div>
+    <div class="squeezable pusher" id="sidebar-pusher">
+        <CustomForm
+            v-if="hasForm"
+            :page="page"
+            :form-mode="formMode"
+            :form-data="formData"
+            :show-add="showAddMutation"
+            ref="form"
+        ></CustomForm>
+        <div class="ts dimmer" id="global-loading">
+            <div class="ts loader"></div>
+        </div>
+        <header>
+            <div class="ts pointing secondary large icon menu">
+                <a
+                    class="item"
+                    style="z-index: 2;"
+                    id="menu-button"
+                    :data-tooltip="CONSTANTS.TEXT.menu"
+                    @click="toggleSidebar()"
+                ><i class="list icon"></i></a>
+                <n-link
+                    to="/"
+                    id="menu-index"
+                    class="item nchu header title"
+                    style="z-index: 2;"
+                    :data-tooltip="CONSTANTS.TEXT.index"
+                >{{CONSTANTS.TEXT.title}}</n-link>
+                <div class="right menu">
+                    <div v-if="isLogin" class="item">{{user.name}}, {{CONSTANTS.TEXT.greet}}</div>
+                    <CustomForm
+                        page="opinion"
+                        ref="add-opinion"
+                        key="add-opinion"
+                        form-name="add-opinion"
+                        :show-add="false"
+                    ></CustomForm>
                     <a
                         class="item"
                         style="z-index: 2;"
-                        id="menu-button"
-                        :data-tooltip="CONSTANTS.TEXT.menu"
-                        @click="toggleSidebar()"
-                    ><i class="list icon"></i></a>
-                    <n-link
-                        to="/"
-                        id="menu-index"
-                        class="item nchu header title"
-                        style="z-index: 2;"
-                        :data-tooltip="CONSTANTS.TEXT.index"
-                    >{{CONSTANTS.TEXT.title}}</n-link>
-                    <div class="right menu">
-                        <div v-if="isLogin" class="item">{{user.name}}, {{CONSTANTS.TEXT.greet}}</div>
+                        :data-tooltip="CONSTANTS.TEXT.opinion"
+                        @click="addOpinion()"
+                    ><i class="mail outline icon"></i></a>
+                    <template v-if="!isLogin">
+                        <div class="item">
+                            <span
+                                class="text button"
+                                id="login-button"
+                                @click="openLoginModal()"
+                            >{{CONSTANTS.TEXT.login}}</span>
+                            ｜
+                            <span
+                                class="text button"
+                                id="register-button"
+                                @click="register()"
+                            >{{CONSTANTS.TEXT.register}}</span>
+                        </div>
                         <CustomForm
-                            page="opinion"
-                            ref="add-opinion"
-                            key="add-opinion"
-                            form-name="add-opinion"
+                            page="user"
+                            ref="register"
+                            form-name="register"
+                            warning="註冊後請通知管理員啟用帳號"
                             :show-add="false"
+                            @saved="registerSaved()"
                         ></CustomForm>
+                    </template>
+                    <template v-else-if="isLogin">
+                        <CustomForm
+                            page="user"
+                            ref="profile"
+                            key="profile"
+                            form-name="profile"
+                            :show-add="false"
+                            @saved="profileSaved()"
+                        ></CustomForm>
+                        <a
+                            href=""
+                            class="item"
+                            style="z-index: 2;"
+                            :data-tooltip="CONSTANTS.TEXT.profile"
+                            @click.prevent="editProfile()"
+                        ><i class="user outline icon"></i></a>
                         <a
                             class="item"
                             style="z-index: 2;"
-                            :data-tooltip="CONSTANTS.TEXT.opinion"
-                            @click="addOpinion()"
-                        ><i class="mail outline icon"></i></a>
-                        <template v-if="!isLogin">
-                            <div class="item">
-                                <span
-                                    class="text button"
-                                    id="login-button"
-                                    @click="openLoginModal()"
-                                >{{CONSTANTS.TEXT.login}}</span>
-                                ｜
-                                <span
-                                    class="text button"
-                                    id="register-button"
-                                    @click="register()"
-                                >{{CONSTANTS.TEXT.register}}</span>
-                            </div>
-                            <CustomForm
-                                page="user"
-                                ref="register"
-                                form-name="register"
-                                warning="註冊後請通知管理員啟用帳號"
-                                :show-add="false"
-                                @saved="registerSaved()"
-                            ></CustomForm>
-                        </template>
-                        <template v-else-if="isLogin">
-                            <CustomForm
-                                page="user"
-                                ref="profile"
-                                key="profile"
-                                form-name="profile"
-                                :show-add="false"
-                                @saved="profileSaved()"
-                            ></CustomForm>
-                            <a
-                                href=""
-                                class="item"
-                                style="z-index: 2;"
-                                :data-tooltip="CONSTANTS.TEXT.profile"
-                                @click.prevent="editProfile()"
-                            ><i class="user outline icon"></i></a>
-                            <a
-                                class="item"
-                                style="z-index: 2;"
-                                :data-tooltip="CONSTANTS.TEXT.logout"
-                                @click="logout()"
-                            ><i class="log out icon"></i></a>
-                        </template>
-                    </div>
+                            :data-tooltip="CONSTANTS.TEXT.logout"
+                            @click="logout()"
+                        ><i class="log out icon"></i></a>
+                    </template>
                 </div>
+            </div>
 
-                <!-- login & register form -->
-                <template v-if="!isLogin">
-                    <div class="ts modals dimmer">
-                        <dialog
-                            class="ts tiny closable modal login"
-                        >
-                            <div class="ts inverted negative segment" v-if="authExpired">
-                                <p>{{MESSAGES['auth-expired']}}</p>
+            <!-- login & register form -->
+            <template v-if="!isLogin">
+                <div class="ts modals dimmer">
+                    <dialog
+                        class="ts tiny closable modal login"
+                    >
+                        <div class="ts inverted negative segment" v-if="authExpired">
+                            <p>{{MESSAGES['auth-expired']}}</p>
+                        </div>
+                        <div class="ts icon content">
+                            <div class="">
+                                <form class="ts form" @keydown.enter="login()">
+                                    <div class="fluid field">
+                                        <label>{{CONSTANTS.TEXT.username}}</label>
+                                        <input type="text" v-model="input.username" >
+                                    </div>
+                                    <div class="fluid field">
+                                        <label>{{CONSTANTS.TEXT.password}}</label>
+                                        <input type="password" v-model="input.password">
+                                        <small id="forget-password">忘記密碼?</small>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="ts login fluid button"
+                                        :class="{loading: loginLoading, disabled: loginLoading}"
+                                        @click="login()"
+                                    >
+                                        {{CONSTANTS.TEXT.login}}
+                                    </button>
+                                </form>
                             </div>
-                            <div class="ts icon content">
-                                <div class="">
-                                    <form class="ts form" @keydown.enter="login()">
-                                        <div class="fluid field">
-                                            <label>{{CONSTANTS.TEXT.username}}</label>
-                                            <input type="text" v-model="input.username" >
-                                        </div>
-                                        <div class="fluid field">
-                                            <label>{{CONSTANTS.TEXT.password}}</label>
-                                            <input type="password" v-model="input.password">
-                                            <small id="forget-password">忘記密碼?</small>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            class="ts login fluid button"
-                                            :class="{loading: loginLoading, disabled: loginLoading}"
-                                            @click="login()"
-                                        >
-                                            {{CONSTANTS.TEXT.login}}
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </dialog>
-                    </div>
-                </template>
+                        </div>
+                    </dialog>
+                </div>
+            </template>
 
-            </header>
-            <content>
-                <slot @hook:mounted="mounted" name="content" ref="content"></slot>
-            </content>
-            <footer>
-                <div id="footer-top">
-                    {{CONSTANTS.FOOTER.top}}<br>
-                </div>
-                <div class="ts grid">
-                    <div class="eight wide column" id="footer-left">
-                        {{CONSTANTS.FOOTER.left1}}<br>
-                        {{CONSTANTS.FOOTER.left2}}<br>
-                    </div>
-                    <div class="eight wide column" id="footer-right">
-                        {{CONSTANTS.FOOTER.right1}}<br>
-                        {{CONSTANTS.FOOTER.right2}}<br>
-                    </div>
-                </div>
-                <div id="footer-bottom">
-                    {{CONSTANTS.FOOTER.bottom}}
-                </div>
-            </footer>
-        </div>
-        <div class="ts bottom left snackbar">
-            <div class="content">
-                {{snackbar.info}}
+        </header>
+        <content>
+            <slot @hook:mounted="mounted" name="content" ref="content"></slot>
+        </content>
+        <footer>
+            <div id="footer-top">
+                {{CONSTANTS.FOOTER.top}}<br>
             </div>
-        </div>
-        <div class="ts bottom left success snackbar">
-            <div class="content">
-                {{snackbar.success}}
+            <div class="ts grid">
+                <div class="eight wide column" id="footer-left">
+                    {{CONSTANTS.FOOTER.left1}}<br>
+                    {{CONSTANTS.FOOTER.left2}}<br>
+                </div>
+                <div class="eight wide column" id="footer-right">
+                    {{CONSTANTS.FOOTER.right1}}<br>
+                    {{CONSTANTS.FOOTER.right2}}<br>
+                </div>
             </div>
-        </div>
-        <div class="ts bottom left error snackbar">
-            <div class="content">
-                {{snackbar.error}}
+            <div id="footer-bottom">
+                {{CONSTANTS.FOOTER.bottom}}
             </div>
+        </footer>
+    </div>
+    <div class="ts bottom left snackbar">
+        <div class="content">
+            {{snackbar.info}}
         </div>
     </div>
+    <div class="ts bottom left success snackbar">
+        <div class="content">
+            {{snackbar.success}}
+        </div>
+    </div>
+    <div class="ts bottom left error snackbar">
+        <div class="content">
+            {{snackbar.error}}
+        </div>
+    </div>
+  </div>
 </template>
 
 <script>
